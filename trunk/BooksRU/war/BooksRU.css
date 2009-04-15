@@ -4,6 +4,11 @@
 	max-width: 8em;
 	height: 10em;
 	max-height: 10em;
+	cursor: pointer;
+}
+
+.book-cover:HOVER {
+	background-color: #ccf;
 }
 
 .book-cover .book-title {
