@@ -7,8 +7,12 @@
 	cursor: pointer;
 }
 
-.book-cover:HOVER {
+.book-cover-HOVER {
 	background-color: #ccf;
+}
+
+.book-cover-FOCUS {
+	background-color: #aaf;
 }
 
 .book-cover .book-title {

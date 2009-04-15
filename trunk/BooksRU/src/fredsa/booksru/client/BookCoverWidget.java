@@ -18,6 +18,8 @@ public class BookCoverWidget extends Composite {
   public BookCoverWidget() {
     initWidget(container);
     addStyleName("book-cover");
+    new MouseHandlerDecorator(container);
+    new FocusHandlerDecorator(container);
 
     container.setWidget(flowPanel);
 
