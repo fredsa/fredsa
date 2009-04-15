@@ -2,11 +2,24 @@ package fredsa.booksru.shared;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
-public class Book implements Serializable {
-  String author;
+import javax.jdo.annotations.Extension;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
-  String title;
+@SuppressWarnings("serial")
+@PersistenceCapable
+public class Book implements Serializable {
+  @Persistent
+  private String author;
+
+  @Persistent
+  @PrimaryKey
+  @Extension(vendorName = "datanucleus", key = "gae.encoded-pk", value = "true")
+  private String id;
+
+  @Persistent
+  private String title;
 
   public String getAuthor() {
     return author;
