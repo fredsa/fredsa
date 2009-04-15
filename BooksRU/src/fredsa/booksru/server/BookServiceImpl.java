@@ -15,12 +15,10 @@ import javax.jdo.Query;
 public class BookServiceImpl extends RemoteServiceServlet implements BookService {
 
   public List<Book> getBooks() {
+    List<Book> books;
     PersistenceManager pm = PMF.get().getPersistenceManager();
 
-    Query query = pm.newQuery(Book.class);
-    query.setRange(0, 10);
-
-    List<Book> books = new ArrayList<Book>(((List<Book>) query.execute()));
+    books = getBooks(pm);
 
     if (books.isEmpty()) {
       Book book;
@@ -37,5 +35,12 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
     }
 
     return books;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Book> getBooks(PersistenceManager pm) {
+    Query query = pm.newQuery(Book.class);
+    query.setRange(0, 10);
+    return new ArrayList<Book>(((List<Book>) query.execute()));
   }
 }
