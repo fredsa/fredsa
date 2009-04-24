@@ -1,27 +1,24 @@
 package fredsa.booksru.client;
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Label;
 
 import fredsa.booksru.shared.Book;
 
-public class BookCoverWidget extends Composite {
+public class BookCoverWidget extends FocusPanel {
 
   private final Label authorLabel = new Label();
   private Book book;
-  private final FocusPanel container = new FocusPanel();
   private final FlowPanel flowPanel = new FlowPanel();
   private final Label titleLabel = new Label();
 
   public BookCoverWidget() {
-    initWidget(container);
     addStyleName("book-cover");
-    new MouseHandlerDecorator(container);
-    new FocusHandlerDecorator(container);
+    new MouseHandlerDecorator(this);
+    new FocusHandlerDecorator(this);
 
-    container.setWidget(flowPanel);
+    setWidget(flowPanel);
 
     titleLabel.setStylePrimaryName("book-title");
     flowPanel.add(titleLabel);
