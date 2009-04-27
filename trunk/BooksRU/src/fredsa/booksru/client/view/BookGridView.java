@@ -1,5 +1,7 @@
 package fredsa.booksru.client.view;
 
+import java.util.List;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
@@ -12,20 +14,18 @@ import com.google.gwt.user.client.ui.FlexTable;
 import fredsa.booksru.client.BookCoverWidget;
 import fredsa.booksru.shared.Book;
 
-import java.util.List;
-
-public class BookGridView extends Composite implements HasSelectionHandlers<Book> {
+public class BookGridView<T extends Book> extends Composite implements HasSelectionHandlers<T> {
   private final FlexTable grid = new FlexTable();
 
   public BookGridView() {
     initWidget(grid);
   }
 
-  public HandlerRegistration addSelectionHandler(SelectionHandler<Book> handler) {
+  public HandlerRegistration addSelectionHandler(SelectionHandler<T> handler) {
     return addHandler(handler, SelectionEvent.getType());
   }
 
-  public void setBooks(List<Book> books) {
+  public void setBooks(List<T> books) {
     int count = books.size();
     int cols = (int) Math.ceil(Math.sqrt(count));
     //    int rows = (int) Math.ceil(count / cols);
@@ -33,11 +33,10 @@ public class BookGridView extends Composite implements HasSelectionHandlers<Book
     for (int i = 0; i < count; i++) {
       int row = i / cols;
       int col = i % cols;
-      final BookCoverWidget bookCover = new BookCoverWidget();
+      final BookCoverWidget<T> bookCover = new BookCoverWidget<T>();
       bookCover.setBook(books.get(i));
       grid.setWidget(row, col, bookCover);
       bookCover.addClickHandler(new ClickHandler() {
-
         public void onClick(ClickEvent event) {
           SelectionEvent.fire(BookGridView.this, bookCover.getBook());
         }

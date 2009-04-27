@@ -6,10 +6,10 @@ import com.google.gwt.user.client.ui.Label;
 
 import fredsa.booksru.shared.Book;
 
-public class BookCoverWidget extends FocusPanel {
+public class BookCoverWidget<T extends Book> extends FocusPanel {
 
   private final Label authorLabel = new Label();
-  private Book book;
+  private T book;
   private final FlowPanel flowPanel = new FlowPanel();
   private final Label titleLabel = new Label();
 
@@ -27,11 +27,11 @@ public class BookCoverWidget extends FocusPanel {
     flowPanel.add(authorLabel);
   }
 
-  public Book getBook() {
+  public T getBook() {
     return book;
   }
 
-  public void setBook(Book book) {
+  public void setBook(T book) {
     this.book = book;
     titleLabel.setText(book.getTitle());
     authorLabel.setText(book.getAuthor());
