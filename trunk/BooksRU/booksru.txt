@@ -1,0 +1,22 @@
+Sample data
+===========
+
+1 Once upon a time    (2000 reads, rank 4)
+
+  2 there was a prince  (110 reads, rank 3)
+
+    3 who liked chocolate (1 read, rank 1)
+    3 and a princess      (100 reads, rank 3)
+
+  2 in a village        (1000 reads, rank 4)
+  
+
+Line entities
+=============
+linenum=0, "" -> scattertime, rank=4, line=Once upon a time
+
+linenum=1, preceeding=Once upon a time -> scattertime, rank=3, line=there was a prince
+linenum=1, preceeding=Once upon a time -> scattertime, rank=4, line=in a village
+
+linenum=2, preceeding=there was a prince -> scattertime, rank=1, line=who liked chocolate
+linenum=2, preceeding=there was a prince -> scattertime, rank=3, line=and a princess
