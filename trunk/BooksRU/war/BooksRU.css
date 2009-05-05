@@ -1,30 +1,8 @@
-.book-cover {
-	border: 1px solid black;
-	width: 8em;
-	max-width: 8em;
-	height: 10em;
-	max-height: 10em;
-	cursor: pointer;
+.line-widget {
+	width: 20em;
+	font-family: monospace;
 }
 
-.book-cover-HOVER {
-	background-color: #ccf;
-}
-
-.book-cover-FOCUS {
-	background-color: #aaf;
-}
-
-.book-cover .book-title {
-	font-size: 1.1em;
-	font-weight: bold;
-	text-align: center;
-	margin: 0.5em;
-}
-
-.book-cover .book-author {
-	font-size: 1em;
-	text-align: center;
-	margin: 0.5em;
-	color: blue;
+.gwt-SuggestBoxPopup .item {
+	font-family: monospace;
 }

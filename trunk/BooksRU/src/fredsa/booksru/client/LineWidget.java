@@ -19,6 +19,7 @@ public class LineWidget extends Composite {
   public LineWidget(Line previousLine) {
     LineSuggestOracle oracle = new LineSuggestOracle(previousLine);
     suggestBox = new SuggestBox(oracle);
+    suggestBox.addStyleName("line-widget");
     initWidget(suggestBox);
     suggestBox.addSelectionHandler(new SelectionHandler<Suggestion>() {
 
