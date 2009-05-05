@@ -13,10 +13,10 @@ Sample data
 
 Line entities
 =============
-linenum=0, "" -> scattertime, rank=4, line=Once upon a time
+linenum=0, preceeding=-1/""                 -> scattertime, rank=4, reads=2000, line=Once upon a time     -> backtrack=-1/""
 
-linenum=1, preceeding=Once upon a time -> scattertime, rank=3, line=there was a prince
-linenum=1, preceeding=Once upon a time -> scattertime, rank=4, line=in a village
+linenum=1, preceeding=0/Once upon a time    -> scattertime, rank=3, reads=110,  line=there was a prince   -> backtrack=0/""
+linenum=1, preceeding=0/Once upon a time    -> scattertime, rank=4, reads=1000, line=in a village         -> backtrack=0/""
 
-linenum=2, preceeding=there was a prince -> scattertime, rank=1, line=who liked chocolate
-linenum=2, preceeding=there was a prince -> scattertime, rank=3, line=and a princess
+linenum=2, preceeding=1/there was a prince  -> scattertime, rank=1, reads=1,    line=who liked chocolate  -> backtrack=1/Once upon a time
+linenum=2, preceeding=1/there was a prince  -> scattertime, rank=3, reads=100,  line=and a princess       -> backtrack=2/Once upon a time
