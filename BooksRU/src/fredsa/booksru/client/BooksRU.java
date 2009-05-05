@@ -1,5 +1,6 @@
 package fredsa.booksru.client;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.Command;
@@ -10,10 +11,7 @@ import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import com.allen_sauer.gwt.log.client.Log;
-
-import fredsa.booksru.client.presenter.PagePresenter;
-import fredsa.booksru.client.view.PageView;
+import fredsa.booksru.shared.Line;
 
 /*
  * * Entry point classes define <code>onModuleLoad()</code>.
@@ -50,9 +48,11 @@ public class BooksRU implements EntryPoint {
     });
     setWindowFocus();
 
-    PageView pageView = new PageView();
-    rootPanel.add(pageView);
-    PagePresenter pagePresenter = new PagePresenter(pageView);
-    pagePresenter.start();
+    //    PageView pageView = new PageView();
+    //    rootPanel.add(pageView);
+    //    PagePresenter pagePresenter = new PagePresenter(pageView);
+    //    pagePresenter.start();
+
+    rootPanel.add(new LineWidget(Line.NULL_LINE));
   }
 }

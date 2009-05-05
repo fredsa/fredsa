@@ -19,12 +19,13 @@ import javax.jdo.annotations.PrimaryKey;
 @SuppressWarnings("serial")
 @PersistenceCapable
 public class Line implements Serializable {
-
   private static final String DELIM = "/";
 
   private static final int LINE_NUMBER = 3;
 
   private static final int LINE_TEXT = 4;
+
+  public static final Line NULL_LINE = null;
 
   private static final int PRECEEDING_LINE_NUMBER = 0;
 
@@ -48,7 +49,7 @@ public class Line implements Serializable {
 
   @Persistent
   @PrimaryKey
-  private String compoundKey;
+  private String compoundKey = DELIM + DELIM + DELIM + DELIM + DELIM;
 
   @Persistent
   private int rank;
@@ -56,17 +57,29 @@ public class Line implements Serializable {
   @Persistent
   private int reads;
 
-  public Line(Line previousLine, String lineText) {
+  protected Line() {
+  }
 
-    setPreceedingLineNumber(previousLine.getLineNumber());
-    setPreceedingLineText(previousLine.getLineText());
+  public Line(Line previousLine, String lineText) {
+    if (previousLine == null) {
+      setPreceedingLineNumber(0);
+      setPreceedingLineText("");
+    } else {
+      setPreceedingLineNumber(previousLine.getLineNumber());
+      setPreceedingLineText(previousLine.getLineText());
+    }
     setLineNumber(getPreceedingLineNumber() + 1);
     setLineText(escapeText(lineText));
     setReads(1);
     setRank(1);
     setScatterTime(System.currentTimeMillis());
-    setBacktrackLineNumber(previousLine.getPreceedingLineNumber());
-    setBacktrackLineText(previousLine.getPreceedingLineText());
+    if (previousLine == null) {
+      setBacktrackLineNumber(-1);
+      setBacktrackLineText("");
+    } else {
+      setBacktrackLineNumber(previousLine.getPreceedingLineNumber());
+      setBacktrackLineText(previousLine.getPreceedingLineText());
+    }
   }
 
   private String concat(String[] a) {
@@ -89,8 +102,12 @@ public class Line implements Serializable {
     return compoundKey;
   }
 
+  private String[] getKeyAsArray() {
+    return (compoundKey + DELIM + "!").split(DELIM, 6);
+  }
+
   private String getKeyElement(int i) {
-    String a[] = compoundKey.split(DELIM);
+    String a[] = getKeyAsArray();
     return a[i];
   }
 
@@ -135,7 +152,7 @@ public class Line implements Serializable {
   }
 
   private void setKeyElement(int i, String value) {
-    String a[] = compoundKey.split(DELIM);
+    String a[] = getKeyAsArray();
     a[i] = value;
     compoundKey = concat(a);
   }
