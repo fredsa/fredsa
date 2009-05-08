@@ -1,32 +1,39 @@
 package fredsa.booksru.client.view;
 
-import java.util.Date;
-import java.util.List;
-
-import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
-import fredsa.booksru.shared.Book;
+import fredsa.booksru.client.HasValueAddHandlers;
+import fredsa.booksru.client.LineWidget;
+import fredsa.booksru.client.ValueAddHandler;
+import fredsa.booksru.shared.Line;
 
-public class PageView extends FlowPanel {
+import java.util.Date;
 
-  private final BookGridView<Book> bookResultsGrid;
+public class PageView extends FlowPanel implements HasValueAddHandlers<String> {
 
   public PageView() {
     add(new Label(new Date().toString()));
-
-    bookResultsGrid = new BookGridView<Book>();
-    add(bookResultsGrid);
-
   }
 
-  public void setBooks(List<Book> result) {
-    bookResultsGrid.setBooks(result);
+  public void addLine(Line line) {
+    LineWidget lineWidget = new LineWidget(line);
+    lineWidget.addValueChangeHandler(new ValueChangeHandler<String>() {
+
+      public void onValueChange(ValueChangeEvent<String> event) {
+        Window.alert("yes");
+
+      }
+    });
+    add(lineWidget);
   }
 
-  public void showError(Throwable caught, String message) {
-    Log.warn(message, caught);
+  public HandlerRegistration addValueAddHandler(ValueAddHandler<String> handler) {
+    return addHandler(handler, ValueAddEvent.getType());
   }
 
 }
