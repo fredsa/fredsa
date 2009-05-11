@@ -11,8 +11,8 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import fredsa.booksru.shared.Line;
@@ -36,9 +36,9 @@ public class LineWidget extends Composite implements HasValueChangeHandlers<Stri
     suggestBox.addStyleName("line-widget");
 
     // text box widget for viewing
-    TextBox textBox = new TextBox();
+    Label label = new Label();
     container.add(suggestBox);
-    container.add(textBox);
+    container.add(label);
 
     // start in editing mode
     setEditable(true);
