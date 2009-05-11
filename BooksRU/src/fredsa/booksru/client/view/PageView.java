@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Label;
 
 import fredsa.booksru.client.HasValueAddHandlers;
 import fredsa.booksru.client.LineWidget;
+import fredsa.booksru.client.ValueAddEvent;
 import fredsa.booksru.client.ValueAddHandler;
 import fredsa.booksru.shared.Line;
 
