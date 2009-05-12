@@ -10,35 +10,19 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DeckPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import fredsa.booksru.shared.Line;
 
 public class LineWidget extends Composite implements HasValueChangeHandlers<String> {
 
-  private static final int WIDGET_DISABLED = 1;
-
-  private static final int WIDGET_ENABLED = 0;
-
-  private final DeckPanel container = new DeckPanel();
-
-  private SuggestBox suggestBox;
+  private MySuggestBox suggestBox;
 
   public LineWidget(Line previousLine) {
-    initWidget(container);
 
-    // suggest box widget for editing
     LineSuggestOracle oracle = new LineSuggestOracle(previousLine);
-    suggestBox = new SuggestBox(oracle);
+    suggestBox = new MySuggestBox(oracle);
     suggestBox.addStyleName("line-widget");
-
-    // text box widget for viewing
-    Label label = new Label();
-    container.add(suggestBox);
-    container.add(label);
 
     // start in editing mode
     setEditable(true);
@@ -59,6 +43,8 @@ public class LineWidget extends Composite implements HasValueChangeHandlers<Stri
         }
       }
     });
+
+    initWidget(suggestBox);
   }
 
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
@@ -66,12 +52,11 @@ public class LineWidget extends Composite implements HasValueChangeHandlers<Stri
   }
 
   public void setEditable(boolean editable) {
-    container.showWidget(editable ? WIDGET_ENABLED : WIDGET_DISABLED);
+    suggestBox.setEditable(editable);
   }
 
   @Override
   protected void onLoad() {
     super.onLoad();
-    suggestBox.setFocus(true);
   }
 }
