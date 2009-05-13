@@ -1,13 +1,14 @@
 package fredsa.booksru.client;
 
-import java.util.ArrayList;
-
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
+import com.allen_sauer.gwt.log.client.Log;
+
 import fredsa.booksru.shared.Line;
+
+import java.util.ArrayList;
 
 public class LineSuggestOracle extends SuggestOracle {
 
@@ -38,7 +39,6 @@ public class LineSuggestOracle extends SuggestOracle {
 
   @Override
   public void requestSuggestions(final Request request, final Callback callback) {
-    //Line[] lines = 
     bookService.getLineSuggestions(previousLine, new AsyncCallback<Line[]>() {
 
       public void onFailure(Throwable caught) {
@@ -48,8 +48,7 @@ public class LineSuggestOracle extends SuggestOracle {
       public void onSuccess(Line[] lines) {
         ArrayList<Suggestion> suggestions = new ArrayList<Suggestion>();
         for (int i = 0; i < lines.length; i++) {
-          LineSuggestion suggestion = new LineSuggestion(lines[i]);
-          suggestions.add(suggestion);
+          suggestions.add(new LineSuggestion(lines[i]));
         }
         Response response = new Response(suggestions);
         callback.onSuggestionsReady(request, response);
