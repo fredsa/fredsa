@@ -7,16 +7,20 @@ import fredsa.booksru.client.BookServiceAsync;
 import fredsa.booksru.client.ValueAddEvent;
 import fredsa.booksru.client.ValueAddHandler;
 import fredsa.booksru.client.view.PageView;
-import fredsa.booksru.shared.Line;
+import fredsa.booksru.shared.Page;
 
 public class PagePresenter {
 
   private final BookServiceAsync bookService = GWT.create(BookService.class);
 
+  private final Page page;
+
   private final PageView pageView;
 
-  public PagePresenter(PageView pageView) {
+  public PagePresenter(PageView pageView, Page page) {
     this.pageView = pageView;
+    this.page = page;
+    pageView.setPage(page);
     pageView.addValueAddHandler(new ValueAddHandler<String>() {
 
       public void onValueAdd(ValueAddEvent<String> event) {
@@ -27,7 +31,6 @@ public class PagePresenter {
   }
 
   private void addLine() {
-    pageView.setCurrentLineEditable(false);
-    pageView.addLine(Line.NULL_LINE);
+    page.addLine();
   }
 }

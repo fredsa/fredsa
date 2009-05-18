@@ -11,18 +11,31 @@ import fredsa.booksru.client.LineWidget;
 import fredsa.booksru.client.ValueAddEvent;
 import fredsa.booksru.client.ValueAddHandler;
 import fredsa.booksru.shared.Line;
+import fredsa.booksru.shared.Page;
 
 import java.util.Date;
 
 public class PageView extends FlowPanel implements HasValueAddHandlers<String> {
 
   private LineWidget lineWidget;
+  private Page page;
 
   public PageView() {
     add(new Label(new Date().toString()));
   }
 
-  public void addLine(Line line) {
+  public HandlerRegistration addValueAddHandler(ValueAddHandler<String> handler) {
+    return addHandler(handler, ValueAddEvent.getType());
+  }
+
+  public Page getPage() {
+    return page;
+  }
+
+  public void onLineAdded(Line line) {
+    if (lineWidget != null) {
+      lineWidget.setEditable(false);
+    }
     lineWidget = new LineWidget(line);
     lineWidget.addValueChangeHandler(new ValueChangeHandler<String>() {
 
@@ -33,14 +46,15 @@ public class PageView extends FlowPanel implements HasValueAddHandlers<String> {
     add(lineWidget);
   }
 
-  public HandlerRegistration addValueAddHandler(ValueAddHandler<String> handler) {
-    return addHandler(handler, ValueAddEvent.getType());
-  }
-
   public void setCurrentLineEditable(boolean editable) {
     if (lineWidget != null) {
       lineWidget.setEditable(editable);
     }
+  }
+
+  public void setPage(Page page) {
+    this.page = page;
+    page.setPageEventListener(this);
   }
 
 }
