@@ -14,6 +14,7 @@ import com.allen_sauer.gwt.log.client.Log;
 
 import fredsa.booksru.client.presenter.PagePresenter;
 import fredsa.booksru.client.view.PageView;
+import fredsa.booksru.shared.Page;
 
 /*
  * * Entry point classes define <code>onModuleLoad()</code>.
@@ -52,6 +53,6 @@ public class BooksRU implements EntryPoint {
 
     PageView pageView = new PageView();
     rootPanel.add(pageView);
-    PagePresenter pagePresenter = new PagePresenter(pageView);
+    PagePresenter pagePresenter = new PagePresenter(pageView, new Page());
   }
 }

@@ -6,3 +6,7 @@
 .gwt-SuggestBoxPopup .item {
 	font-family: monospace;
 }
+
+.my-suggest-box {
+	border: 2px solid green;
+}

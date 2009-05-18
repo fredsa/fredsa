@@ -22,12 +22,14 @@ public class MySuggestBox extends DeckPanel implements HasSelectionHandlers<Stri
   private SuggestBox suggestBox;
 
   public MySuggestBox(SuggestOracle oracle) {
+    setStylePrimaryName("my-suggest-box");
+
     // suggest box widget for editing
     suggestBox = new SuggestBox(oracle);
     suggestBox.addStyleName("line-widget");
 
     // label widget for viewing
-    label = new Label();
+    label = new Label("label");
 
     add(suggestBox);
     add(label);
