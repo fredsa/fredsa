@@ -25,7 +25,7 @@ public class Line implements Serializable {
 
   private static final int LINE_TEXT = 4;
 
-  public static final Line NULL_LINE = null;
+  public static final Line NULL_LINE = new Line(null, "");
 
   private static final int PRECEEDING_LINE_NUMBER = 0;
 

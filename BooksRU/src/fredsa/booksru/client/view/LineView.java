@@ -36,6 +36,7 @@ public class LineView extends Composite implements HasValueChangeHandlers<String
   }
 
   public void clear() {
+    oracle.setSuggestions(null);
     suggestBox.setText("");
   }
 
@@ -43,7 +44,6 @@ public class LineView extends Composite implements HasValueChangeHandlers<String
   protected void onLoad() {
     super.onLoad();
     suggestBox.setFocus(true);
-    clear();
   }
 
   public void setSuggestions(Line[] suggestedLines) {

@@ -18,9 +18,12 @@ public class PagePresenter {
 
   private final BookServiceAsync bookService = GWT.create(BookService.class);
 
+  private Line line = Line.NULL_LINE;
+
   private LineView lineView = new LineView();
 
   private Page page = new Page();
+
   private PageView pageView = new PageView();
 
   private HTML waitingMessage;
@@ -30,12 +33,13 @@ public class PagePresenter {
     rootPanel.add(waitingMessage);
     rootPanel.add(pageView);
     rootPanel.add(lineView);
-    requestLines(Line.NULL_LINE);
+    requestLines(line);
 
     lineView.addValueChangeHandler(new ValueChangeHandler<String>() {
       public void onValueChange(ValueChangeEvent<String> event) {
         pageView.addLine(event.getValue());
         lineView.clear();
+        requestLines(line = new Line(line, event.getValue()));
       }
     });
   }
@@ -45,7 +49,7 @@ public class PagePresenter {
 
       public void onFailure(Throwable caught) {
         waitingMessage.setHTML(waitingMessage.getHTML() + ".");
-        requestLines(Line.NULL_LINE);
+        requestLines(previousLine);
       }
 
       public void onSuccess(Line[] suggestedLines) {
