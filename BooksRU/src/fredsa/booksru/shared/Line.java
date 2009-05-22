@@ -21,17 +21,21 @@ import javax.jdo.annotations.PrimaryKey;
 public class Line implements Serializable {
   private static final String DELIM = "/";
 
-  private static final int LINE_NUMBER = 3;
+  private static final int LINE_NUMBER = 4;
 
-  private static final int LINE_TEXT = 4;
+  private static final int LINE_TEXT = 5;
 
-  public static final Line NULL_LINE = new Line(null, "");
+  public static final Line NULL_LINE;
+  private static final int PRECEEDING_LINE_NUMBER = 1;
 
-  private static final int PRECEEDING_LINE_NUMBER = 0;
+  private static final int PRECEEDING_LINE_TEXT = 2;
 
-  private static final int PRECEEDING_LINE_TEXT = 1;
+  private static final int SCATTER_TIME = 3;
 
-  private static final int SCATTER_TIME = 2;
+  static {
+    NULL_LINE = new Line(null, "");
+    NULL_LINE.setReads(1);
+  }
 
   private static String escapeText(String text) {
     return text.replaceAll("/", "");
@@ -62,7 +66,7 @@ public class Line implements Serializable {
 
   public Line(Line previousLine, String lineText) {
     if (previousLine == null) {
-      setPreceedingLineNumber(0);
+      setPreceedingLineNumber(-1);
       setPreceedingLineText("");
     } else {
       setPreceedingLineNumber(previousLine.getLineNumber());
@@ -70,11 +74,11 @@ public class Line implements Serializable {
     }
     setLineNumber(getPreceedingLineNumber() + 1);
     setLineText(escapeText(lineText));
-    setReads(1);
-    setRank(1);
+    setReads(0);
+    setRank(0);
     setScatterTime(System.currentTimeMillis());
     if (previousLine == null) {
-      setBacktrackLineNumber(-1);
+      setBacktrackLineNumber(-2);
       setBacktrackLineText("");
     } else {
       setBacktrackLineNumber(previousLine.getPreceedingLineNumber());
@@ -103,7 +107,7 @@ public class Line implements Serializable {
   }
 
   private String[] getKeyAsArray() {
-    return (compoundKey + DELIM + "!").split(DELIM, 6);
+    return (compoundKey + DELIM).split(DELIM, 7);
   }
 
   private String getKeyElement(int i) {
@@ -137,6 +141,11 @@ public class Line implements Serializable {
 
   public long getScatterTime() {
     return reverse(Long.parseLong(getKeyElement(SCATTER_TIME)));
+  }
+
+  public void incrementReads() {
+    setReads(getReads() + 1);
+    setRank(getReads() / 2);
   }
 
   public void setBacktrackLineNumber(int backtrackLineNumber) {
@@ -173,11 +182,11 @@ public class Line implements Serializable {
     setKeyElement(PRECEEDING_LINE_TEXT, preceedingLineText);
   }
 
-  public void setRank(int rank) {
+  private void setRank(int rank) {
     this.rank = rank;
   }
 
-  public void setReads(int reads) {
+  private void setReads(int reads) {
     this.reads = reads;
   }
 
