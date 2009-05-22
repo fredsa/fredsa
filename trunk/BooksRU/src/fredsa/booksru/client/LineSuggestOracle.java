@@ -63,9 +63,6 @@ public class LineSuggestOracle extends SuggestOracle {
         String replacementText = lines[i].getLineText();
         suggestions.add(new LineSuggestion(emphasize(replacementText, query), replacementText));
       }
-    } else {
-      suggestions.add(new LineSuggestion(emphasize("replacementText", "query"), "replacementText"));
-
     }
     Response response = new Response(suggestions);
     callback.onSuggestionsReady(request, response);
