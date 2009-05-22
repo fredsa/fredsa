@@ -33,6 +33,9 @@ public class LineSuggestOracle extends SuggestOracle {
   }
 
   private String emphasize(String text, String query) {
+    if (text == null || query == null) {
+      return text;
+    }
     int pos = text.toLowerCase().indexOf(query.toLowerCase());
     return pos == -1 ? text : text.substring(0, pos) + "<b style='color: blue !important;'>"
         + text.substring(pos, pos + query.length()) + "</b>" + text.substring(pos + query.length());
@@ -44,13 +47,25 @@ public class LineSuggestOracle extends SuggestOracle {
   }
 
   @Override
+  public void requestDefaultSuggestions(Request request, Callback callback) {
+    requestSuggestions(request, callback);
+  }
+
+  @Override
   public void requestSuggestions(final Request request, final Callback callback) {
     ArrayList<Suggestion> suggestions = new ArrayList<Suggestion>();
     String query = request.getQuery();
-    suggestions.add(new LineSuggestion(emphasize(query, query), query));
-    for (int i = 0; i < lines.length; i++) {
-      String replacementText = lines[i].getLineText();
-      suggestions.add(new LineSuggestion(emphasize(replacementText, query), replacementText));
+    if (query != null) {
+      suggestions.add(new LineSuggestion(emphasize(query, query), query));
+    }
+    if (lines != null) {
+      for (int i = 0; i < lines.length; i++) {
+        String replacementText = lines[i].getLineText();
+        suggestions.add(new LineSuggestion(emphasize(replacementText, query), replacementText));
+      }
+    } else {
+      suggestions.add(new LineSuggestion(emphasize("replacementText", "query"), "replacementText"));
+
     }
     Response response = new Response(suggestions);
     callback.onSuggestionsReady(request, response);
