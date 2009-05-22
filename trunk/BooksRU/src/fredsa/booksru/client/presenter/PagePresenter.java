@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 import fredsa.booksru.client.BookService;
 import fredsa.booksru.client.BookServiceAsync;
-import fredsa.booksru.client.LineSuggestionWidget;
+import fredsa.booksru.client.view.LineView;
 import fredsa.booksru.client.view.PageView;
 import fredsa.booksru.shared.Line;
 import fredsa.booksru.shared.Page;
@@ -18,7 +18,7 @@ public class PagePresenter {
 
   private final BookServiceAsync bookService = GWT.create(BookService.class);
 
-  private LineSuggestionWidget lineSuggestionWidget = new LineSuggestionWidget();
+  private LineView lineView = new LineView();
 
   private Page page = new Page();
   private PageView pageView = new PageView();
@@ -29,13 +29,13 @@ public class PagePresenter {
     waitingMessage = new HTML("Loading...");
     rootPanel.add(waitingMessage);
     rootPanel.add(pageView);
-    rootPanel.add(lineSuggestionWidget);
+    rootPanel.add(lineView);
     requestLines(Line.NULL_LINE);
 
-    lineSuggestionWidget.addValueChangeHandler(new ValueChangeHandler<String>() {
+    lineView.addValueChangeHandler(new ValueChangeHandler<String>() {
       public void onValueChange(ValueChangeEvent<String> event) {
         pageView.addLine(event.getValue());
-        lineSuggestionWidget.setText("");
+        lineView.clear();
       }
     });
   }
@@ -53,7 +53,7 @@ public class PagePresenter {
         if (previousLine == Line.NULL_LINE) {
           waitingMessage.removeFromParent();
         }
-        lineSuggestionWidget.setSuggestions(suggestedLines);
+        lineView.setSuggestions(suggestedLines);
       }
     });
   }

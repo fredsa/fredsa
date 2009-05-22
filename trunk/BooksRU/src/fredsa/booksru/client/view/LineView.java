@@ -1,4 +1,4 @@
-package fredsa.booksru.client;
+package fredsa.booksru.client.view;
 
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -10,20 +10,21 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
+import fredsa.booksru.client.LineSuggestOracle;
 import fredsa.booksru.shared.Line;
 
-public class LineSuggestionWidget extends Composite implements HasValueChangeHandlers<String> {
+public class LineView extends Composite implements HasValueChangeHandlers<String> {
 
   private LineSuggestOracle oracle = new LineSuggestOracle();
   private SuggestBox suggestBox;
 
-  public LineSuggestionWidget() {
+  public LineView() {
     suggestBox = new SuggestBox(oracle);
-    suggestBox.addStyleName("line-widget");
+    suggestBox.addStyleName("lineview");
 
     suggestBox.addSelectionHandler(new SelectionHandler<Suggestion>() {
       public void onSelection(SelectionEvent<Suggestion> event) {
-        ValueChangeEvent.fire(LineSuggestionWidget.this, event.getSelectedItem().getReplacementString());
+        ValueChangeEvent.fire(LineView.this, event.getSelectedItem().getReplacementString());
       }
     });
 
@@ -34,18 +35,19 @@ public class LineSuggestionWidget extends Composite implements HasValueChangeHan
     return addHandler(handler, ValueChangeEvent.getType());
   }
 
-  public void setSuggestions(Line[] suggestedLines) {
-    oracle.setSuggestions(suggestedLines);
-
-  }
-
-  public void setText(String text) {
-    suggestBox.setText(text);
+  public void clear() {
+    suggestBox.setText("");
   }
 
   @Override
   protected void onLoad() {
     super.onLoad();
     suggestBox.setFocus(true);
+    clear();
+  }
+
+  public void setSuggestions(Line[] suggestedLines) {
+    oracle.setSuggestions(suggestedLines);
+    suggestBox.showSuggestionList();
   }
 }
