@@ -2,8 +2,12 @@
 	font-family: monospace;
 }
 
+.pageview {
+	font-family: monospace;
+}
+
 .line-widget {
-	width: 20em;
+	width: 40em;
 	font-family: monospace;
 	border: 2px solid green;
 }
