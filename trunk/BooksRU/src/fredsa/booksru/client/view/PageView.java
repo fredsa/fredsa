@@ -1,11 +1,11 @@
 package fredsa.booksru.client.view;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
 import fredsa.booksru.shared.Page;
-
-import java.util.Date;
 
 public class PageView extends FlowPanel //implements HasValueAddHandlers<String> 
 {
@@ -13,6 +13,7 @@ public class PageView extends FlowPanel //implements HasValueAddHandlers<String>
   private Page page;
 
   public PageView() {
+    setStylePrimaryName("pageview");
     add(new Label(new Date().toString()));
   }
 

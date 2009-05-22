@@ -2,7 +2,6 @@ package fredsa.booksru.client;
 
 import java.util.ArrayList;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SuggestOracle;
 
 import fredsa.booksru.shared.Line;
@@ -27,8 +26,6 @@ public class LineSuggestOracle extends SuggestOracle {
     }
 
   }
-
-  private static final BookServiceAsync bookService = GWT.create(BookService.class);
 
   private Line[] lines;
 
