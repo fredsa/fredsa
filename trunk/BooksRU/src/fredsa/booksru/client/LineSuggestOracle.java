@@ -61,8 +61,8 @@ public class LineSuggestOracle extends SuggestOracle {
     if (lines != null) {
       for (int i = 0; i < lines.length; i++) {
         String replacementText = lines[i].getLineText();
-        suggestions.add(new LineSuggestion(emphasize(replacementText, query) + " ("
-            + lines[i].getCompoundKey() + ")", replacementText));
+        suggestions.add(new LineSuggestion(emphasize(replacementText, query) + " (" + lines[i]
+            + ")", replacementText));
       }
     }
     Response response = new Response(suggestions);

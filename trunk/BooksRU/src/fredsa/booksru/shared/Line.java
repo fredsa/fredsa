@@ -197,4 +197,9 @@ public class Line implements Serializable {
   public void setScatterTime(long scatterTime) {
     setKeyElement(SCATTER_TIME, Long.toString(reverse(scatterTime)));
   }
+
+  @Override
+  public String toString() {
+    return "compoundKey=" + getCompoundKey() + ";reads=" + getReads() + ";rank=" + getRank();
+  }
 }

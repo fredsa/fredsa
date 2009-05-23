@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
@@ -56,7 +57,7 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
     List<Line> results = (List<Line>) query.execute();
     for (Iterator iterator = results.iterator(); iterator.hasNext();) {
       Line line = (Line) iterator.next();
-      System.err.println(line.getCompoundKey());
+      System.err.println(line);
     }
     return new ArrayList<Line>(results);
   }
@@ -64,14 +65,16 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
   public Line[] getLineSuggestions(Line previousLine) {
     PersistenceManager pm = PMF.get().getPersistenceManager();
     if (previousLine.getLineNumber() > 0) {
-      if (previousLine.getReads() == 0) {
-        pm.makePersistent(previousLine);
-      } else {
-        Key key = KeyFactory.createKey(Line.class.getSimpleName(), previousLine.getCompoundKey());
-        Line line = pm.getObjectById(Line.class, key);
-        line.incrementReads();
-        pm.makePersistent(line);
+      Key key = KeyFactory.createKey(Line.class.getSimpleName(), previousLine.getCompoundKey());
+      Line line;
+      try {
+        line = pm.getObjectById(Line.class, key);
+      } catch (JDOObjectNotFoundException ex) {
+        line = previousLine;
       }
+      line.incrementReads();
+      pm.makePersistent(line);
+      System.out.println("persisting existing " + line);
     }
     return getLines(pm, previousLine).toArray(new Line[] {});
   }
