@@ -7,7 +7,6 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -51,12 +50,13 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
 
   private List<Line> getLines(PersistenceManager pm, Line previousLine) {
     Query query = pm.newQuery(Line.class);
-    query.setFilter("previousLineNumber == " + previousLine.getLineNumber());
+    String prefix = previousLine.getPrefixFilterForNextLine();
+    query.setFilter("compoundKey > '" + prefix + "' && compoundKey < '" + prefix + "z'");
     query.setRange(0, 10);
     List<Line> results = (List<Line>) query.execute();
     for (Iterator iterator = results.iterator(); iterator.hasNext();) {
       Line line = (Line) iterator.next();
-      Log.debug(line.getCompoundKey());
+      System.err.println(line.getCompoundKey());
     }
     return new ArrayList<Line>(results);
   }
@@ -76,4 +76,3 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
     return getLines(pm, previousLine).toArray(new Line[] {});
   }
 }
-///0//-4129273751919394816/1//////
