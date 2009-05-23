@@ -131,6 +131,10 @@ public class Line implements Serializable {
     return getKeyElement(PRECEEDING_LINE_TEXT);
   }
 
+  public String getPrefixFilterForNextLine() {
+    return DELIM + getLineNumber() + DELIM + getLineText() + DELIM;
+  }
+
   public int getRank() {
     return rank;
   }
