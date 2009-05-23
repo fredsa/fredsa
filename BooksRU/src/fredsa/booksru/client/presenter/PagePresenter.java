@@ -28,6 +28,8 @@ public class PagePresenter {
 
   private PageView pageView = new PageView();
 
+  private Line[] suggestedLines;
+
   private HTML waitingMessage;
 
   public PagePresenter(RootPanel rootPanel) {
@@ -42,9 +44,19 @@ public class PagePresenter {
       public void onValueChange(ValueChangeEvent<String> event) {
         pageView.addLine(event.getValue());
         lineView.clear();
-        requestLines(line = new Line(line, event.getValue()));
+        requestLines(line = getOrMakeLine(line, event.getValue()));
       }
+
     });
+  }
+
+  private Line getOrMakeLine(Line previousLine, String lineText) {
+    for (int i = 0; i < suggestedLines.length; i++) {
+      if (suggestedLines[i].getLineText().equals(lineText)) {
+        return suggestedLines[i];
+      }
+    }
+    return new Line(previousLine, lineText);
   }
 
   private void requestLines(final Line previousLine) {
@@ -62,6 +74,7 @@ public class PagePresenter {
       }
 
       public void onSuccess(Line[] suggestedLines) {
+        PagePresenter.this.suggestedLines = suggestedLines;
         page.setSuggestions(previousLine, suggestedLines);
         if (previousLine == Line.NULL_LINE) {
           waitingMessage.removeFromParent();
