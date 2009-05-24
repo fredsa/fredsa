@@ -42,12 +42,16 @@ public class PagePresenter {
 
     lineView.addValueChangeHandler(new ValueChangeHandler<String>() {
       public void onValueChange(ValueChangeEvent<String> event) {
-        pageView.addLine(event.getValue());
         lineView.clear();
-        requestLines(line = getOrMakeLine(line, event.getValue()));
+        if (event.getValue() == null) {
+          pageView.removeLine();
+        } else {
+          pageView.addLine(event.getValue());
+          requestLines(line = getOrMakeLine(line, event.getValue()));
+        }
       }
-
     });
+
   }
 
   private Line getOrMakeLine(Line previousLine, String lineText) {
