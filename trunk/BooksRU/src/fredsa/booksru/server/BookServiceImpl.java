@@ -57,7 +57,6 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
     List<Line> results = (List<Line>) query.execute();
     for (Iterator iterator = results.iterator(); iterator.hasNext();) {
       Line line = (Line) iterator.next();
-      System.err.println(line);
     }
     return new ArrayList<Line>(results);
   }
@@ -73,10 +72,9 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
         line = previousLine;
       }
       line.incrementReads();
+      pm.currentTransaction().begin();
       pm.makePersistent(line);
-      System.out.println("persisting existing " + line);
-      line = pm.getObjectById(Line.class, key);
-      System.out.println("persisted existing " + line);
+      pm.currentTransaction().commit();
     }
     return getLines(pm, previousLine).toArray(new Line[] {});
   }
