@@ -14,6 +14,10 @@ public class PageView extends FlowPanel //implements HasValueAddHandlers<String>
     add(new Label(text));
   }
 
+  public void removeLine() {
+    remove(getWidgetCount() - 1);
+  }
+
   //  public HandlerRegistration addValueAddHandler(ValueAddHandler<String> handler) {
   //    return addHandler(handler, ValueAddEvent.getType());
   //  }

@@ -1,5 +1,8 @@
 package fredsa.booksru.client.view;
 
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -25,6 +28,16 @@ public class LineView extends Composite implements HasValueChangeHandlers<String
     suggestBox.addSelectionHandler(new SelectionHandler<Suggestion>() {
       public void onSelection(SelectionEvent<Suggestion> event) {
         ValueChangeEvent.fire(LineView.this, event.getSelectedItem().getReplacementString());
+      }
+    });
+
+    // Workaround for GWT issue 3533
+    suggestBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
+      public void onKeyUp(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE
+            && suggestBox.getText().length() == 0) {
+          ValueChangeEvent.fire(LineView.this, null);
+        }
       }
     });
 
