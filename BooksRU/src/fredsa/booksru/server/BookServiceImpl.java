@@ -75,6 +75,8 @@ public class BookServiceImpl extends RemoteServiceServlet implements BookService
       line.incrementReads();
       pm.makePersistent(line);
       System.out.println("persisting existing " + line);
+      line = pm.getObjectById(Line.class, key);
+      System.out.println("persisted existing " + line);
     }
     return getLines(pm, previousLine).toArray(new Line[] {});
   }
