@@ -76,12 +76,16 @@ public class LineSuggestOracle extends SuggestOracle {
       }
 
       for (int i = 0; i < lines.length; i++) {
-        int color = Math.round((lines[i].getReads() - min) / (max - min + 1) * 255);
+        float intensity = 1 - (lines[i].getReads() - min) / (max - min + 1F);
+        int r = Math.round(intensity * 192);
+        int g = Math.round(intensity * 192);
+        int b = Math.round(intensity * 192);
         String replacementText = lines[i].getLineText();
         String emph = emphasize(replacementText, query);
-        emph = "<span style='color: rgb(" + color + ", " + color + ", " + color + ");'>(" + color
-            + ")" + emph + "</span>";
-        suggestions.add(new LineSuggestion(emph + " (" + lines[i] + ")", replacementText));
+        emph = "<span style='color: rgb(" + r + ", " + g + ", " + b + ");'>" + emph + "</span>";
+        suggestions.add(new LineSuggestion(emph
+            + " <div style='text-align:right; color:#aae; padding-left: 10em;'>(" + lines[i]
+            + ")</div>", replacementText));
       }
     }
     Response response = new Response(suggestions);

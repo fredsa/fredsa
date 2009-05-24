@@ -200,6 +200,6 @@ public class Line implements Serializable {
 
   @Override
   public String toString() {
-    return "compoundKey=" + getCompoundKey() + ";reads=" + getReads() + ";rank=" + getRank();
+    return getCompoundKey() + ";reads=" + getReads() + ";rank=" + getRank();
   }
 }
