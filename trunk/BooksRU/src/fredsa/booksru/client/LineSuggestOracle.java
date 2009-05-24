@@ -37,8 +37,12 @@ public class LineSuggestOracle extends SuggestOracle {
       return text;
     }
     int pos = text.toLowerCase().indexOf(query.toLowerCase());
-    return pos == -1 ? text : text.substring(0, pos) + "<b style='color: blue !important;'>"
-        + text.substring(pos, pos + query.length()) + "</b>" + text.substring(pos + query.length());
+    if (pos != -1) {
+      text = text.substring(0, pos) + "<b style='color: blue !important;'>"
+          + text.substring(pos, pos + query.length()) + "</b>"
+          + text.substring(pos + query.length());
+    }
+    return text;
   }
 
   @Override
@@ -59,10 +63,25 @@ public class LineSuggestOracle extends SuggestOracle {
       suggestions.add(new LineSuggestion(emphasize(query, query), query));
     }
     if (lines != null) {
+      int min = Integer.MAX_VALUE;
+      int max = 0;
       for (int i = 0; i < lines.length; i++) {
+        int reads = lines[i].getReads();
+        if (reads > max) {
+          max = reads;
+        }
+        if (reads < min) {
+          min = reads;
+        }
+      }
+
+      for (int i = 0; i < lines.length; i++) {
+        int color = Math.round((lines[i].getReads() - min) / (max - min + 1) * 255);
         String replacementText = lines[i].getLineText();
-        suggestions.add(new LineSuggestion(emphasize(replacementText, query) + " (" + lines[i]
-            + ")", replacementText));
+        String emph = emphasize(replacementText, query);
+        emph = "<span style='color: rgb(" + color + ", " + color + ", " + color + ");'>(" + color
+            + ")" + emph + "</span>";
+        suggestions.add(new LineSuggestion(emph + " (" + lines[i] + ")", replacementText));
       }
     }
     Response response = new Response(suggestions);
