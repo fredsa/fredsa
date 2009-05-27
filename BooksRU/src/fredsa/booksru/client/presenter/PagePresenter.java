@@ -44,10 +44,16 @@ public class PagePresenter {
       public void onValueChange(ValueChangeEvent<String> event) {
         lineView.clear();
         if (event.getValue() == null) {
-          pageView.removeLine();
+          // remove a line
+          if (page.removeLastLine() != null) {
+            pageView.removeLine();
+            requestLines(line = page.getLastLine());
+          }
         } else {
+          // add a line
           pageView.addLine(event.getValue());
           requestLines(line = getOrMakeLine(line, event.getValue()));
+          page.addLine(line);
         }
       }
     });
@@ -64,7 +70,7 @@ public class PagePresenter {
   }
 
   private void requestLines(final Line previousLine) {
-    bookService.getLineSuggestions(previousLine, new AsyncCallback<Line[]>() {
+    AsyncCallback<Line[]> callback = new AsyncCallback<Line[]>() {
 
       public void onFailure(Throwable caught) {
         waitingMessage.setHTML(waitingMessage.getHTML() + ".");
@@ -85,7 +91,14 @@ public class PagePresenter {
         }
         lineView.setSuggestions(suggestedLines);
       }
-    });
+    };
+    lineView.setSuggestions(null);
+    Line[] suggestions = page.getSuggestions(previousLine);
+    if (suggestions == null) {
+      bookService.getLineSuggestions(previousLine, callback);
+    } else {
+      callback.onSuccess(suggestions);
+    }
   }
 
 }

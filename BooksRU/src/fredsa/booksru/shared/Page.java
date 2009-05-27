@@ -9,25 +9,24 @@ public class Page implements Serializable {
 
   private HashMap<Line, Line[]> suggestionMap = new HashMap<Line, Line[]>();
 
-  //  private PageView pageEventListener;
-
   public Page() {
   }
 
-  //  public void addLine() {
-  //    int size = lines.size();
-  //    Line line = size == 0 ? Line.NULL_LINE : new Line(lines.get(size - 1), "");
-  //    addLine(line);
-  //  }
-  //
-  //  public void setPageEventListener(PageView pageEventListener) {
-  //    this.pageEventListener = pageEventListener;
-  //  }
-  //
-  //  private void addLine(Line line) {
-  //    lines.add(line);
-  //    pageEventListener.onLineAdded(line);
-  //  }
+  public void addLine(Line line) {
+    lines.add(line);
+  }
+
+  public Line getLastLine() {
+    return lines.isEmpty() ? Line.NULL_LINE : lines.get(lines.size() - 1);
+  }
+
+  public Line[] getSuggestions(Line previousLine) {
+    return suggestionMap.get(previousLine);
+  }
+
+  public Line removeLastLine() {
+    return lines.isEmpty() ? null : lines.remove(lines.size() - 1);
+  }
 
   public void setSuggestions(Line previousLine, Line[] suggestedLines) {
     suggestionMap.put(previousLine, suggestedLines);
