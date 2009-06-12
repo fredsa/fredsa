@@ -11,6 +11,9 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 import fredsa.booksru.client.BookService;
 import fredsa.booksru.client.BookServiceAsync;
+import fredsa.booksru.client.action.EventBus;
+import fredsa.booksru.client.action.GetLineSuggestionsReponse;
+import fredsa.booksru.client.action.GotLineSuggestions;
 import fredsa.booksru.client.view.LineView;
 import fredsa.booksru.client.view.PageView;
 import fredsa.booksru.shared.Line;
@@ -19,6 +22,8 @@ import fredsa.booksru.shared.Page;
 public class PagePresenter {
 
   private final BookServiceAsync bookService = GWT.create(BookService.class);
+
+  EventBus eventBus;
 
   private Line line = Line.NULL_LINE;
 
@@ -32,7 +37,8 @@ public class PagePresenter {
 
   private HTML waitingMessage;
 
-  public PagePresenter(RootPanel rootPanel) {
+  public PagePresenter(EventBus eventBus, RootPanel rootPanel) {
+    this.eventBus = eventBus;
     rootPanel.add(new Label(line.getLineText()));
     waitingMessage = new HTML("Loading...");
     rootPanel.add(waitingMessage);
@@ -92,6 +98,14 @@ public class PagePresenter {
         lineView.setSuggestions(suggestedLines);
       }
     };
+    eventBus.addHandler(GetLineSuggestionsReponse.class, new GotLineSuggestions() {
+
+      @Override
+      void got(Line[] suggestions) {
+        // TODO Auto-generated method stub
+
+      }
+    });
     lineView.setSuggestions(null);
     Line[] suggestions = page.getSuggestions(previousLine);
     if (suggestions == null) {
@@ -100,5 +114,4 @@ public class PagePresenter {
       callback.onSuccess(suggestions);
     }
   }
-
 }
