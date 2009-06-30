@@ -39,7 +39,7 @@ public class Blobs implements EntryPoint {
   public void onModuleLoad() {
     final Button sendButton = new Button("Send");
     final TextBox nameField = new TextBox();
-    nameField.setText("GWT User");
+    nameField.setText("1024");
 
     // We can add style names to widgets
     sendButton.addStyleName("sendButton");
@@ -132,5 +132,7 @@ public class Blobs implements EntryPoint {
     MyHandler handler = new MyHandler();
     sendButton.addClickHandler(handler);
     nameField.addKeyUpHandler(handler);
+
+    sendButton.click();
   }
 }
