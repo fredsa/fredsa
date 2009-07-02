@@ -15,15 +15,19 @@ import javax.jdo.Query;
  */
 @SuppressWarnings("serial")
 public class GreetingServiceImpl extends RemoteServiceServlet implements GreetingService {
+  private final static int MAX_BLOB_SIZE = 1000000;
 
   public String greetServer(String input) {
     int size = Integer.parseInt(input);
     PersistenceManager pm = PMF.get().getPersistenceManager();
 
     MyFile file = new MyFile();
-    file.addChunk(makeChunk(1, size));
-    file.addChunk(makeChunk(2, size));
-    file.addChunk(makeChunk(3, size));
+    int sizeRemaining = size;
+    while (sizeRemaining > MAX_BLOB_SIZE) {
+      file.addChunk(makeChunk(1, MAX_BLOB_SIZE));
+      size -= MAX_BLOB_SIZE;
+    }
+    file.addChunk(makeChunk(2, sizeRemaining));
     pm.makePersistent(file);
 
     Query query = pm.newQuery(MyFile.class);
@@ -39,7 +43,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
       byte[] bytes = chunk.getBytes();
       text += "|" + bytes[0] + " (" + bytes.length + ")";
     }
-    return id + ":" + text;
+    return "<a href='/blobs/download?len=" + size + "&id=" + id + "'>" + id + ":" + text + "</a>";
   }
 
   private MyFileChunk makeChunk(int seq, int size) {

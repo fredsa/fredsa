@@ -1,0 +1,10 @@
+<!-- Indices written at Thu, 2 Jul 2009 00:06:41 UTC -->
+
+<datastore-indexes>
+
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="MyFileChunk" ancestor="true" source="auto">
+        <property name="fileChunks_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>
