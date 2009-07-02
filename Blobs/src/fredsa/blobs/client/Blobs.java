@@ -133,6 +133,6 @@ public class Blobs implements EntryPoint {
     sendButton.addClickHandler(handler);
     nameField.addKeyUpHandler(handler);
 
-    sendButton.click();
+    //    sendButton.click();
   }
 }
