@@ -1,7 +1,0 @@
-com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException, true
-fredsa.bestpractices.client.GetContactsResponse, true
-fredsa.bestpractices.client.UpdateContact, true
-java.lang.Exception, false
-java.lang.RuntimeException, false
-java.lang.String, true
-java.lang.Throwable, false
