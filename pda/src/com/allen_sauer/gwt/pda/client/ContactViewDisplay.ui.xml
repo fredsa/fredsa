@@ -5,13 +5,15 @@
     
   </ui:style>
   <g:FocusPanel ui:field="panel">
-    <g:Label styleName="label">First Name:</g:Label>
-    <g:Label styleName="field" ui:field="firstName"></g:Label>
-    <g:Label styleName="label">Last Name:</g:Label>
-    <g:Label styleName="field" ui:field="lastName"></g:Label>
-    <g:Label styleName="label">Display Name:</g:Label>
-    <g:Label styleName="field" ui:field="displayName"></g:Label>
-    <g:Label styleName="label">Enabled:</g:Label>
-    <g:CheckBox ui:field="enabledCheckbox" enabled="false"></g:CheckBox>
+    <g:FlowPanel>
+      <g:Label styleName="label">First Name:</g:Label>
+      <g:Label styleName="field" ui:field="firstName"></g:Label>
+      <g:Label styleName="label">Last Name:</g:Label>
+      <g:Label styleName="field" ui:field="lastName"></g:Label>
+      <g:Label styleName="label">Display Name:</g:Label>
+      <g:Label styleName="field" ui:field="displayName"></g:Label>
+      <g:Label styleName="label">Enabled:</g:Label>
+      <g:CheckBox ui:field="enabledCheckbox" enabled="false"></g:CheckBox>
+    </g:FlowPanel>
   </g:FocusPanel>
 </ui:UiBinder> 
