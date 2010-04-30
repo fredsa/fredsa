@@ -11,38 +11,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
-public class CacheServlet extends HttpServlet {
+public class NoCacheServlet extends HttpServlet {
   private DateFormat df = SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.FULL,
       SimpleDateFormat.FULL);
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-    //    UserService userService = UserServiceFactory.getUserService();
-    //    if (!userService.isUserLoggedIn()) {
-    //      resp.sendRedirect(userService.createLoginURL(req.getRequestURI()));
-    //      return;
-    //    }
-
-    String sleepText = req.getParameter("sleep");
-    if (sleepText != null) {
-      try {
-        Thread.sleep(Integer.parseInt(sleepText));
-      } catch (InterruptedException ignore) {
-      }
-    }
-
-    String ageText = req.getParameter("age");
-    int age = Integer.parseInt(ageText);
-
     //  Date: <Date>
-    //  Expires: <Date + age>
-    //  Cache-control: public, max-age=<age>
+    //  Expires: Mon, 01 Jan 1990 00:00:00 GMT
+    //  Pragma: no-cache
+    //  Cache-control: no-cache, must-revalidate
 
     Date now = new Date();
     resp.setDateHeader("Date", now.getTime());
-    resp.setDateHeader("Expires", now.getTime() + 1000L * age);
-    resp.setHeader("Cache-Control", "public, max-age=" + age);
+    resp.setDateHeader("Expires", 0);
+    resp.setHeader("Pragma", "no-cache");
+    resp.setHeader("Cache-Control", "no-cache, must-revalidate");
 
     resp.setContentType("text/plain");
     resp.getWriter().println(df.format(now) + " " + System.nanoTime());
@@ -57,7 +42,6 @@ public class CacheServlet extends HttpServlet {
           resp.getWriter().println(" - " + value);
         }
       }
-      //    resp.getWriter().println(userService.isUserAdmin() ? "admin" : "user");
     }
   }
 }
