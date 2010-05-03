@@ -1,5 +1,15 @@
 package com.allen_sauer.gwt.pda.client;
 
+import com.allen_sauer.gwt.pda.client.command.Response;
+import com.allen_sauer.gwt.pda.client.command.SearchCommand;
+import com.allen_sauer.gwt.pda.client.command.SearchResponse;
+import com.allen_sauer.gwt.pda.client.event.SearchEvent;
+import com.allen_sauer.gwt.pda.client.event.SearchEventHandler;
+import com.allen_sauer.gwt.pda.client.event.SearchResultEvent;
+import com.allen_sauer.gwt.pda.client.presenter.ContactListPresenter;
+import com.allen_sauer.gwt.pda.client.presenter.SearchPresenter;
+import com.allen_sauer.gwt.pda.client.view.ContactListDisplay;
+import com.allen_sauer.gwt.pda.client.view.SearchDisplay;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
@@ -47,8 +57,8 @@ public class Pda implements EntryPoint {
 			}
 		});
 
-		ContactListEditor contactListEditor = new ContactListEditor(pdaService,
+		ContactListPresenter contactListPresenter = new ContactListPresenter(pdaService,
 				eventBus);
-		contactListEditor.bindDisplay(contactListDisplay);
+		contactListPresenter.bindDisplay(contactListDisplay);
 	}
 }

@@ -1,6 +1,6 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.view;
 
-import com.allen_sauer.gwt.pda.client.SearchPresenter.Display;
+import com.allen_sauer.gwt.pda.client.presenter.SearchPresenter.Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;

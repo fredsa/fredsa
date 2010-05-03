@@ -1,9 +1,11 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.presenter;
+
+import com.allen_sauer.gwt.pda.client.PdaServiceAsync;
 
 
 public class ContactEditPresenter {
 
-  static interface Display {
+  public static interface Display {
   }
 
   private Display display;

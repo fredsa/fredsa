@@ -1,4 +1,6 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.command;
+
+import com.allen_sauer.gwt.pda.client.shared.Contact;
 
 @SuppressWarnings("serial")
 public class SearchResponse implements Response {

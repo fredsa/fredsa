@@ -1,11 +1,11 @@
 package com.allen_sauer.gwt.pda.server;
 
-import com.allen_sauer.gwt.pda.client.Command;
-import com.allen_sauer.gwt.pda.client.Contact;
 import com.allen_sauer.gwt.pda.client.PdaService;
-import com.allen_sauer.gwt.pda.client.Response;
-import com.allen_sauer.gwt.pda.client.SearchCommand;
-import com.allen_sauer.gwt.pda.client.SearchResponse;
+import com.allen_sauer.gwt.pda.client.command.Command;
+import com.allen_sauer.gwt.pda.client.command.Response;
+import com.allen_sauer.gwt.pda.client.command.SearchCommand;
+import com.allen_sauer.gwt.pda.client.command.SearchResponse;
+import com.allen_sauer.gwt.pda.client.shared.Contact;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**

@@ -1,4 +1,5 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.event;
+
 
 public class EditEvent extends Event {
 

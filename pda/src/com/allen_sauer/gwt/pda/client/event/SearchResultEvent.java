@@ -1,5 +1,6 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.event;
 
+import com.allen_sauer.gwt.pda.client.shared.Contact;
 import com.google.gwt.event.shared.GwtEvent;
 
 public class SearchResultEvent extends GwtEvent<SearchResultEventHandler> {

@@ -1,6 +1,7 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.view;
 
-import com.allen_sauer.gwt.pda.client.ContactViewPresenter.Display;
+import com.allen_sauer.gwt.pda.client.presenter.ContactViewPresenter.Display;
+import com.allen_sauer.gwt.pda.client.shared.Contact;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;

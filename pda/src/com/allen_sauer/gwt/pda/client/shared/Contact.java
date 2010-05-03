@@ -1,4 +1,4 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.shared;
 
 import java.io.Serializable;
 

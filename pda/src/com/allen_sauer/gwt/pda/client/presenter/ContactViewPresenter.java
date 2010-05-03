@@ -1,12 +1,16 @@
-package com.allen_sauer.gwt.pda.client;
+package com.allen_sauer.gwt.pda.client.presenter;
 
+import com.allen_sauer.gwt.pda.client.EventBus;
+import com.allen_sauer.gwt.pda.client.PdaServiceAsync;
+import com.allen_sauer.gwt.pda.client.event.EditEvent;
+import com.allen_sauer.gwt.pda.client.shared.Contact;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 
 public class ContactViewPresenter {
 
-  static interface Display {
+  public static interface Display {
     String getDisplayName();
     HasClickHandlers getEditButton();
   }
