@@ -1,6 +1,6 @@
 package com.allen_sauer.gwt.pda.client;
 
-import com.allen_sauer.gwt.pda.client.ContactEditEditor.Display;
+import com.allen_sauer.gwt.pda.client.ContactEditPresenter.Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;

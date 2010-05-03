@@ -43,10 +43,10 @@ public class ContactListDisplay extends Composite implements Display {
     contactListPanel.add(new HTML("<hr>"));
     for (Contact contact : contacts) {
       ContactViewDisplay display = new ContactViewDisplay(contact);
-      ContactViewEditor editor = new ContactViewEditor(pdaService);
+      ContactViewPresenter presenter = new ContactViewPresenter(pdaService);
       contactListPanel.add(display);
       contactListPanel.add(new HTML("<hr>"));
-      editor.bindDisplay(display);
+      presenter.bindDisplay(display);
     }
   }
 }

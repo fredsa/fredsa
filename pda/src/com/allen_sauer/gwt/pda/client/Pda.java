@@ -21,9 +21,9 @@ public class Pda implements EntryPoint {
 		RootPanel.get().add(searchDisplay);
 		RootPanel.get().add(contactListDisplay);
 
-		SearchEditor searchEditor = new SearchEditor(pdaService, eventBus);
-		searchEditor.bindDisplay(searchDisplay);
-		searchEditor.start();
+		SearchPresenter searchPresenter = new SearchPresenter(pdaService, eventBus);
+		searchPresenter.bindDisplay(searchDisplay);
+		searchPresenter.start();
 
 		eventBus.addHandler(SearchEvent.TYPE, new SearchEventHandler() {
 

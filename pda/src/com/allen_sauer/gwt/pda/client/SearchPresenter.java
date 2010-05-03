@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class SearchEditor extends Composite {
+public class SearchPresenter extends Composite {
 	interface Display {
 		TextBox getSearchBox();
 
@@ -26,7 +26,7 @@ public class SearchEditor extends Composite {
 
 	private final HandlerManager eventBus;
 
-	public SearchEditor(PdaServiceAsync pdaService, HandlerManager eventBus) {
+	public SearchPresenter(PdaServiceAsync pdaService, HandlerManager eventBus) {
 		this.pdaService = pdaService;
 		this.eventBus = eventBus;
 	}
@@ -35,7 +35,7 @@ public class SearchEditor extends Composite {
 		display.getFocusable().setFocus(true);
 	}
 
-	public void bindDisplay(final SearchEditor.Display display) {
+	public void bindDisplay(final SearchPresenter.Display display) {
 		this.display = display;
 		display.getSearchBox().addKeyDownHandler(new KeyDownHandler() {
 			public void onKeyDown(KeyDownEvent event) {

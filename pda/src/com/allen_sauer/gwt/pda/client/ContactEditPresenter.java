@@ -1,7 +1,7 @@
 package com.allen_sauer.gwt.pda.client;
 
 
-public class ContactEditEditor {
+public class ContactEditPresenter {
 
   static interface Display {
   }
@@ -10,7 +10,7 @@ public class ContactEditEditor {
 
   private PdaServiceAsync pdaService;
 
-  public ContactEditEditor(PdaServiceAsync pdaService) {
+  public ContactEditPresenter(PdaServiceAsync pdaService) {
     this.pdaService = pdaService;
   }
 

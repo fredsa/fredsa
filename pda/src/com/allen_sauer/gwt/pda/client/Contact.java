@@ -3,43 +3,49 @@ package com.allen_sauer.gwt.pda.client;
 import java.io.Serializable;
 
 public class Contact implements Serializable {
-	public Contact() {
-	}
+  private String displayName;
 
-	private String firstName;
-	private String lastName;
-	private boolean enabled = true;
-	private String displayName;
+  private boolean enabled = true;
+  private String firstName;
+  private String id;
+  private String lastName;
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+  public Contact() {
+  }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+  public String getDisplayName() {
+    return displayName;
+  }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+  public String getFirstName() {
+    return firstName;
+  }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+  public String getId() {
+    return id;
+  }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+  public String getLastName() {
+    return lastName;
+  }
 
-	public String getLastName() {
-		return lastName;
-	}
+  public boolean isEnabled() {
+    return enabled;
+  }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
-	public String getFirstName() {
-		return firstName;
-	}
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 }

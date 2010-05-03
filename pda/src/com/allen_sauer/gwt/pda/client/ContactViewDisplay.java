@@ -1,6 +1,6 @@
 package com.allen_sauer.gwt.pda.client;
 
-import com.allen_sauer.gwt.pda.client.ContactViewEditor.Display;
+import com.allen_sauer.gwt.pda.client.ContactViewPresenter.Display;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,7 +41,11 @@ public class ContactViewDisplay extends Composite implements Display {
     enabledCheckbox.setValue(contact.isEnabled());
   }
 
-  public HasClickHandlers getPanel() {
+  public String getDisplayName() {
+    return displayName.getText();
+  }
+
+  public HasClickHandlers getEditButton() {
     return panel;
   }
 
