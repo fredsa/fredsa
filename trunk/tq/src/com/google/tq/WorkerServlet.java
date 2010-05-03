@@ -1,10 +1,12 @@
 package com.google.tq;
 
-import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.param;
-
+import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.*;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 
@@ -17,22 +19,43 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class WorkerServlet extends HttpServlet {
   @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    boolean requeue = false;
     resp.setContentType("text/plain");
-    String key = req.getParameter("key");
-    key = Integer.toString(Integer.parseInt(key) + 1);
-    Queue queue = QueueFactory.getDefaultQueue();
-    queue.add(param("key", key));
-    resp.getWriter().println("Task added.");
 
+    String limit = req.getParameter("limit");
+    if (limit == null) {
+      limit = "1";
+    }
 
-    // Get a handle on the datastore itself
+    String kind = req.getParameter("kind");
+
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+    Entity victim = new Entity("Victim");
+    datastore.put(victim);
 
-    for (int i = 0; i < 20; i++) {
-      Entity person = new Entity("Person");
-      datastore.put(person);
+    Entity dragon = new Entity("Dragon");
+    datastore.put(dragon);
+
+    Entity slayer = new Entity("Slayer");
+    datastore.put(slayer);
+
+    Query query = new Query(kind).setKeysOnly();
+    for (Entity entity : datastore.prepare(query).asIterable(
+        FetchOptions.Builder.withLimit(Integer.parseInt(limit)))) {
+      datastore.delete(entity.getKey());
+      resp.getWriter().println(kind + " " + entity.getKey() + " deleted.");
+      requeue = true;
+    }
+
+    if (requeue) {
+      Queue queue = QueueFactory.getDefaultQueue();
+      queue.add(url("/worker").param("limit", limit));
+      if (kind != null) {
+        queue.add(param("kind", kind));
+      }
+      resp.getWriter().println("Task added.");
     }
 
   }

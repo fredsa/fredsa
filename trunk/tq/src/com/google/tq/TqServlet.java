@@ -1,8 +1,9 @@
 package com.google.tq;
 
+import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.*;
+
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.*;
 
 import java.io.IOException;
 
@@ -16,7 +17,7 @@ public class TqServlet extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setContentType("text/plain");
     Queue queue = QueueFactory.getDefaultQueue();
-    queue.add(param("key", "1"));
+    queue.add(url("/worker"));
     resp.getWriter().println("Task added.");
   }
 }

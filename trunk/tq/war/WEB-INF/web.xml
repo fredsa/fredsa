@@ -22,7 +22,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 
   <servlet-mapping>
     <servlet-name>Worker</servlet-name>
-    <url-pattern>/_ah/queue/default</url-pattern>
+    <url-pattern>/worker</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>
