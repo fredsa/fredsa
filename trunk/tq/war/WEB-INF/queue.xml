@@ -1,6 +1,10 @@
 <queue-entries>
   <queue>
-    <name>default</name>
-    <rate>1/s</rate>
+    <name>query</name>
+    <rate>10/s</rate>
+  </queue>
+  <queue>
+    <name>delete</name>
+    <rate>50/s</rate>
   </queue>
 </queue-entries>
