@@ -1,12 +1,12 @@
 package com.allen_sauer.gwt.pda.client.presenter;
 
-import com.allen_sauer.gwt.pda.client.EventBus;
 import com.allen_sauer.gwt.pda.client.PdaServiceAsync;
 import com.allen_sauer.gwt.pda.client.event.EditEvent;
 import com.allen_sauer.gwt.pda.client.shared.Contact;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.shared.HandlerManager;
 
 public class ContactViewPresenter {
 
@@ -14,7 +14,6 @@ public class ContactViewPresenter {
     String getDisplayName();
     HasClickHandlers getEditButton();
   }
-  EventBus eventBus;
 
   private ClickHandler clickHandler = new ClickHandler() {
     public void onClick(ClickEvent event) {
@@ -25,9 +24,12 @@ public class ContactViewPresenter {
   private Contact contact = new Contact();
   private Display display;
 
+  private final HandlerManager eventBus;
+
   private PdaServiceAsync pdaService;
 
-  public ContactViewPresenter(PdaServiceAsync pdaService) {
+  public ContactViewPresenter(HandlerManager eventBus, PdaServiceAsync pdaService) {
+    this.eventBus = eventBus;
     this.pdaService = pdaService;
   }
 
