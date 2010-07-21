@@ -11,7 +11,6 @@ import com.google.gwt.event.shared.HandlerManager;
 public class ContactViewPresenter {
 
   public static interface Display {
-    String getDisplayName();
     HasClickHandlers getEditButton();
   }
 
