@@ -6,6 +6,7 @@ import com.allen_sauer.gwt.pda.client.command.Response;
 import com.allen_sauer.gwt.pda.client.command.SearchCommand;
 import com.allen_sauer.gwt.pda.client.command.SearchResponse;
 import com.allen_sauer.gwt.pda.client.shared.Contact;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -14,14 +15,14 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class PdaServiceImpl extends RemoteServiceServlet implements PdaService {
 
-	public Response execute(Command command) {
+  public <R extends Response> R execute(Command<R> command) {
 		if (command instanceof SearchCommand) {
 			SearchCommand cmd = (SearchCommand) command;
 			String firstName = cmd.getText();
 			Contact contact = makeFirstName(firstName);
 			Contact contact2 = makeFirstName(firstName);
-			
-			return new SearchResponse(new Contact[] { contact, contact2 });
+
+      return (R) new SearchResponse(new Contact[] {contact, contact2});
 		}
 		return null;
 	}

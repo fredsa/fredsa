@@ -2,6 +2,7 @@ package com.allen_sauer.gwt.pda.client.event;
 
 import com.google.gwt.event.shared.GwtEvent;
 
+@Deprecated
 public class EditEvent extends GwtEvent<EditEventHandler> {
   public static final Type<EditEventHandler> TYPE = new Type<EditEventHandler>();
   private final String contactId;

@@ -7,6 +7,8 @@ import com.allen_sauer.gwt.pda.client.command.SearchResponse;
 import com.allen_sauer.gwt.pda.client.event.SearchEvent;
 import com.allen_sauer.gwt.pda.client.event.SearchEventHandler;
 import com.allen_sauer.gwt.pda.client.event.SearchResultEvent;
+import com.allen_sauer.gwt.pda.client.presenter.Place.Command;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -65,24 +67,30 @@ public class SearchPresenter {
     display.getSearchBox().addKeyDownHandler(new KeyDownHandler() {
       public void onKeyDown(KeyDownEvent event) {
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          doSearch(display.getSearchBox().getText());
+          requestSearch(display.getSearchBox().getText());
         }
       }
     });
     display.getSearchButton().addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        doSearch(display.getSearchBox().getText());
+        requestSearch(display.getSearchBox().getText());
       }
     });
   }
 
-  public void start() {
-    display.getFocusable().setFocus(true);
+  public void start(String value) {
+    doSearch(value);
   }
 
-  private void doSearch(String text) {
-    eventBus.fireEvent(new SearchEvent(text));
+  private void doSearch(String value) {
+    display.getSearchBox().setText(value);
     display.getSearchBox().selectAll();
+    display.getFocusable().setFocus(true);
+    eventBus.fireEvent(new SearchEvent(value));
+  }
+
+  private void requestSearch(String text) {
+    Place.newItem(Command.SEARCH, text);
   }
 
 }

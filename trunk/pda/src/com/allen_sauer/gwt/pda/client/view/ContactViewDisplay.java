@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.LabelElement;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,6 +23,9 @@ public class ContactViewDisplay extends Composite implements Display {
 
   @UiField
   LabelElement displayName;
+
+  @UiField
+  Button editButton;
 
   @UiField
   InputElement enabledCheckbox;
@@ -44,7 +48,8 @@ public class ContactViewDisplay extends Composite implements Display {
   }
 
   public HasClickHandlers getEditButton() {
-    return panel;
+    //    return panel;
+    return editButton;
   }
 
 }
