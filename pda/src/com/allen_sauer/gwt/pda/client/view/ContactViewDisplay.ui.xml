@@ -36,6 +36,10 @@
         <legend>Person</legend>
 
         <div class="{style.row}">
+          <g:Button ui:field="editButton">Edit</g:Button>
+        </div>
+
+        <div class="{style.row}">
           <label class="{style.label}" for="firstName">First Name:</label>
           <label class="{style.field}" ui:field="firstName"></label>
         </div>
