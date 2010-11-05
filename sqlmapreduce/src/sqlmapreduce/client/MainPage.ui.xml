@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    @external .error;
+    @external .results;
+    .error {
+      font-weight: bold;
+      color: red;
+      white-space: pre;
+    }
+    
+    .results {
+      font-family: monospace;
+      white-space: pre;
+    }
+    
+    .sql {
+      width: 30em;
+      height: 5em;
+      white-space: normal;
+    }
+    
+    .sp {
+      border: 1px solid black;
+      width: 100%;
+      height: 500px;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    <div>SQL query:</div>
+    <g:TextArea ui:field="sql" styleName="{style.sql}">select * from message</g:TextArea>
+
+    <g:Button ui:field="go">Go!</g:Button>
+
+    <div>Results:</div>
+    <g:ScrollPanel styleName="{style.sp}">
+      <g:Label ui:field="results"></g:Label>
+    </g:ScrollPanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 
