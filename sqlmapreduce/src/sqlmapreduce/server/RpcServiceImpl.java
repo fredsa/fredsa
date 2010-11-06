@@ -28,7 +28,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     String t = "";
     String[] queries = sql.split(";");
     for (String query : queries) {
-      t += "<div class='query'>" + query + "</div>";
+      query = query.trim();
       try {
         t += doDatastoreQuery(query);
       } catch (SQLException e) {
@@ -42,7 +42,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     String t = "";
     String[] queries = sql.split(";");
     for (String query : queries) {
-      t += "<div class='query'>" + query + "</div>";
+      query = query.trim();
       try {
         t += doRelationalQuery(query);
       } catch (SQLException e) {
@@ -87,6 +87,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
   private String doDatastoreQuery(String sql) throws SQLException {
     String t = "";
+    t += "<div class='query'>" + sql + "</div>";
     sql = sql.replaceAll("\\s+", " ").trim().toLowerCase();
     if (!sql.startsWith(SELECT_STAR_FROM)) {
       t += "<div class='error'>Unrecognized GQL query</div>";
@@ -115,16 +116,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
   private String doRelationalQuery(String sql) throws SQLException {
     String t = "";
     Connection c = Constants.getConnection();
-
-    t += executeUpdate(c, "create database fred");
-
-    try {
-      c.setCatalog("fredsa");
-    } catch (Exception ignore) {
-    }
-    t += executeUpdate(c, "create table message(line varchar(200), line2 varchar(200))");
-
-    t += executeUpdate(c, "insert into message values('Hello World', 'xxx')");
 
     t += "<div class='query'>" + sql + "</div>";
     if (sql.trim().toLowerCase().startsWith("select")) {

@@ -5,6 +5,7 @@ import com.google.appengine.api.rdbms.AppEngineDriver;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +35,20 @@ public class Constants {
 
   public static Connection getConnection() {
     try {
-      return DriverManager.getConnection(Constants.RDBMS_CONNECT_STRING, "sa", null);
+      Connection c = DriverManager.getConnection(Constants.RDBMS_CONNECT_STRING, "sa", null);
+
+      try {
+        Statement stmt = c.createStatement();
+        stmt.executeUpdate("create database fred");
+      } catch (Exception ignore) {
+      }
+
+      try {
+        c.setCatalog("fredsa");
+      } catch (Exception ignore) {
+      }
+
+      return c;
     } catch (SQLException e) {
       log.log(Level.SEVERE, "failed to open database connection", e);
       throw new RuntimeException(e);
