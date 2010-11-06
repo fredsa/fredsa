@@ -1,12 +1,10 @@
 package sqlmapreduce.server;
 
-import com.google.appengine.api.rdbms.AppEngineDriver;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import sqlmapreduce.client.SqlService;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -18,14 +16,6 @@ import java.sql.Statement;
 @SuppressWarnings("serial")
 public class SqlServiceImpl extends RemoteServiceServlet implements SqlService {
 
-  static {
-    try {
-      DriverManager.registerDriver(new AppEngineDriver());
-    } catch (SQLException e) {
-      throw new ExceptionInInitializerError(e);
-    }
-  }
-
   public String greetServer(String input) {
     try {
       return query(input);
@@ -36,8 +26,7 @@ public class SqlServiceImpl extends RemoteServiceServlet implements SqlService {
 
   private String query(String sql) throws SQLException {
     String t = "";
-    Connection c = DriverManager.getConnection(
-        "jdbc:google:speckle://localhost:1234#googlecom:fredsa", "sa", null);
+    Connection c = Sql.getConnection();
 
     try {
       c.createStatement().executeUpdate("create database fred;");
@@ -80,5 +69,4 @@ public class SqlServiceImpl extends RemoteServiceServlet implements SqlService {
     c.close();
     return t;
   }
-
 }

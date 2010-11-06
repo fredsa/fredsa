@@ -4,18 +4,25 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-  
-  <!-- Servlets -->
+
   <servlet>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>sqlServlet</servlet-name>
     <servlet-class>sqlmapreduce.server.SqlServiceImpl</servlet-class>
   </servlet>
-  
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>sqlServlet</servlet-name>
     <url-pattern>/sqlmapreduce/sql</url-pattern>
   </servlet-mapping>
-  
+
+  <servlet>
+    <servlet-name>mapreduce</servlet-name>
+    <servlet-class>com.google.appengine.tools.mapreduce.MapReduceServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>mapreduce</servlet-name>
+    <url-pattern>/mapreduce/*</url-pattern>
+  </servlet-mapping>
+
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>Sqlmapreduce.html</welcome-file>
