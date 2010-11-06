@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Sql {
-  static final String RDBMS_CONNECT_STRING = "jdbc:google:speckle://localhost:1234#googlecom:fredsa";
+  static final String RDBMS_CONNECT_STRING = "jdbc:google:rdbms://localhost:1234#googlecom:fredsa";
 
   private static final Logger log = Logger.getLogger(Sql.class.getName());
 

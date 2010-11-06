@@ -20,7 +20,7 @@
     <property>
       <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind
       </name>
-      <value template="optional">Contact</value>
+      <value template="optional">contact</value>
     </property>
   </configuration>
 

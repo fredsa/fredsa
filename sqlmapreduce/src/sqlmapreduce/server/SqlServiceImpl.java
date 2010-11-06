@@ -27,14 +27,26 @@ public class SqlServiceImpl extends RemoteServiceServlet implements SqlService {
     }
   }
 
-  public void initDatabase() {
+  public String initDatabase() {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    //    for (int i = 0; i < 10; i++) {
-      Entity entity = new Entity("Contact");
-      entity.setProperty("first_name", "Ford");
-      entity.setProperty("last_name", "Prefect");
-      ds.put(entity);
-    //  }
+    String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia"};
+    String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan"};
+
+    String t = "";
+    for (String first : FIRST_NAMES) {
+      for (String last : LAST_NAMES) {
+        String kind = "Contact";
+        Entity entity = new Entity(kind);
+        entity.setProperty("first_name", first);
+        entity.setProperty("last_name", last);
+        if (t.length() > 0) {
+          t += "<br>";
+        }
+        t += "Kind=" + kind + "(first_name=" + first + ", last_name=" + last + ")";
+        ds.put(entity);
+      }
+    }
+    return t;
   }
 
   private String query(String sql) throws SQLException {

@@ -7,5 +7,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface SqlService extends RemoteService {
   String greetServer(String name);
 
-  void initDatabase();
+  String initDatabase();
 }

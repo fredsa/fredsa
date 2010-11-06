@@ -8,5 +8,5 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface SqlServiceAsync {
   void greetServer(String input, AsyncCallback<String> callback);
 
-  void initDatabase(AsyncCallback<Void> callback);
+  void initDatabase(AsyncCallback<String> callback);
 }
