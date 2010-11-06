@@ -5,9 +5,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("rpc")
 public interface RpcService extends RemoteService {
-  String executeQuery(String sql);
+  String executeDatastoreQuery(String sql);
 
-  String initDatabase();
+  String executeRelationalQuery(String sql);
 
-  String initSql();
+  String initDatastore();
+
+  String initRelational();
 }

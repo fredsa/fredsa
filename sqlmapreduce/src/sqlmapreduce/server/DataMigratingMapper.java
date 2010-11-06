@@ -10,6 +10,8 @@ import com.google.appengine.tools.mapreduce.DatastoreInputFormat;
 
 import org.apache.hadoop.io.NullWritable;
 
+import sqlmapreduce.shared.Constants;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -76,7 +78,7 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
       columnList += "\"" + name + "\" VARCHAR(2000)";
     }
 
-    Connection c = Sql.getConnection();
+    Connection c = Constants.getConnection();
     String sql = "CREATE TABLE " + kind + "(" + columnList + ")";
     try {
       c.createStatement().execute(sql);
@@ -94,14 +96,14 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
   @Override
   public void taskCleanup(Context context) {
     log.warning("Doing per-task cleanup");
-    Sql.closeConnection(connection);
+    Constants.closeConnection(connection);
   }
 
   @Override
   public void taskSetup(Context context) {
     log.warning("Doing per-task setup");
     kind = context.getConfiguration().get(DatastoreInputFormat.ENTITY_KIND_KEY);
-    connection = Sql.getConnection();
+    connection = Constants.getConnection();
   }
 
   private Entity getFirstEntity(String kind) {

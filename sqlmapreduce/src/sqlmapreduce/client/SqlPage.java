@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
+import sqlmapreduce.shared.Constants;
+
 public class SqlPage extends Composite {
 
   interface MainPageUiBinder extends UiBinder<Widget, SqlPage> {
@@ -39,6 +41,7 @@ public class SqlPage extends Composite {
   public SqlPage(RpcServiceAsync service) {
     this.service = service;
     initWidget(uiBinder.createAndBindUi(this));
+    sql.setText(Constants.INITIAL_SQL);
   }
 
   @Override
@@ -55,7 +58,7 @@ public class SqlPage extends Composite {
   @UiHandler("initSql")
   void onInitSqlClick(ClickEvent e) {
     initSql.setEnabled(false);
-    service.initSql(new AsyncCallback<String>() {
+    service.initRelational(new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         initSql.setEnabled(true);
@@ -80,7 +83,7 @@ public class SqlPage extends Composite {
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.executeQuery(sql.getText(), new AsyncCallback<String>() {
+    service.executeRelationalQuery(sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");

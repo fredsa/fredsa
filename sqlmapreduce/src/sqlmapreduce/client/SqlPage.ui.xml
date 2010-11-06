@@ -8,19 +8,6 @@
       height: 100%;
     }
     
-    @external .error;
-    @external .results;
-    .error {
-      font-weight: bold;
-      color: red;
-      white-space: pre;
-    }
-    
-    .results {
-      font-family: monospace;
-      white-space: pre;
-    }
-    
     .sql {
       width: 30em;
       height: 5em;
@@ -43,8 +30,7 @@
     <div style="border-top: 1px solid black; margin: 5px;" />
 
     <div>SQL query:</div>
-    <g:TextArea ui:field="sql" styleName="{style.sql}">select * from
-      contact</g:TextArea>
+    <g:TextArea ui:field="sql" styleName="{style.sql}"></g:TextArea>
 
     <g:Button ui:field="go">Go!</g:Button>
 

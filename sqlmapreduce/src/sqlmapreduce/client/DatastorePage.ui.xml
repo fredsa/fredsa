@@ -2,23 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
-      .container {
+    .container {
       background-color: #fafffa;
       padding: 0.3em;
       height: 100%;
-    }
-  
-    @external .error;
-    @external .results;
-    .error {
-      font-weight: bold;
-      color: red;
-      white-space: pre;
-    }
-    
-    .results {
-      font-family: monospace;
-      white-space: pre;
     }
     
     .sql {
@@ -34,7 +21,7 @@
     }
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
-  <h2>Datastore</h2>
+    <h2>Datastore</h2>
     [
     <a target="ah_admin" href="/_ah/admin">/_ah/admin</a>
     ]
@@ -43,8 +30,7 @@
     <div style="border-top: 1px solid black; margin: 5px;" />
 
     <div>SQL query:</div>
-    <g:TextArea ui:field="sql" styleName="{style.sql}">select * from
-      contact</g:TextArea>
+    <g:TextArea ui:field="sql" styleName="{style.sql}"></g:TextArea>
 
     <g:Button ui:field="go">Go!</g:Button>
 

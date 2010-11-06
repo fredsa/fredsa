@@ -3,28 +3,56 @@ package sqlmapreduce.server;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import sqlmapreduce.client.RpcService;
+import sqlmapreduce.shared.Constants;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @SuppressWarnings("serial")
 public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
-  public String executeQuery(String sql) {
-    try {
-      return query(sql);
-    } catch (SQLException e) {
-      return "<pre style='color: red;'>" + e.getMessage() + "</pre>";
+  private static final String SELECT_STAR_FROM = "select * from ";
+
+  public String executeDatastoreQuery(String sql) {
+    String t = "";
+    String[] queries = sql.split(";");
+    for (String query : queries) {
+      t += "<div class='query'>" + query + "</div>";
+      try {
+        t += doDatastoreQuery(query);
+      } catch (SQLException e) {
+        t += "<div class='error'>" + e.getMessage() + "</div>";
+      }
     }
+    return t;
   }
 
-  public String initDatabase() {
+  public String executeRelationalQuery(String sql) {
+    String t = "";
+    String[] queries = sql.split(";");
+    for (String query : queries) {
+      t += "<div class='query'>" + query + "</div>";
+      try {
+        t += doRelationalQuery(query);
+      } catch (SQLException e) {
+        t += "<div class='error'>" + e.getMessage() + "</div>";
+      }
+    }
+    return t;
+  }
+
+  public String initDatastore() {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia"};
     String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan"};
@@ -32,26 +60,24 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     String t = "";
     for (String first : FIRST_NAMES) {
       for (String last : LAST_NAMES) {
-        String kind = "Contact";
+        String kind = Constants.KIND;
         Entity entity = new Entity(kind);
         entity.setProperty("first_name", first);
         entity.setProperty("last_name", last);
-        if (t.length() > 0) {
-          t += "<br>";
-        }
-        t += "Kind=" + kind + "(first_name=" + first + ", last_name=" + last + ")";
+        t += "<div class='results'>Kind=" + kind + "(first_name=" + first + ", last_name=" + last
+            + ")</div>";
         ds.put(entity);
       }
     }
     return t;
   }
 
-  public String initSql() {
+  public String initRelational() {
     String t = "";
-    Connection c = Sql.getConnection();
+    Connection c = Constants.getConnection();
 
     t += executeUpdate(c, "drop table contact;");
-    t += executeUpdate(c, "drop table employee;");
+    t += executeUpdate(c, "drop table emloyee;");
     t += executeUpdate(c, "create table employee ( id int, name varchar(200) )");
     t += executeUpdate(c, "insert into employee values(1, 'Ford Prefect')");
     t += executeUpdate(c, "insert into employee values(42, 'Fred Sauer')");
@@ -59,61 +85,79 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     return t;
   }
 
-  private String executeUpdate(Connection c, String sql) {
-    String t = "<br>" + sql + "<br>";
-    try {
-      Statement stmt = c.createStatement();
-      stmt.executeUpdate(sql);
-      t += stmt.getUpdateCount() + " rows updated.<br>";
-    } catch (Exception e) {
-      t += e.getMessage() + "<br>";
+  private String doDatastoreQuery(String sql) throws SQLException {
+    String t = "";
+    sql = sql.replaceAll("\\s+", " ").trim().toLowerCase();
+    if (!sql.startsWith(SELECT_STAR_FROM)) {
+      t += "<div class='error'>Unrecognized GQL query</div>";
+      return t;
+    }
+    String table = sql.substring(SELECT_STAR_FROM.length());
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery prepared = ds.prepare(new Query(table));
+    for (Iterator<Entity> iterator = prepared.asIterator(); iterator.hasNext();) {
+      Entity entity = iterator.next();
+      Map<String, Object> props = entity.getProperties();
+      String propList = "";
+      for (Entry<String, Object> entry : props.entrySet()) {
+        String name = entry.getKey();
+        String value = "" + entry.getValue();
+        if (propList.length() > 0) {
+          propList += "\t";
+        }
+        propList += name + ": " + value;
+      }
+      t += "<div class='results'>" + propList + "</div>";
     }
     return t;
   }
 
-  private String query(String sql) throws SQLException {
+  private String doRelationalQuery(String sql) throws SQLException {
     String t = "";
-    Connection c = Sql.getConnection();
+    Connection c = Constants.getConnection();
 
-    try {
-      c.createStatement().executeUpdate("create database fred;");
-    } catch (Exception ignore) {
-    }
+    t += executeUpdate(c, "create database fred");
 
     try {
       c.setCatalog("fredsa");
     } catch (Exception ignore) {
     }
+    t += executeUpdate(c, "create table message(line varchar(200), line2 varchar(200))");
 
-    try {
-      c.createStatement().executeUpdate(
-          "create table message(line varchar(200), line2 varchar(200))");
-    } catch (Exception ignore) {
-    }
+    t += executeUpdate(c, "insert into message values('Hello World', 'xxx')");
 
-    try {
-      c.createStatement().executeUpdate("insert into message values('Hello World', 'xxx')");
-    } catch (Exception ignore) {
-    }
-
+    t += "<div class='query'>" + sql + "</div>";
     if (sql.trim().toLowerCase().startsWith("select")) {
       ResultSet query = c.createStatement().executeQuery(sql);
       ResultSetMetaData metaData = query.getMetaData();
       while (query.next()) {
+        t += "<div class='results'>";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
           if (i > 1) {
             t += "\t";
           }
           t += query.getString(i);
         }
-        t += "\n";
+        t += "</div>";
       }
     } else {
       Statement statement = c.createStatement();
       statement.execute(sql);
-      t += "update count = " + statement.getUpdateCount();
+      t += "<div class='status'>update count = " + statement.getUpdateCount() + "</div>";
     }
     c.close();
+    return t;
+  }
+
+  private String executeUpdate(Connection c, String sql) {
+    String t = "<div class='query'>" + sql + "</div>";
+    try {
+      Statement stmt = c.createStatement();
+      stmt.executeUpdate(sql);
+      t += "<div class='status'>" + stmt.getUpdateCount() + " rows updated.</div>";
+    } catch (Exception e) {
+      t += "<div class='error'>" + e.getMessage() + "</div>";
+    }
     return t;
   }
 }

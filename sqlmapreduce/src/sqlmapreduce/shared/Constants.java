@@ -1,4 +1,4 @@
-package sqlmapreduce.server;
+package sqlmapreduce.shared;
 
 import com.google.appengine.api.rdbms.AppEngineDriver;
 
@@ -8,11 +8,14 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Sql {
+public class Constants {
+  public static final String INITIAL_SQL = "select * from contact;\nselect * from employee;";
+
+  public static final String KIND = "contact";
+
   static final String RDBMS_CONNECT_STRING = "jdbc:google:rdbms://localhost:1234#googlecom:fredsa";
 
-  private static final Logger log = Logger.getLogger(Sql.class.getName());
-
+  private static final Logger log = Logger.getLogger(Constants.class.getName());
   static {
     try {
       DriverManager.registerDriver(new AppEngineDriver());
@@ -31,7 +34,7 @@ public class Sql {
 
   public static Connection getConnection() {
     try {
-      return DriverManager.getConnection(Sql.RDBMS_CONNECT_STRING, "sa", null);
+      return DriverManager.getConnection(Constants.RDBMS_CONNECT_STRING, "sa", null);
     } catch (SQLException e) {
       log.log(Level.SEVERE, "failed to open database connection", e);
       throw new RuntimeException(e);
