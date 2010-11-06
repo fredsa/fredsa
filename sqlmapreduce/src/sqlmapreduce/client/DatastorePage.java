@@ -32,9 +32,9 @@ public class DatastorePage extends Composite {
   @UiField
   TextArea sql;
 
-  private final SqlServiceAsync service;
+  private final RpcServiceAsync service;
 
-  public DatastorePage(SqlServiceAsync service) {
+  public DatastorePage(RpcServiceAsync service) {
     this.service = service;
     initWidget(uiBinder.createAndBindUi(this));
   }

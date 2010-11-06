@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class Sqlmapreduce implements EntryPoint {
 
-  private final SqlServiceAsync service = GWT.create(SqlService.class);
+  private final RpcServiceAsync service = GWT.create(RpcService.class);
 
   public void onModuleLoad() {
     Grid grid = new Grid(1, 2);

@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -25,14 +26,17 @@ public class SqlPage extends Composite {
   Button go;
 
   @UiField
+  Button initSql;
+
+  @UiField
   HTML results;
 
   @UiField
   TextArea sql;
 
-  private final SqlServiceAsync service;
+  private final RpcServiceAsync service;
 
-  public SqlPage(SqlServiceAsync service) {
+  public SqlPage(RpcServiceAsync service) {
     this.service = service;
     initWidget(uiBinder.createAndBindUi(this));
   }
@@ -48,6 +52,23 @@ public class SqlPage extends Composite {
     execute();
   }
 
+  @UiHandler("initSql")
+  void onInitSqlClick(ClickEvent e) {
+    initSql.setEnabled(false);
+    service.initSql(new AsyncCallback<String>() {
+
+      public void onFailure(Throwable caught) {
+        initSql.setEnabled(true);
+        Window.alert("Initialization failed: " + caught.getMessage());
+      }
+
+      public void onSuccess(String result) {
+        initSql.setEnabled(true);
+        results.setHTML(result);
+      }
+    });
+  }
+
   @UiHandler("sql")
   void onKeyDown(KeyDownEvent e) {
     if (e.getNativeKeyCode() == KeyCodes.KEY_ENTER && e.isAnyModifierKeyDown()) {
@@ -59,21 +80,21 @@ public class SqlPage extends Composite {
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.greetServer(sql.getText(), new AsyncCallback<String>() {
+    service.executeQuery(sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");
         if (caught instanceof RuntimeException) {
-          results.setText(caught.getMessage());
+          results.setHTML(caught.getMessage());
         } else {
-          results.setText(caught.toString());
+          results.setHTML(caught.toString());
         }
         go.setEnabled(true);
       }
 
       public void onSuccess(String result) {
         results.setStylePrimaryName("results");
-        results.setText(result);
+        results.setHTML(result);
         sql.setFocus(true);
         sql.selectAll();
         go.setEnabled(true);

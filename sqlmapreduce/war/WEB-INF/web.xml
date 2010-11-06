@@ -6,12 +6,12 @@
 <web-app>
 
   <servlet>
-    <servlet-name>sqlServlet</servlet-name>
-    <servlet-class>sqlmapreduce.server.SqlServiceImpl</servlet-class>
+    <servlet-name>rpcServlet</servlet-name>
+    <servlet-class>sqlmapreduce.server.RpcServiceImpl</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>sqlServlet</servlet-name>
-    <url-pattern>/sqlmapreduce/sql</url-pattern>
+    <servlet-name>rpcServlet</servlet-name>
+    <url-pattern>/sqlmapreduce/rpc</url-pattern>
   </servlet-mapping>
 
   <servlet>
