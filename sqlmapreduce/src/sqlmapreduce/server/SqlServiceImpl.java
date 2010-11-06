@@ -1,5 +1,8 @@
 package sqlmapreduce.server;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import sqlmapreduce.client.SqlService;
@@ -22,6 +25,16 @@ public class SqlServiceImpl extends RemoteServiceServlet implements SqlService {
     } catch (SQLException e) {
       throw new RuntimeException(e.getMessage());
     }
+  }
+
+  public void initDatabase() {
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    //    for (int i = 0; i < 10; i++) {
+      Entity entity = new Entity("Contact");
+      entity.setProperty("first_name", "Ford");
+      entity.setProperty("last_name", "Prefect");
+      ds.put(entity);
+    //  }
   }
 
   private String query(String sql) throws SQLException {

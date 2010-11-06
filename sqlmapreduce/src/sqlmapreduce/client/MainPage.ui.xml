@@ -28,8 +28,18 @@
     }
   </ui:style>
   <g:HTMLPanel>
+    [
+    <a target="ah_admin" href="/_ah/admin">/_ah/admin</a>
+    ]
+    [
+    <a target="mr_status" href="/mapreduce/status">/mapreduce/status</a>
+    ]
+    <g:Button ui:field="initDatastore">Initialize App Engine datastore</g:Button>
+    <div style="border-top: 1px solid black; margin: 5px;"/>
+
     <div>SQL query:</div>
-    <g:TextArea ui:field="sql" styleName="{style.sql}">select * from message</g:TextArea>
+    <g:TextArea ui:field="sql" styleName="{style.sql}">select * from
+      message</g:TextArea>
 
     <g:Button ui:field="go">Go!</g:Button>
 

@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -23,6 +24,9 @@ public class MainPage extends Composite {
 
   @UiField
   Button go;
+
+  @UiField
+  Button initDatastore;
 
   @UiField
   Label results;
@@ -44,8 +48,25 @@ public class MainPage extends Composite {
   }
 
   @UiHandler("go")
-  void onClick(ClickEvent e) {
+  void onGoClick(ClickEvent e) {
     execute();
+  }
+
+  @UiHandler("initDatastore")
+  void onInitDatastoreClick(ClickEvent e) {
+    initDatastore.setEnabled(false);
+    service.initDatabase(new AsyncCallback<Void>() {
+
+      public void onFailure(Throwable caught) {
+        initDatastore.setEnabled(true);
+        Window.alert("Initialization failed: " + caught.getMessage());
+      }
+
+      public void onSuccess(Void result) {
+        initDatastore.setEnabled(true);
+        Window.alert("done");
+      }
+    });
   }
 
   @UiHandler("sql")
