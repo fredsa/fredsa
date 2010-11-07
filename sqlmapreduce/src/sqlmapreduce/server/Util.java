@@ -40,7 +40,7 @@ public class Util {
       }
 
       try {
-        c.setCatalog("fredsa");
+        c.setCatalog("fred");
       } catch (Exception ignore) {
       }
 
