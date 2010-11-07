@@ -1,6 +1,8 @@
 package sqlmapreduce.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -47,7 +49,12 @@ public class SqlPage extends Composite {
   @Override
   protected void onLoad() {
     super.onLoad();
-    sql.setFocus(true);
+    // deferred to deal with Firefox layout issue
+    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+      public void execute() {
+        sql.setFocus(true);
+      }
+    });
   }
 
   @UiHandler("go")

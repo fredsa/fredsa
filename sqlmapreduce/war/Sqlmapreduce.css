@@ -23,9 +23,10 @@ HTML,BODY {
   white-space: pre;
 }
 
+.header {
+  text-decoration: underline;
+}
+
 .value {
-  background: green;
-  width: 5em;
-  height: 3em;
-  overflow: hidden;
+  margin: 0.1em;
 }

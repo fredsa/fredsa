@@ -25,17 +25,22 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
   private static final String SELECT_STAR_FROM = "select * from ";
 
+  private DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+
   private String t;
 
   public String executeDatastoreQuery(String sql) {
     t = "";
+
     String[] queries = sql.split(";");
     for (String query : queries) {
       query = query.trim();
-      try {
-        doDatastoreQuery(query);
-      } catch (SQLException e) {
-        logError(e);
+      if (query.length() > 0) {
+        try {
+          doDatastoreQuery(query);
+        } catch (SQLException e) {
+          logError(e);
+        }
       }
     }
     return t;
@@ -46,10 +51,12 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     String[] queries = sql.split(";");
     for (String query : queries) {
       query = query.trim();
-      try {
-        doRelationalQuery(query);
-      } catch (SQLException e) {
-        logError(e);
+      if (query.length() > 0) {
+        try {
+          doRelationalQuery(query);
+        } catch (SQLException e) {
+          logError(e);
+        }
       }
     }
     return t;
@@ -58,32 +65,34 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
   public String initDatastore() {
     t = "";
 
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia"};
     String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan"};
 
+    int count = 0;
     for (String first : FIRST_NAMES) {
       for (String last : LAST_NAMES) {
         String kind = Constants.KIND;
         Entity entity = new Entity(kind);
         entity.setProperty("first_name", first);
         entity.setProperty("last_name", last);
-        t += "<div class='results'>Kind=" + kind + "(first_name=" + first + ", last_name=" + last
-            + ")</div>";
+        logResult("Kind=" + kind + "(first_name: " + formatValue(first) + " last_name: "
+            + formatValue(last) + ")");
         ds.put(entity);
+        count++;
       }
     }
+    logStatus(count + " entities created");
     return t;
   }
 
   public String initRelational() {
     t = "";
-    Connection c = Constants.getConnection();
+    Connection c = Util.getConnection();
 
     executeUpdate(c, "drop table contact;");
-    executeUpdate(c, "drop table emloyee;");
+    executeUpdate(c, "drop table employee;");
     executeUpdate(c, "create table employee ( id int, name varchar(200) )");
-    executeUpdate(c, "insert into employee values(1, 'Ford Prefect')");
+    executeUpdate(c, "insert into employee values(1, 'Patrick Chanezon')");
     executeUpdate(c, "insert into employee values(42, 'Fred Sauer')");
 
     return t;
@@ -97,7 +106,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       return;
     }
     String table = sql.substring(SELECT_STAR_FROM.length());
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery prepared = ds.prepare(new Query(table));
     List<Entity> results = prepared.asList(Builder.withDefaults());
     for (Entity entity : results) {
@@ -105,10 +113,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       String propList = "";
       for (Entry<String, Object> entry : props.entrySet()) {
         String name = entry.getKey();
-        String value = "" + entry.getValue();
-        if (propList.length() > 0) {
-          propList += "\t";
-        }
+        String value = formatValue("" + entry.getValue());
         propList += name + ": " + value;
       }
       logResult(propList);
@@ -117,18 +122,27 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
   }
 
   private void doRelationalQuery(String sql) throws SQLException {
-    Connection c = Constants.getConnection();
+    Connection c = Util.getConnection();
 
     logQuery(sql);
     if (sql.trim().toLowerCase().startsWith("select")) {
       ResultSet query = c.createStatement().executeQuery(sql);
       ResultSetMetaData metaData = query.getMetaData();
+
+      {
+        String tt = "";
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+          tt += formatHeader(metaData.getColumnName(i));
+        }
+        logResult(tt);
+      }
+
       int count = 0;
       while (query.next()) {
         count++;
         String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          tt += "<span class='value'>" + formatValue(query.getString(i)) + "</span>";
+          tt += formatValue(query.getString(i));
         }
         logResult(tt);
       }
@@ -152,8 +166,14 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
   }
 
-  private String formatValue(String string) {
-    return string + "          ".substring(0, 10);
+  private String formatHeader(String value) {
+    value = sizeValue(value);
+    return "<span class='header value'>" + value + "</span>";
+  }
+
+  private String formatValue(String value) {
+    value = sizeValue(value);
+    return "<span class='value'>" + value + "</span>";
   }
 
   private void log(String className, String message) {
@@ -178,5 +198,16 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
   private void logStatus(String message) {
     log("status", message);
+  }
+
+  private String sizeValue(String value) {
+    int LEN = 15;
+    if (value.length() > LEN) {
+      value = value.substring(0, LEN - 1) + "É";
+    } else {
+      value += "                                                    ";
+      value = value.substring(0, LEN);
+    }
+    return value;
   }
 }

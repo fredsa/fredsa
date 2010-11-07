@@ -19,9 +19,9 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritable, NullWritable> {
+public class DeleteKindMapper extends AppEngineMapper<Key, Entity, NullWritable, NullWritable> {
 
-  private static final Logger log = Logger.getLogger(DataMigratingMapper.class.getName());
+  private static final Logger log = Logger.getLogger(DeleteKindMapper.class.getName());
   private Connection connection;
 
   private String kind;
@@ -34,30 +34,8 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
   @Override
   public void map(Key key, Entity entity, Context context) {
     log.warning("Mapping key: " + key);
-    Map<String, Object> props = entity.getProperties();
-    String paramList = "";
-    String valueList = "";
-    for (Entry<String, Object> entry : props.entrySet()) {
-      String name = entry.getKey();
-      String value = "" + entry.getValue();
-      if (paramList.length() > 0) {
-        paramList += ", ";
-        valueList += ", ";
-      }
-      paramList += "\"" + name + "\"";
-      valueList += "'" + value + "'";
-    }
-
-    String sql = "INSERT INTO " + kind + " (" + paramList + ") VALUES (" + valueList + ")";
-    log.info(sql);
-    try {
-      connection.createStatement().executeUpdate(sql);
-    } catch (SQLException e) {
-      log.log(Level.WARNING, "failed to insert values " + valueList + " due to " + e.getMessage());
-      context.getCounter(kind, e.getClass().getCanonicalName()).increment(1);
-    }
-
-    context.getCounter(kind, "migrated").increment(1);
+    DatastoreServiceFactory.getDatastoreService().delete(key);
+    context.getCounter(kind, "delete").increment(1);
   }
 
   @Override

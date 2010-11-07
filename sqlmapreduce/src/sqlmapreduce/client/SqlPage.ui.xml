@@ -22,16 +22,12 @@
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
     <h2>SQL</h2>
-    [
-    <a target="mr_status" href="/mapreduce/status">/mapreduce/status</a>
-    ]
     <g:Button ui:field="initSql">Initialize SQL database</g:Button>
 
     <div style="border-top: 1px solid black; margin: 5px;" />
 
     <div>SQL query:</div>
     <g:TextArea ui:field="sql" styleName="{style.sql}"></g:TextArea>
-
     <g:Button ui:field="go">Go!</g:Button>
 
     <div>Results:</div>
