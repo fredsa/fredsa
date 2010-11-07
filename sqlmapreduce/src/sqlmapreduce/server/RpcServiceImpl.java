@@ -35,7 +35,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       try {
         doDatastoreQuery(query);
       } catch (SQLException e) {
-        t += "<div class='error'>" + e.getMessage() + "</div>";
+        logError(e);
       }
     }
     return t;
@@ -49,7 +49,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       try {
         doRelationalQuery(query);
       } catch (SQLException e) {
-        t += "<div class='error'>" + e.getMessage() + "</div>";
+        logError(e);
       }
     }
     return t;
@@ -90,10 +90,10 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
   }
 
   private void doDatastoreQuery(String sql) throws SQLException {
-    t += "<div class='query'>" + sql + "</div>";
+    logQuery(sql);
     sql = sql.replaceAll("\\s+", " ").trim().toLowerCase();
     if (!sql.startsWith(SELECT_STAR_FROM)) {
-      t += "<div class='error'>Unrecognized GQL query</div>";
+      logError("Unrecognized GQL query");
       return;
     }
     String table = sql.substring(SELECT_STAR_FROM.length());
@@ -113,21 +113,17 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       }
       logResults(propList);
     }
-    t += "<div class='status'>" + results.size() + " results.</div>";
-  }
-
-  private void logResults(String propList) {
-    t += "<div class='results'>" + propList + "</div>";
+    logStatus(results.size() + " results");
   }
 
   private void doRelationalQuery(String sql) throws SQLException {
     Connection c = Constants.getConnection();
 
-    t += "<div class='query'>" + sql + "</div>";
+    logQuery(sql);
     if (sql.trim().toLowerCase().startsWith("select")) {
       ResultSet query = c.createStatement().executeQuery(sql);
       ResultSetMetaData metaData = query.getMetaData();
-      int count =0;
+      int count = 0;
       while (query.next()) {
         count++;
         t += "<div class='results'>";
@@ -139,23 +135,43 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         }
         t += "</div>";
       }
-      t += "<div class='status'>" + count + " results.</div>";
+      logStatus(count + " results.");
     } else {
       Statement statement = c.createStatement();
       statement.execute(sql);
-      t += "<div class='status'>update count = " + statement.getUpdateCount() + "</div>";
+      logStatus("update count = " + statement.getUpdateCount());
     }
     c.close();
   }
 
   private void executeUpdate(Connection c, String sql) {
-    t = "<div class='query'>" + sql + "</div>";
+    logQuery(sql);
     try {
       Statement stmt = c.createStatement();
       stmt.executeUpdate(sql);
-      t += "<div class='status'>" + stmt.getUpdateCount() + " rows updated.</div>";
+      logStatus(stmt.getUpdateCount() + " rows updated.");
     } catch (Exception e) {
-      t += "<div class='error'>" + e.getMessage() + "</div>";
+      logError(e);
     }
+  }
+
+  private void logError(Exception e) {
+    logError(e.getMessage());
+  }
+
+  private void logError(String message) {
+    t += "<div class='error'>" + message + "</div>";
+  }
+
+  private void logQuery(String sql) {
+    t += "<div class='query'>" + sql + "</div>";
+  }
+
+  private void logResults(String message) {
+    t += "<div class='results'>" + message + "</div>";
+  }
+
+  private void logStatus(String message) {
+    t += "<div class='status'>" + message + "</div>";
   }
 }
