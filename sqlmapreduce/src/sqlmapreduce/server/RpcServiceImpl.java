@@ -111,7 +111,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         }
         propList += name + ": " + value;
       }
-      logResults(propList);
+      logResult(propList);
     }
     logStatus(results.size() + " results");
   }
@@ -126,14 +126,11 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       int count = 0;
       while (query.next()) {
         count++;
-        t += "<div class='results'>";
+        String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          if (i > 1) {
-            t += "\t";
-          }
-          t += query.getString(i);
+          tt += "<span class='value'>" + formatValue(query.getString(i)) + "</span>";
         }
-        t += "</div>";
+        logResult(tt);
       }
       logStatus(count + " results.");
     } else {
@@ -155,23 +152,31 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
   }
 
+  private String formatValue(String string) {
+    return string + "          ".substring(0, 10);
+  }
+
+  private void log(String className, String message) {
+    t += "<div class='" + className + "'>" + message + "</div>";
+  }
+
   private void logError(Exception e) {
     logError(e.getMessage());
   }
 
   private void logError(String message) {
-    t += "<div class='error'>" + message + "</div>";
+    log("error", message);
   }
 
-  private void logQuery(String sql) {
-    t += "<div class='query'>" + sql + "</div>";
+  private void logQuery(String message) {
+    log("query", message);
   }
 
-  private void logResults(String message) {
-    t += "<div class='results'>" + message + "</div>";
+  private void logResult(String message) {
+    log("results", message);
   }
 
   private void logStatus(String message) {
-    t += "<div class='status'>" + message + "</div>";
+    log("status", message);
   }
 }
