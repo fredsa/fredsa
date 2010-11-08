@@ -10,7 +10,6 @@ import com.google.appengine.tools.mapreduce.DatastoreInputFormat;
 
 import org.apache.hadoop.io.NullWritable;
 
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -38,14 +37,12 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
     String paramList = "";
     String valueList = "";
     for (Entry<String, Object> entry : props.entrySet()) {
-      String name = entry.getKey();
-      String value = "" + entry.getValue();
       if (paramList.length() > 0) {
         paramList += ", ";
         valueList += ", ";
       }
-      paramList += "\"" + name + "\"";
-      valueList += "'" + value + "'";
+      paramList += entry.getKey();
+      valueList += "'" + entry.getValue() + "'";
     }
 
     String sql = "INSERT INTO " + kind + " (" + paramList + ") VALUES (" + valueList + ")";
@@ -69,12 +66,10 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
     Map<String, Object> props = entity.getProperties();
     String columnList = "";
     for (Entry<String, Object> entry : props.entrySet()) {
-      String name = entry.getKey();
-      Object value = entry.getValue();
       if (columnList.length() > 0) {
         columnList += ", ";
       }
-      columnList += "\"" + name + "\" VARCHAR(2000)";
+      columnList += entry.getKey() + " VARCHAR(2000)";
     }
 
     Connection c = Util.getConnection();
@@ -107,7 +102,8 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
 
   private Entity getFirstEntity(String kind) {
     Query query = new Query(kind);
-    List<Entity> results = DatastoreServiceFactory.getDatastoreService().prepare(query).asList(Builder.withLimit(1));
+    List<Entity> results = DatastoreServiceFactory.getDatastoreService().prepare(query).asList(
+        Builder.withLimit(1));
     return results.get(0);
   }
 
