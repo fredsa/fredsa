@@ -27,13 +27,13 @@ public class SqlPage extends Composite {
   private static MainPageUiBinder uiBinder = GWT.create(MainPageUiBinder.class);
 
   @UiField
+  Button dropTables;
+
+  @UiField
   Button empSal;
 
   @UiField
   Button go;
-
-  @UiField
-  Button initSql;
 
   @UiField
   HTML results;
@@ -46,7 +46,7 @@ public class SqlPage extends Composite {
   public SqlPage(RpcServiceAsync service) {
     this.service = service;
     initWidget(uiBinder.createAndBindUi(this));
-    sql.setText(Constants.INITIAL_SQL);
+    sql.setText(Constants.INITIAL_QUERY);
   }
 
   @Override
@@ -70,18 +70,18 @@ public class SqlPage extends Composite {
     execute();
   }
 
-  @UiHandler("initSql")
+  @UiHandler("dropTables")
   void onInitSqlClick(ClickEvent e) {
-    initSql.setEnabled(false);
+    dropTables.setEnabled(false);
     service.initRelational(new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
-        initSql.setEnabled(true);
+        dropTables.setEnabled(true);
         Window.alert("Initialization failed: " + caught.getMessage());
       }
 
       public void onSuccess(String result) {
-        initSql.setEnabled(true);
+        dropTables.setEnabled(true);
         results.setHTML(result);
       }
     });
@@ -95,10 +95,15 @@ public class SqlPage extends Composite {
     }
   }
 
+  @UiHandler("usageReport")
+  void onUsageReportClick(ClickEvent e) {
+    sql.setText(Constants.USAGE_SQL);
+  }
+
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.executeRelationalQuery(sql.getText(), new AsyncCallback<String>() {
+    service.executeRelationalQueries(sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");
@@ -111,7 +116,6 @@ public class SqlPage extends Composite {
       }
 
       public void onSuccess(String result) {
-        results.setStylePrimaryName("results");
         results.setHTML(result);
         sql.setFocus(true);
         sql.selectAll();

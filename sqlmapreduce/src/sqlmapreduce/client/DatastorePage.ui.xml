@@ -26,7 +26,7 @@
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
     <h3>Datastore</h3>
-    <g:Button ui:field="initDatastore">Initialize</g:Button>
+    <g:Button ui:field="seedDatastore">Random usage</g:Button>
     [
     <a target="ah_admin" href="/_ah/admin">/_ah/admin</a>
     ]
@@ -47,7 +47,7 @@
 
     <div>Results:</div>
     <g:ScrollPanel styleName="{style.sp}">
-      <g:HTML ui:field="results"></g:HTML>
+      <g:HTML ui:field="results" styleName="results"></g:HTML>
     </g:ScrollPanel>
 
   </g:HTMLPanel>

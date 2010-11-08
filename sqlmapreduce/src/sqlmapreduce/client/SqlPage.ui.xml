@@ -22,8 +22,9 @@
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
     <h3>SQL</h3>
-    <g:Button ui:field="initSql">Initialize</g:Button>
+    <g:Button ui:field="dropTables">Drop Tables</g:Button>
     <g:Button ui:field="empSal">EMP/SAL Example</g:Button>
+    <g:Button ui:field="usageReport">Usage Report</g:Button>
 
     <div style="border-top: 1px solid black; margin: 5px;" />
 
@@ -33,7 +34,7 @@
 
     <div>Results:</div>
     <g:ScrollPanel styleName="{style.sp}">
-      <g:HTML ui:field="results"></g:HTML>
+      <g:HTML ui:field="results" styleName="results"></g:HTML>
     </g:ScrollPanel>
 
   </g:HTMLPanel>

@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,15 +25,13 @@ import java.util.Map.Entry;
 @SuppressWarnings("serial")
 public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
-  private static final int LEN = 15;
-
-  private static final String SELECT_STAR_FROM = "select * from ";
+  private static final String SELECT_STAR_FROM = "SELECT * FROM ";
 
   private DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
   private String t;
 
-  public String executeDatastoreQuery(String namespace, String sql) {
+  public String executeDatastoreQueries(String namespace, String sql) {
     t = "";
     NamespaceManager.set(namespace);
 
@@ -45,12 +44,14 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         } catch (SQLException e) {
           logError(e);
         }
+      } else {
+        t += "<br>";
       }
     }
     return t;
   }
 
-  public String executeRelationalQuery(String sql) {
+  public String executeRelationalQueries(String sql) {
     t = "";
     String[] queries = sql.split(";");
     for (String query : queries) {
@@ -61,67 +62,46 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         } catch (SQLException e) {
           logError(e);
         }
+      } else {
+        t += "<br>";
       }
     }
-    return t;
-  }
-
-  public String initDatastore(String namespace) {
-    t = "";
-    NamespaceManager.set(namespace);
-
-    String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia", null};
-    String[] MIDDLE_INITIAL = {"A", "X", null};
-    String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan", null};
-
-    int count = 0;
-    for (String first : FIRST_NAMES) {
-      for (String mi : MIDDLE_INITIAL) {
-        for (String last : LAST_NAMES) {
-          String kind = Constants.KIND;
-          Entity entity = new Entity(kind);
-
-          if (first != null) {
-            entity.setProperty("first", first);
-          }
-          if (mi != null) {
-            entity.setProperty("mi", mi);
-          }
-          if (last != null) {
-            entity.setProperty("last", last);
-          }
-
-          String message = "Kind=" + kind + "(";
-          message += "first: " + formatValue(LEN, first);
-          message += " mi: " + formatValue(4, mi);
-          message += " last: " + formatValue(LEN, last);
-          message += ")";
-          logResult(message);
-          ds.put(entity);
-          count++;
-        }
-      }
-    }
-    logStatus(count + " entities created");
     return t;
   }
 
   public String initRelational() {
+    return executeRelationalQueries(Constants.INIT_SQL);
+  }
+
+  public String seedDatastore(String namespace) {
     t = "";
-    Connection c = Util.getConnection();
+    NamespaceManager.set(namespace);
 
-    executeUpdate(c, "drop table contact;");
-    executeUpdate(c, "drop table employee;");
-    executeUpdate(c, "create table employee ( id int, name varchar(200) )");
-    executeUpdate(c, "insert into employee values(1, 'Patrick Chanezon')");
-    executeUpdate(c, "insert into employee values(42, 'Fred Sauer')");
+    int ROWS = 20;
+    for (int i = 0; i < ROWS; i++) {
+      String kind = Constants.KIND;
+      Entity entity = new Entity(kind);
 
+      int cust_id = (int) (Math.random() * Constants.MAX_CUST_ID) + 1;
+      long time = (long) (System.currentTimeMillis() - Math.random() * 86400 * 30);
+      int download = (int) (Math.random() * 30);
+      int upload = (int) (Math.random() * 5);
+
+      entity.setProperty("download", download);
+      entity.setProperty("upload", upload);
+      entity.setProperty("cust_id", cust_id);
+      entity.setProperty("time", new Date(time));
+
+      ds.put(entity);
+      logResult(dumpEntity(entity));
+    }
+    logStatus(ROWS + " entities created");
     return t;
   }
 
   private void doDatastoreQuery(String sql) throws SQLException {
     logQuery(sql);
-    sql = sql.replaceAll("\\s+", " ").trim().toLowerCase();
+    sql = sql.replaceAll("\\s+", " ").trim().toUpperCase();
     if (!sql.startsWith(SELECT_STAR_FROM)) {
       logError("Unrecognized GQL query");
       return;
@@ -130,14 +110,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     PreparedQuery prepared = ds.prepare(new Query(kind));
     List<Entity> results = prepared.asList(Builder.withDefaults());
     for (Entity entity : results) {
-      Map<String, Object> props = entity.getProperties();
-      String propList = "Kind=" + kind + "(";
-      for (Entry<String, Object> entry : props.entrySet()) {
-        String name = entry.getKey();
-        String value = formatValue(LEN, "" + entry.getValue());
-        propList += name + ": " + value;
-      }
-      propList += ")";
+      String propList = dumpEntity(entity);
       logResult(propList);
     }
     logStatus(results.size() + " results");
@@ -154,7 +127,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       {
         String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          tt += formatHeader(LEN, metaData.getColumnName(i));
+          tt += Util.formatHeader(Constants.LEN, metaData.getColumnName(i));
         }
         logResult(tt);
       }
@@ -164,7 +137,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         count++;
         String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          tt += formatValue(LEN, query.getString(i));
+          tt += Util.formatValue(Constants.LEN, query.getString(i));
         }
         logResult(tt);
       }
@@ -177,6 +150,18 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     c.close();
   }
 
+  private String dumpEntity(Entity entity) {
+    Map<String, Object> props = entity.getProperties();
+    String propList = "Kind=" + entity.getKind() + "(";
+    for (Entry<String, Object> entry : props.entrySet()) {
+      String name = entry.getKey();
+      Object v = entry.getValue();
+      propList += name + ": " + Util.propertyValueToString(v);
+    }
+    propList += ")";
+    return propList;
+  }
+
   private void executeUpdate(Connection c, String sql) {
     logQuery(sql);
     try {
@@ -186,16 +171,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     } catch (Exception e) {
       logError(e);
     }
-  }
-
-  private String formatHeader(int len, String value) {
-    value = sizeValue(len, value);
-    return "<span class='header value'>" + value + "</span>";
-  }
-
-  private String formatValue(int len, String value) {
-    value = sizeValue(len, value);
-    return "<span class='value'>" + value + "</span>";
   }
 
   private void log(String className, String message) {
@@ -222,16 +197,4 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     log("status", message);
   }
 
-  private String sizeValue(int len, String value) {
-    if (value == null) {
-      value = "null";
-    }
-    if (value.length() > len) {
-      value = value.substring(0, len - 1) + "É";
-    } else {
-      value += "                                                    ";
-      value = value.substring(0, len);
-    }
-    return value;
-  }
 }

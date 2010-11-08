@@ -32,13 +32,13 @@ public class DatastorePage extends Composite {
   Button go;
 
   @UiField
-  Button initDatastore;
-
-  @UiField
   TextBox namespace;
 
   @UiField
   HTML results;
+
+  @UiField
+  Button seedDatastore;
 
   @UiField
   TextArea sql;
@@ -48,7 +48,7 @@ public class DatastorePage extends Composite {
   public DatastorePage(RpcServiceAsync service) {
     this.service = service;
     initWidget(uiBinder.createAndBindUi(this));
-    sql.setText(Constants.INITIAL_SQL);
+    sql.setText(Constants.INITIAL_QUERY);
   }
 
   @Override
@@ -65,18 +65,18 @@ public class DatastorePage extends Composite {
     execute();
   }
 
-  @UiHandler("initDatastore")
+  @UiHandler("seedDatastore")
   void onInitDatastoreClick(ClickEvent e) {
-    initDatastore.setEnabled(false);
-    service.initDatastore(getNamespace(), new AsyncCallback<String>() {
+    seedDatastore.setEnabled(false);
+    service.seedDatastore(getNamespace(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
-        initDatastore.setEnabled(true);
-        Window.alert("Initialization failed: " + caught.getMessage());
+        seedDatastore.setEnabled(true);
+        Window.alert("Seeding datastore failed: " + caught.getMessage());
       }
 
       public void onSuccess(String result) {
-        initDatastore.setEnabled(true);
+        seedDatastore.setEnabled(true);
         results.setHTML(result);
       }
     });
@@ -101,7 +101,7 @@ public class DatastorePage extends Composite {
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.executeDatastoreQuery(getNamespace(), sql.getText(), new AsyncCallback<String>() {
+    service.executeDatastoreQueries(getNamespace(), sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");
@@ -114,7 +114,6 @@ public class DatastorePage extends Composite {
       }
 
       public void onSuccess(String result) {
-        results.setStylePrimaryName("results");
         results.setHTML(result);
         sql.setFocus(true);
         sql.selectAll();

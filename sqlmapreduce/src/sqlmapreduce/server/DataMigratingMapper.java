@@ -12,6 +12,7 @@ import org.apache.hadoop.io.NullWritable;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,7 +43,7 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
         valueList += ", ";
       }
       paramList += entry.getKey();
-      valueList += "'" + entry.getValue() + "'";
+      valueList += propertyValueToSql(entry.getValue());
     }
 
     String sql = "INSERT INTO " + kind + " (" + paramList + ") VALUES (" + valueList + ")";
@@ -53,7 +54,7 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
       } catch (SQLException e) {
         for (Entry<String, Object> entry : props.entrySet()) {
           String s = "ALTER TABLE " + kind + " ADD COLUMN " + entry.getKey() + " "
-              + Util.COLUMN_SPEC;
+              + getSqlTypeForProperty(entry.getValue());
           try {
             connection.createStatement().execute(s);
           } catch (Exception ignore) {
@@ -82,7 +83,7 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
       if (columnList.length() > 0) {
         columnList += ", ";
       }
-      columnList += entry.getKey() + " VARCHAR(2000)";
+      columnList += entry.getKey() + " " + getSqlTypeForProperty(entry.getValue());
     }
 
     Connection c = Util.getConnection();
@@ -118,6 +119,30 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
     List<Entity> results = DatastoreServiceFactory.getDatastoreService().prepare(query).asList(
         Builder.withLimit(1));
     return results.get(0);
+  }
+
+  private String getSqlTypeForProperty(Object value) {
+    if (value instanceof Number) {
+      return "numeric";
+    } else if (value instanceof Date) {
+      return "varchar";
+    } else if (value instanceof String) {
+      return "varchar";
+    } else {
+      throw new RuntimeException("Unrecognized property value class: " + value.getClass().getName());
+    }
+  }
+
+  private String propertyValueToSql(Object value) {
+    if (value instanceof Number) {
+      return "" + value;
+    } else if (value instanceof Date) {
+      return "'" + Util.DATE_TIME_FORMAT.format(value) + "'";
+    } else if (value instanceof String) {
+      return "'" + value + "'";
+    } else {
+      throw new RuntimeException("Unrecognized property value class: " + value.getClass().getName());
+    }
   }
 
 }
