@@ -24,6 +24,8 @@ import java.util.Map.Entry;
 @SuppressWarnings("serial")
 public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
+  private static final int LEN = 15;
+
   private static final String SELECT_STAR_FROM = "select * from ";
 
   private DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -90,9 +92,9 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
           }
 
           String message = "Kind=" + kind + "(";
-          message += "first: " + formatValue(first);
-          message += " mi: " + formatValue(mi);
-          message += " last: " + formatValue(last);
+          message += "first: " + formatValue(LEN, first);
+          message += " mi: " + formatValue(4, mi);
+          message += " last: " + formatValue(LEN, last);
           message += ")";
           logResult(message);
           ds.put(entity);
@@ -124,17 +126,18 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       logError("Unrecognized GQL query");
       return;
     }
-    String table = sql.substring(SELECT_STAR_FROM.length());
-    PreparedQuery prepared = ds.prepare(new Query(table));
+    String kind = sql.substring(SELECT_STAR_FROM.length());
+    PreparedQuery prepared = ds.prepare(new Query(kind));
     List<Entity> results = prepared.asList(Builder.withDefaults());
     for (Entity entity : results) {
       Map<String, Object> props = entity.getProperties();
-      String propList = "";
+      String propList = "Kind=" + kind + "(";
       for (Entry<String, Object> entry : props.entrySet()) {
         String name = entry.getKey();
-        String value = formatValue("" + entry.getValue());
+        String value = formatValue(LEN, "" + entry.getValue());
         propList += name + ": " + value;
       }
+      propList += ")";
       logResult(propList);
     }
     logStatus(results.size() + " results");
@@ -151,7 +154,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
       {
         String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          tt += formatHeader(metaData.getColumnName(i));
+          tt += formatHeader(LEN, metaData.getColumnName(i));
         }
         logResult(tt);
       }
@@ -161,7 +164,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         count++;
         String tt = "";
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          tt += formatValue(query.getString(i));
+          tt += formatValue(LEN, query.getString(i));
         }
         logResult(tt);
       }
@@ -185,13 +188,13 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
   }
 
-  private String formatHeader(String value) {
-    value = sizeValue(value);
+  private String formatHeader(int len, String value) {
+    value = sizeValue(len, value);
     return "<span class='header value'>" + value + "</span>";
   }
 
-  private String formatValue(String value) {
-    value = sizeValue(value);
+  private String formatValue(int len, String value) {
+    value = sizeValue(len, value);
     return "<span class='value'>" + value + "</span>";
   }
 
@@ -219,16 +222,15 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     log("status", message);
   }
 
-  private String sizeValue(String value) {
-    int LEN = 10;
+  private String sizeValue(int len, String value) {
     if (value == null) {
       value = "null";
     }
-    if (value.length() > LEN) {
-      value = value.substring(0, LEN - 1) + "É";
+    if (value.length() > len) {
+      value = value.substring(0, len - 1) + "É";
     } else {
       value += "                                                    ";
-      value = value.substring(0, LEN);
+      value = value.substring(0, len);
     }
     return value;
   }

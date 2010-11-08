@@ -27,6 +27,9 @@ public class SqlPage extends Composite {
   private static MainPageUiBinder uiBinder = GWT.create(MainPageUiBinder.class);
 
   @UiField
+  Button empSal;
+
+  @UiField
   Button go;
 
   @UiField
@@ -55,6 +58,11 @@ public class SqlPage extends Composite {
         sql.setFocus(true);
       }
     });
+  }
+
+  @UiHandler("empSal")
+  void onEmpSalClick(ClickEvent e) {
+    sql.setText(Constants.EMP_SAL_SQL);
   }
 
   @UiHandler("go")

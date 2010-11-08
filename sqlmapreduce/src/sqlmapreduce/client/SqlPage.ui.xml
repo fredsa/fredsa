@@ -9,7 +9,7 @@
     }
     
     .sql {
-      width: 30em;
+      width: 35em;
       height: 5em;
       white-space: normal;
     }
@@ -21,8 +21,9 @@
     }
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
-    <h2>SQL</h2>
+    <h3>SQL</h3>
     <g:Button ui:field="initSql">Initialize</g:Button>
+    <g:Button ui:field="empSal">EMP/SAL Example</g:Button>
 
     <div style="border-top: 1px solid black; margin: 5px;" />
 

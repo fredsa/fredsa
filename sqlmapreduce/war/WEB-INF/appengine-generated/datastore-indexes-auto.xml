@@ -1,8 +1,8 @@
-<!-- Indices written at Mon, 8 Nov 2010 11:17:32 CET -->
+<!-- Indices written at Mon, 8 Nov 2010 14:00:04 CET -->
 
 <datastore-indexes>
 
-    <!-- Used 11 times in query history -->
+    <!-- Used 1 time in query history -->
     <datastore-index kind="contact" ancestor="false" source="auto">
         <property name="__key__" direction="desc"/>
     </datastore-index>
