@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Util {
+  static final String COLUMN_SPEC = "VARCHAR(2000)";
   static final String RDBMS_CONNECT_STRING = "jdbc:google:rdbms://localhost:1234#googlecom:fredsa";
 
   private static final Logger log = Logger.getLogger(Util.class.getName());

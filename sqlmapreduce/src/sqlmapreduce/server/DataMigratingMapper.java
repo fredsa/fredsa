@@ -48,7 +48,20 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
     String sql = "INSERT INTO " + kind + " (" + paramList + ") VALUES (" + valueList + ")";
     log.info(sql);
     try {
-      connection.createStatement().executeUpdate(sql);
+      try {
+        connection.createStatement().executeUpdate(sql);
+      } catch (SQLException e) {
+        for (Entry<String, Object> entry : props.entrySet()) {
+          String s = "ALTER TABLE " + kind + " ADD COLUMN " + entry.getKey() + " "
+              + Util.COLUMN_SPEC;
+          try {
+            connection.createStatement().execute(s);
+          } catch (Exception ignore) {
+          }
+        }
+        // second try
+        connection.createStatement().executeUpdate(sql);
+      }
     } catch (SQLException e) {
       log.log(Level.WARNING, "failed to insert values " + valueList + " due to " + e.getMessage());
       context.getCounter(kind, e.getClass().getCanonicalName()).increment(1);

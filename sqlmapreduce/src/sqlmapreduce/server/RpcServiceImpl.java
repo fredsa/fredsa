@@ -68,20 +68,36 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     t = "";
     NamespaceManager.set(namespace);
 
-    String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia"};
-    String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan"};
+    String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia", null};
+    String[] MIDDLE_INITIAL = {"A", "X", null};
+    String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan", null};
 
     int count = 0;
     for (String first : FIRST_NAMES) {
-      for (String last : LAST_NAMES) {
-        String kind = Constants.KIND;
-        Entity entity = new Entity(kind);
-        entity.setProperty("first_name", first);
-        entity.setProperty("last_name", last);
-        logResult("Kind=" + kind + "(first_name: " + formatValue(first) + " last_name: "
-            + formatValue(last) + ")");
-        ds.put(entity);
-        count++;
+      for (String mi : MIDDLE_INITIAL) {
+        for (String last : LAST_NAMES) {
+          String kind = Constants.KIND;
+          Entity entity = new Entity(kind);
+
+          if (first != null) {
+            entity.setProperty("first", first);
+          }
+          if (mi != null) {
+            entity.setProperty("mi", mi);
+          }
+          if (last != null) {
+            entity.setProperty("last", last);
+          }
+
+          String message = "Kind=" + kind + "(";
+          message += "first: " + formatValue(first);
+          message += " mi: " + formatValue(mi);
+          message += " last: " + formatValue(last);
+          message += ")";
+          logResult(message);
+          ds.put(entity);
+          count++;
+        }
       }
     }
     logStatus(count + " entities created");
@@ -204,7 +220,10 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
   }
 
   private String sizeValue(String value) {
-    int LEN = 15;
+    int LEN = 10;
+    if (value == null) {
+      value = "null";
+    }
     if (value.length() > LEN) {
       value = value.substring(0, LEN - 1) + "É";
     } else {
