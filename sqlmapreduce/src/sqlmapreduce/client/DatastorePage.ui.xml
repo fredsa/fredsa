@@ -32,7 +32,7 @@
 
     <div style="border-top: 1px solid black; margin: 5px;" />
 
-    <div>GQL query:</div>
+    <div>GQL query: <g:TextBox ui:field="namespace"></g:TextBox></div>
     <g:TextArea ui:field="sql" styleName="{style.sql}"></g:TextArea>
 
     <g:Button ui:field="go">Go!</g:Button>

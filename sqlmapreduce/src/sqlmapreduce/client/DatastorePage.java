@@ -2,6 +2,7 @@ package sqlmapreduce.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import sqlmapreduce.shared.Constants;
@@ -31,6 +33,9 @@ public class DatastorePage extends Composite {
   Button initDatastore;
 
   @UiField
+  TextBox namespace;
+
+  @UiField
   HTML results;
 
   @UiField
@@ -44,6 +49,15 @@ public class DatastorePage extends Composite {
     sql.setText(Constants.INITIAL_SQL);
   }
 
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    if (namespace.getText().length() == 0) {
+      namespace.setText("Namespace");
+      namespace.getElement().getStyle().setColor("gray");
+    }
+  }
+
   @UiHandler("go")
   void onGoClick(ClickEvent e) {
     execute();
@@ -52,7 +66,7 @@ public class DatastorePage extends Composite {
   @UiHandler("initDatastore")
   void onInitDatastoreClick(ClickEvent e) {
     initDatastore.setEnabled(false);
-    service.initDatastore(new AsyncCallback<String>() {
+    service.initDatastore(namespace.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         initDatastore.setEnabled(true);
@@ -74,10 +88,18 @@ public class DatastorePage extends Composite {
     }
   }
 
+  @UiHandler("namespace")
+  void onNamespaceFocus(FocusEvent e) {
+    if (namespace.getText().equals("Namespace")) {
+      namespace.setText("");
+      namespace.getElement().getStyle().setColor("");
+    }
+  }
+
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.executeDatastoreQuery(sql.getText(), new AsyncCallback<String>() {
+    service.executeDatastoreQuery(namespace.getText(), sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");

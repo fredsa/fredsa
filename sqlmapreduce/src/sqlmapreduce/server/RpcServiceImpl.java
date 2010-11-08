@@ -1,5 +1,6 @@
 package sqlmapreduce.server;
 
+import com.google.appengine.api.NamespaceManager;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -29,8 +30,9 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
   private String t;
 
-  public String executeDatastoreQuery(String sql) {
+  public String executeDatastoreQuery(String namespace, String sql) {
     t = "";
+    NamespaceManager.set(namespace);
 
     String[] queries = sql.split(";");
     for (String query : queries) {
@@ -62,8 +64,9 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     return t;
   }
 
-  public String initDatastore() {
+  public String initDatastore(String namespace) {
     t = "";
+    NamespaceManager.set(namespace);
 
     String[] FIRST_NAMES = {"Ford", "Arthur", "Zaphod", "Tricia"};
     String[] LAST_NAMES = {"Prefect", "Dent", "Beeblebrox", "McMillan"};
