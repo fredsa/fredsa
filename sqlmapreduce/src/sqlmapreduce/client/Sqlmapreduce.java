@@ -36,7 +36,9 @@ public class Sqlmapreduce implements EntryPoint {
         }
       }
     });
-    History.fireCurrentHistoryState();
+    if (History.getToken().length() > 0) {
+      History.fireCurrentHistoryState();
+    }
 
   }
 }

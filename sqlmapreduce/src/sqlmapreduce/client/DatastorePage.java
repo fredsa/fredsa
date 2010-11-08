@@ -24,6 +24,8 @@ public class DatastorePage extends Composite {
   interface DatastorePageUiBinder extends UiBinder<Widget, DatastorePage> {
   }
 
+  private static final String NAMESPACE_HINT_TEXT = "Namespace";
+
   private static DatastorePageUiBinder uiBinder = GWT.create(DatastorePageUiBinder.class);
 
   @UiField
@@ -52,8 +54,8 @@ public class DatastorePage extends Composite {
   @Override
   protected void onLoad() {
     super.onLoad();
-    if (namespace.getText().length() == 0) {
-      namespace.setText("Namespace");
+    if (getNamespace().length() == 0) {
+      namespace.setText(NAMESPACE_HINT_TEXT);
       namespace.getElement().getStyle().setColor("gray");
     }
   }
@@ -66,7 +68,7 @@ public class DatastorePage extends Composite {
   @UiHandler("initDatastore")
   void onInitDatastoreClick(ClickEvent e) {
     initDatastore.setEnabled(false);
-    service.initDatastore(namespace.getText(), new AsyncCallback<String>() {
+    service.initDatastore(getNamespace(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         initDatastore.setEnabled(true);
@@ -90,7 +92,7 @@ public class DatastorePage extends Composite {
 
   @UiHandler("namespace")
   void onNamespaceFocus(FocusEvent e) {
-    if (namespace.getText().equals("Namespace")) {
+    if (NAMESPACE_HINT_TEXT.equals(namespace.getText())) {
       namespace.setText("");
       namespace.getElement().getStyle().setColor("");
     }
@@ -99,7 +101,7 @@ public class DatastorePage extends Composite {
   private void execute() {
     go.setEnabled(false);
     results.setText("");
-    service.executeDatastoreQuery(namespace.getText(), sql.getText(), new AsyncCallback<String>() {
+    service.executeDatastoreQuery(getNamespace(), sql.getText(), new AsyncCallback<String>() {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");
@@ -119,6 +121,14 @@ public class DatastorePage extends Composite {
         go.setEnabled(true);
       }
     });
+  }
+
+  private String getNamespace() {
+    String ns = namespace.getText();
+    if (NAMESPACE_HINT_TEXT.equals(ns)) {
+      return "";
+    }
+    return ns;
   }
 
 }
