@@ -22,6 +22,7 @@
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
     <h3>SQL</h3>
+    <g:Button ui:field="queryData">Query Data</g:Button>
     <g:Button ui:field="dropTables">Drop Tables</g:Button>
     <g:Button ui:field="empSal">EMP/SAL Example</g:Button>
     <g:Button ui:field="usageReport">Usage Report</g:Button>

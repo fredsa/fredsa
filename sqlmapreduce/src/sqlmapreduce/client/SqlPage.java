@@ -36,6 +36,9 @@ public class SqlPage extends Composite {
   Button go;
 
   @UiField
+  Button queryData;
+
+  @UiField
   HTML results;
 
   @UiField
@@ -93,6 +96,11 @@ public class SqlPage extends Composite {
       e.preventDefault();
       execute();
     }
+  }
+
+  @UiHandler("queryData")
+  void onQueryDataClick(ClickEvent e) {
+    sql.setText(Constants.INITIAL_QUERY);
   }
 
   @UiHandler("usageReport")

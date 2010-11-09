@@ -35,6 +35,9 @@ public class DatastorePage extends Composite {
   TextBox namespace;
 
   @UiField
+  Button queryData;
+
+  @UiField
   HTML results;
 
   @UiField
@@ -96,6 +99,11 @@ public class DatastorePage extends Composite {
       namespace.setText("");
       namespace.getElement().getStyle().setColor("");
     }
+  }
+
+  @UiHandler("queryData")
+  void onQueryDataClick(ClickEvent e) {
+    sql.setText(Constants.INITIAL_QUERY);
   }
 
   private void execute() {

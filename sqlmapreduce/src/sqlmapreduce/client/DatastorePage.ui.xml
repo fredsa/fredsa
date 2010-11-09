@@ -26,6 +26,7 @@
   </ui:style>
   <g:HTMLPanel styleName="{style.container}">
     <h3>Datastore</h3>
+    <g:Button ui:field="queryData">Query Data</g:Button>
     <g:Button ui:field="seedDatastore">Random usage</g:Button>
     [
     <a target="ah_admin" href="/_ah/admin">/_ah/admin</a>
