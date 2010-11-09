@@ -16,7 +16,15 @@
 
   <!-- Configure java.util.logging -->
   <system-properties>
-    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />
   </system-properties>
+
+  <admin-console>
+    <page name="Datastore" url="/#datastore" />
+    <page name="SQL" url="/#sql" />
+    <page name="Demo" url="/#both" />
+    <page name="Fred's MR" url="/mapreduce/status" />
+    <page name="Appstats" url="/appstats" />
+  </admin-console>
 
 </appengine-web-app>

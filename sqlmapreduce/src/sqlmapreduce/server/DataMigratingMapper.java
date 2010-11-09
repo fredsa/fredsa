@@ -123,11 +123,11 @@ public class DataMigratingMapper extends AppEngineMapper<Key, Entity, NullWritab
 
   private String getSqlTypeForProperty(Object value) {
     if (value instanceof Number) {
-      return "numeric";
+      return "NUMERIC";
     } else if (value instanceof Date) {
-      return "varchar";
+      return "VARCHAR(200)";
     } else if (value instanceof String) {
-      return "varchar";
+      return "VARCHAR(200)";
     } else {
       throw new RuntimeException("Unrecognized property value class: " + value.getClass().getName());
     }

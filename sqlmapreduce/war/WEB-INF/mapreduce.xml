@@ -20,7 +20,7 @@
     <property>
       <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind
       </name>
-      <value template="optional">USAGE</value>
+      <value template="optional">CUST_USAGE</value>
     </property>
   </configuration>
 
@@ -44,7 +44,7 @@
     <property>
       <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind
       </name>
-      <value template="optional">USAGE</value>
+      <value template="optional">CUST_USAGE</value>
     </property>
   </configuration>
 
@@ -61,7 +61,7 @@
     <property>
       <name human="Entity Kind to Map Over">mapreduce.mapper.inputformat.datastoreinputformat.entitykind
       </name>
-      <value template="optional">USAGE</value>
+      <value template="optional">CUST_USAGE</value>
     </property>
   </configuration>
 </configurations>
