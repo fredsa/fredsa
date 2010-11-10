@@ -113,11 +113,7 @@ public class DatastorePage extends Composite {
 
       public void onFailure(Throwable caught) {
         results.setStylePrimaryName("error");
-        if (caught instanceof RuntimeException) {
-          results.setHTML(caught.getMessage());
-        } else {
-          results.setHTML(caught.toString());
-        }
+        results.setHTML(caught.getClass().getName());
         go.setEnabled(true);
       }
 

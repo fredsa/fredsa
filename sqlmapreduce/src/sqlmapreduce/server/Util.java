@@ -17,7 +17,8 @@ import java.util.logging.Logger;
 public class Util {
   static DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
 
-  static final String RDBMS_CONNECT_STRING = "jdbc:google:rdbms://localhost:1234#googlecom:fredsa";
+  static final String RDBMS_CONNECT_STRING = "jdbc:google:rdbms://localhost:1234#googlecom:sqlreduce";
+  //  static final String RDBMS_CONNECT_STRING = "jdbc:mysql:///";
 
   private static final Logger log = Logger.getLogger(Util.class.getName());
 
