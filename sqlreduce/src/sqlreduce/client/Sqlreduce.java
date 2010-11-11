@@ -8,12 +8,14 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 
 public class Sqlreduce implements EntryPoint {
 
   private final RpcServiceAsync service = GWT.create(RpcService.class);
 
   public void onModuleLoad() {
+    RootPanel.get("loading").removeFromParent();
     final DatastorePage datastorePage = new DatastorePage(service);
     final SqlPage sqlPage = new SqlPage(service);
 
@@ -38,6 +40,8 @@ public class Sqlreduce implements EntryPoint {
     });
     if (History.getToken().length() > 0) {
       History.fireCurrentHistoryState();
+    } else {
+      History.newItem("both");
     }
 
   }

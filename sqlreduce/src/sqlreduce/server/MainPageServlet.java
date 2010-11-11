@@ -26,14 +26,15 @@ public class MainPageServlet extends RemoteServiceServlet {
       return;
     }
 
-    // If user is not logged in, redirect to login page
+    // User is not logged in, so redirect to login page
     if (!userService.isUserLoggedIn()) {
       resp.sendRedirect(userService.createLoginURL(currentUri(req)));
       return;
     }
 
-    // If not an administrator apologize
-    if (!userService.isUserAdmin()) {
+    // User is not authorized, so apologize
+    if (!userService.isUserAdmin()
+        && !userService.getCurrentUser().getEmail().toLowerCase().endsWith("@google.com")) {
       resp.setContentType("text/html");
       resp.getWriter().print(
           "<html><body>Sorry, you are not an administrator. Click here to <a href='"
