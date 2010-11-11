@@ -3,7 +3,7 @@
   <configuration name="SQL Migration Mapper">
     <property>
       <name>mapreduce.map.class</name>
-      <value>sqlmapreduce.server.DataMigratingMapper</value>
+      <value>sqlreduce.server.DataMigratingMapper</value>
     </property>
     <property>
       <name>mapreduce.mapper.shardcount</name>
@@ -27,7 +27,7 @@
   <configuration name="Delete Kind Mapper">
     <property>
       <name>mapreduce.map.class</name>
-      <value>sqlmapreduce.server.DeleteKindMapper</value>
+      <value>sqlreduce.server.DeleteKindMapper</value>
     </property>
     <property>
       <name>mapreduce.mapper.shardcount</name>
@@ -51,7 +51,7 @@
   <configuration name="TestMapper">
     <property>
       <name>mapreduce.map.class</name>
-      <value>sqlmapreduce.server.TestMapper</value>
+      <value>sqlreduce.server.TestMapper</value>
     </property>
     <property>
       <name>mapreduce.inputformat.class</name>

@@ -7,17 +7,17 @@
 
   <servlet>
     <servlet-name>rpcServlet</servlet-name>
-    <servlet-class>sqlmapreduce.server.RpcServiceImpl</servlet-class>
+    <servlet-class>sqlreduce.server.RpcServiceImpl</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>rpcServlet</servlet-name>
-    <url-pattern>/sqlmapreduce/rpc</url-pattern>
+    <url-pattern>/sqlreduce/rpc</url-pattern>
   </servlet-mapping>
 
 <!-- 
   <servlet>
     <servlet-name>mainPageServlet</servlet-name>
-    <servlet-class>sqlmapreduce.server.MainPageServlet</servlet-class>
+    <servlet-class>sqlreduce.server.MainPageServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>mainPageServlet</servlet-name>
@@ -60,9 +60,9 @@
     <web-resource-collection>
       <url-pattern>/*</url-pattern>
       <!--
-      <url-pattern>/sqlmapreduce/*</url-pattern>
-      <url-pattern>/Sqlmapreduce.html</url-pattern>
-      <url-pattern>/Sqlmapreduce.css</url-pattern>
+      <url-pattern>/sqlreduce/*</url-pattern>
+      <url-pattern>/Sqlreduce.html</url-pattern>
+      <url-pattern>/Sqlreduce.css</url-pattern>
       -->
     </web-resource-collection>
     <auth-constraint>
@@ -82,7 +82,7 @@
 
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Sqlmapreduce.html</welcome-file>
+    <welcome-file>Sqlreduce.html</welcome-file>
   </welcome-file-list>
   <!-- 
    -->
