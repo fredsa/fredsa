@@ -84,56 +84,36 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
       """ % (self.request.get("action"), person.maybeKey()))
 
       for prop in props:
-        if isinstance(props[prop], db.BooleanProperty):
+        label = person.propnames.get(prop, prop)
+        value = getattr(person, prop)
+        if isinstance(props[prop], SelectableStringProperty):
+          values=person.proplists[prop]
+          html="""<select name="%s" size="%s">""" % (prop, len(values))
+          for v in values:
+            selected="selected" if value == v else ""
+            html+="""<option %s value="%s">%s</option>""" % (selected, v, v)
+          html+="""</select>"""
+        elif isinstance(props[prop], db.BooleanProperty):
           checked = "checked" if getattr(person, prop) else ""
-          html = """<input type="checkbox" name="%s" %s> %s""" % (checked, prop, prop)
+          html = """<input type="checkbox" name="%s" %s> %s""" % (checked, prop, label)
           label = ""
+        elif isinstance(props[prop], db.StringProperty):
+          html = """<input type="text" name="%s" value="%s">""" % (prop, value)
         else:
           html = """xxxxx"""
-          label = prop
-        self.response.out.write("""<tr><td style='color:red'>%s</td><td>%s</td></tr>""" % (label, html))
+        self.response.out.write("""<tr style="color:red;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
 
-      self.response.out.write('<tr><td>Category:</td><td><select name="category" size="%s">' % len(self.categories))
-      for cat in self.categories:
-        selected="selected" if person.category == cat else ""
-        self.response.out.write('<option %s value="%s">%s</option>' % (selected, cat, cat))
-      self.response.out.write('</select></td></tr>')
-
-      if person.enabled:
-        checked="checked"
-      else:
-        checked=""
-      self.response.out.write("""
-<tr><td></td><td><input type="checkbox" name="enabled" %s> Enabled</td></tr> 
-      """ % checked)
-
-      if person.send_card:
-        checked="checked"
-      else:
-        checked=""
-      self.response.out.write("""
-<tr><td></td><td><input type="checkbox" name="send_card" %s> Send Card</td></tr> 
-      """ % checked)
-
-      self.response.out.write("""
-<tr><td>Mailing Name:</td><td><input type="text" name="mailing_name" size="50" value="%s"></td></tr> 
-<tr><td>Title:</td><td><input type="text" name="title" size="15" value="%s"></td></tr> 
-<tr><td>First Name:</td><td><input type="text" name="first_name" size="50" value="%s"></td></tr> 
-<tr><td>Last Name:</td><td><input type="text" name="last_name" size="50" value="%s"></td></tr> 
-<tr><td>Company Name:</td><td><input type="text" name="company_name" size="50" value="%s"></td></tr> 
-<tr><td valign="top">Comments:</td><td><textarea name="comments" cols="50" rows=10>%s</textarea></td></tr> 
-<tr><td></td><td><input type="submit" name="updated" value="Save Changes"></td></tr> 
-      """ % (person.mailing_name, person.title, person.first_name, person.last_name, person.company_name, person.comments))
-
+      self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
+      prop = props.keys()[0]
       self.response.out.write("""
 </table> 
-</form> 
-<script>document.personform.category.focus();</script>
+</form>
+<script>document.personform.%s.focus();</script>
 <hr> 
-      """)
+      """ % prop)
 
-  def __init__(self):
-    self.categories=("Relatives", "Personal", "Hotel/Restaurant/Entertainment", "Services by Individuals", "Companies, Institutions, etc.", "Business Relations")
+class SelectableStringProperty(db.StringProperty):
+  pass
 
 class Person(db.Model):
   mailing_name = db.StringProperty(default="")
@@ -142,9 +122,23 @@ class Person(db.Model):
   last_name = db.StringProperty(default="")
   company_name = db.StringProperty(default="")
   comments = db.StringProperty(default="")
-  category = db.StringProperty(default="")
+  category = SelectableStringProperty(default="")
   enabled = db.BooleanProperty(required=True, default=True)
   send_card = db.BooleanProperty(required=True, default=False)
+  propnames = {
+    "mailing_name": "Mailing Name",
+    "title": "Title",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "company_name": "Company Name",
+    "comments": "Comments",
+    "category": "Category",
+    "enabled": "Enabled",
+    "send_card": "Send Card",
+    }
+  proplists={
+    "category": ("Relatives", "Personal", "Hotel/Restaurant/Entertainment", "Services by Individuals", "Companies, Institutions, etc.", "Business Relations")
+    }
 
   def maybeKey(self):
     if self.is_saved():
