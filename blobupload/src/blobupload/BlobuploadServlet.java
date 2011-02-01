@@ -27,8 +27,7 @@ public class BlobuploadServlet extends HttpServlet {
   private static final Logger log = Logger.getLogger(BlobuploadServlet.class.getName());
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
-      IOException {
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setContentType("text/html");
     resp.getWriter().println(
         "<html><body><form name=test method=post enctype='multipart/form-data'>"
@@ -37,8 +36,7 @@ public class BlobuploadServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException,
-      IOException {
+  public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException {
     try {
       ServletFileUpload upload = new ServletFileUpload();
       res.setContentType("text/plain");
