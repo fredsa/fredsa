@@ -65,14 +65,15 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
 
   def personForm(self, person):
       props = Person.properties()
-      for prop in props:
-        if isinstance(props[prop], db.BooleanProperty):
-          res = prop in self.request.arguments()
-          setattr(person, prop, res)
-        elif isinstance(props[prop], db.StringListProperty):
-          setattr(person, prop, [])
+      for propname in props:
+        prop = props[propname]
+        if isinstance(prop, db.BooleanProperty):
+          res = propname in self.request.arguments()
+          setattr(person, propname, res)
+        elif isinstance(prop, db.StringListProperty):
+          setattr(person, propname, [])
         else:
-          setattr(person, prop, self.request.get(prop))
+          setattr(person, propname, self.request.get(propname))
 
       if person.first_name or person.last_name or person.mailing_name:
         person.put()
@@ -85,34 +86,35 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
 <table> 
       """ % (self.request.get("action"), person.maybeKey()))
 
-      for prop in props:
-	label = props[prop].verbose_name
-        value = getattr(person, prop)
-        if isinstance(props[prop], SelectableStringProperty):
-          values=props[prop].choices
-          html="""<select name="%s" size="%s">""" % (prop, len(values))
+      for propname in props:
+        prop = props[propname]
+	label = props[propname].verbose_name
+        value = getattr(person, propname)
+        if isinstance(prop, SelectableStringProperty):
+          values=prop.choices
+          html="""<select name="%s" size="%s">""" % (propname, len(values))
           for v in values:
             selected="selected" if value == v else ""
             html+="""<option %s value="%s">%s</option>""" % (selected, v, v)
           html+="""</select>"""
-        elif isinstance(props[prop], db.BooleanProperty):
-          checked = "checked" if getattr(person, prop) else ""
-          html = """<input type="checkbox" name="%s" %s> %s""" % (checked, prop, label)
+        elif isinstance(prop, db.BooleanProperty):
+          checked = "checked" if getattr(person, propname) else ""
+          html = """<input type="checkbox" name="%s" %s> %s""" % (checked, propname, label)
           label = ""
-        elif isinstance(props[prop], db.StringProperty):
-          html = """<input type="text" name="%s" value="%s">""" % (prop, value)
+        elif isinstance(prop, db.StringProperty):
+          html = """<input type="text" name="%s" value="%s">""" % (propname, value)
         else:
           html = """xxxxx"""
         self.response.out.write("""<tr style="color:red;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
 
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
-      prop = props.keys()[0]
+      propname = props.keys()[0]
       self.response.out.write("""
 </table> 
 </form>
 <script>document.personform.%s.focus();</script>
 <hr> 
-      """ % prop)
+      """ % propname)
 
 class SelectableStringProperty(db.StringProperty):
   pass
