@@ -69,6 +69,8 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
         if isinstance(props[prop], db.BooleanProperty):
           res = prop in self.request.arguments()
           setattr(person, prop, res)
+        elif isinstance(props[prop], db.StringListProperty):
+          setattr(person, prop, [])
         else:
           setattr(person, prop, self.request.get(prop))
 
@@ -84,10 +86,10 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
       """ % (self.request.get("action"), person.maybeKey()))
 
       for prop in props:
-        label = person.propnames.get(prop, prop)
+	label = props[prop].verbose_name
         value = getattr(person, prop)
         if isinstance(props[prop], SelectableStringProperty):
-          values=person.proplists[prop]
+          values=props[prop].choices
           html="""<select name="%s" size="%s">""" % (prop, len(values))
           for v in values:
             selected="selected" if value == v else ""
@@ -116,29 +118,24 @@ class SelectableStringProperty(db.StringProperty):
   pass
 
 class Person(db.Model):
-  mailing_name = db.StringProperty(default="")
-  title = db.StringProperty(default="")
-  first_name = db.StringProperty(default="")
-  last_name = db.StringProperty(default="")
-  company_name = db.StringProperty(default="")
-  comments = db.StringProperty(default="")
-  category = SelectableStringProperty(default="")
-  enabled = db.BooleanProperty(required=True, default=True)
-  send_card = db.BooleanProperty(required=True, default=False)
-  propnames = {
-    "mailing_name": "Mailing Name",
-    "title": "Title",
-    "first_name": "First Name",
-    "last_name": "Last Name",
-    "company_name": "Company Name",
-    "comments": "Comments",
-    "category": "Category",
-    "enabled": "Enabled",
-    "send_card": "Send Card",
-    }
-  proplists={
-    "category": ("Relatives", "Personal", "Hotel/Restaurant/Entertainment", "Services by Individuals", "Companies, Institutions, etc.", "Business Relations")
-    }
+  mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
+  title = db.StringProperty(verbose_name="Title", default="")
+  first_name = db.StringProperty(verbose_name="First Name", default="")
+  last_name = db.StringProperty(verbose_name="Last Name", default="")
+  company_name = db.StringProperty(verbose_name="Company Name", default="")
+  comments = db.StringProperty(verbose_name="Comments", default="")
+  category = SelectableStringProperty(verbose_name="Category", default="",
+    choices=[
+      "Relatives",
+      "Personal",
+      "Hotel/Restaurant/Entertainment",
+      "Services by Individuals",
+      "Companies, Institutions, etc.",
+      "Business Relations"
+    ])
+  enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
+  send_card = db.BooleanProperty(verbose_name="Send Card", default=False, required=True)
+  words = db.StringListProperty(verbose_name="Words", default=[])
 
   def maybeKey(self):
     if self.is_saved():
