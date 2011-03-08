@@ -65,6 +65,7 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
 
   def personForm(self, person):
       props = Person.properties()
+      words = []
       for propname in props:
         prop = props[propname]
         if isinstance(prop, db.BooleanProperty):
@@ -72,9 +73,15 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
           setattr(person, propname, res)
         elif isinstance(prop, db.StringListProperty):
           setattr(person, propname, [])
+        elif isinstance(prop, db.StringProperty):
+          value=self.request.get(propname)
+          words.extend(value.lower().split())
+          setattr(person, propname, value)
         else:
+          self.response.out.write("HMMMM" + propname)
           setattr(person, propname, self.request.get(propname))
 
+      setattr(person, "words", list(set(words)))
       if person.first_name or person.last_name or person.mailing_name:
         person.put()
 
@@ -103,6 +110,8 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
           label = ""
         elif isinstance(prop, db.StringProperty):
           html = """<input type="text" name="%s" value="%s">""" % (propname, value)
+        elif isinstance(prop, db.StringListProperty):
+          html = """<input type="text" name="%s" value="%s">""" % (propname, ", ".join(value))
         else:
           html = """xxxxx"""
         self.response.out.write("""<tr style="color:red;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
@@ -137,7 +146,7 @@ class Person(db.Model):
     ])
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
   send_card = db.BooleanProperty(verbose_name="Send Card", default=False, required=True)
-  words = db.StringListProperty(verbose_name="Words", default=[])
+  words = db.StringListProperty(verbose_name="words", default=[])
 
   def maybeKey(self):
     if self.is_saved():
