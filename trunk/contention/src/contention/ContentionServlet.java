@@ -25,7 +25,8 @@ public class ContentionServlet extends HttpServlet {
 
     try {
       String key = req.getParameter("key");
-      DatastoreServiceConfig config = DatastoreServiceConfig.Builder.withDeadline(30d / 1000d);
+      double timeout = Double.parseDouble(req.getParameter("timeout"));
+      DatastoreServiceConfig config = DatastoreServiceConfig.Builder.withDeadline(timeout / 1000d);
       DatastoreService ds = DatastoreServiceFactory.getDatastoreService(config);
       Entity entity = new Entity("Foo", key);
       entity.setProperty("last", new Date());
