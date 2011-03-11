@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import fixhtml5.shared.Case;
+import fixhtml5.shared.NotLoggedInException;
 
 public class Main implements EntryPoint {
 
@@ -56,7 +57,7 @@ public class Main implements EntryPoint {
   private void onModuleLoad2() {
     final Element wait = Document.get().getElementById("wait");
     wait.setInnerHTML("Fetching cases...");
-    caseService.getCase(0, new AsyncCallback<Case>() {
+    caseService.getCase(null, new AsyncCallback<Case>() {
       @Override
       public void onSuccess(Case result) {
         wait.removeFromParent();
@@ -65,6 +66,13 @@ public class Main implements EntryPoint {
 
       @Override
       public void onFailure(Throwable caught) {
+        if (caught instanceof NotLoggedInException) {
+          NotLoggedInException e = (NotLoggedInException) caught;
+          String url = e.getLoginURL();
+          wait.setInnerHTML("Sorry, you are not logged in. Please <a target=\"_blank\" href=\""
+              + url + "\">login</a> first.");
+          return;
+        }
         wait.setInnerHTML("FAILED TO LOAD CASES: " + caught);
       }
     });
