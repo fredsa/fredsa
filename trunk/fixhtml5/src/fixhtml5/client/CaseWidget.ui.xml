@@ -1,17 +1,41 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
+    h2 {
+      margin: 1em 0em 0em 0em;
+      font-size: 1.2em;
+    }
     .fieldset {
       margin: 0.2em;
       padding: 0.6em;
       border: 1px solid #ccc;
      }
+     .textarea , .result {
+       width: 60em;
+       height: 20em;
+       display: block;
+     }
+     .button {
+       margin: 1em;
+     }
   </ui:style>
   <g:HTMLPanel>
     <fieldset styleName="{style.fieldset}">
       <legend ui:field="caseTitle"></legend>
-      <pre ui:field="pre"></pre>
-      <g:Button ui:field="button">test</g:Button>
+
+      <h2>HTML</h2>      
+      <g:TextArea ui:field="htmlTextArea" styleName="{style.textarea}"></g:TextArea>
+
+      <h2>JavaScript</h2>
+      <g:TextArea ui:field="scriptTextArea" styleName="{style.textarea}"></g:TextArea>
+
+      <g:Button ui:field="button" styleName="{style.button}">execute</g:Button>
+      
+      <h2>Result</h2>
+      <hr/>
+      <g:HTML ui:field="result" styleName="{style.result}"></g:HTML>
+      <hr/>
+
     </fieldset>
   </g:HTMLPanel>
 </ui:UiBinder>
