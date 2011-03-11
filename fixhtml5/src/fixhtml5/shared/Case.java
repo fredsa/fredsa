@@ -3,7 +3,31 @@ package fixhtml5.shared;
 import java.io.Serializable;
 
 public class Case implements Serializable {
-  String name;
-  String html;
-  String script;
+  private String name;
+  private String html;
+  private String script;
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setHtml(String html) {
+    this.html = html;
+  }
+
+  public String getHtml() {
+    return html;
+  }
+
+  public void setScript(String script) {
+    this.script = script;
+  }
+
+  public String getScript() {
+    return script;
+  }
 }
