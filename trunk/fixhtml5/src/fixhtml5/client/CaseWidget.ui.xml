@@ -1,9 +1,14 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
-    
+    .foo {
+      margin: 0.1em;
+      border: 1px solid black;
+     }
   </ui:style>
-  <div>
+  <g:HTMLPanel styleName="{style.foo}">
     <h1 ui:field="caseTitle"></h1>
-  </div>
+    <pre ui:field="pre"></pre>
+    <g:Button ui:field="button">test</g:Button>
+  </g:HTMLPanel>
 </ui:UiBinder>
