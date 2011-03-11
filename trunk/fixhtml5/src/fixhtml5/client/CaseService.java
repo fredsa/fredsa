@@ -7,5 +7,5 @@ import fixhtml5.shared.Case;
 
 @RemoteServiceRelativePath("case")
 public interface CaseService extends RemoteService {
-  Case getCase(int number) throws IllegalArgumentException;
+  Case getCase(int number);
 }
