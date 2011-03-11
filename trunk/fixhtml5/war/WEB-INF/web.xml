@@ -5,20 +5,18 @@
 
 <web-app>
   
-  <!-- Servlets -->
   <servlet>
-    <servlet-name>greetServlet</servlet-name>
-    <servlet-class>fixhtml5.server.GreetingServiceImpl</servlet-class>
+    <servlet-name>caseServlet</servlet-name>
+    <servlet-class>fixhtml5.server.CaseServlet</servlet-class>
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/fixhtml5/greet</url-pattern>
+    <servlet-name>caseServlet</servlet-name>
+    <url-pattern>/fixhtml5/case</url-pattern>
   </servlet-mapping>
   
-  <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Fixhtml5.html</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
 
 </web-app>
