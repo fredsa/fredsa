@@ -3,6 +3,7 @@ package fixhtml5.shared;
 import java.io.Serializable;
 
 public class Case implements Serializable {
+  private String key;
   private String name;
   private String html;
   private String script;
@@ -29,5 +30,13 @@ public class Case implements Serializable {
 
   public String getScript() {
     return script;
+  }
+
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public String getKey() {
+    return key;
   }
 }

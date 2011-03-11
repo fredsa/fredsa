@@ -38,7 +38,7 @@ public class CaseWidget extends Composite {
 
   public CaseWidget(Case c) {
     initWidget(uiBinder.createAndBindUi(this));
-    caseTitle.setInnerHTML(c.getName());
+    caseTitle.setInnerHTML(c.getKey() + " - " + c.getName());
     htmlTextArea.setValue(c.getHtml());
     scriptTextArea.setValue(c.getScript());
     result.setHTML(c.getHtml());

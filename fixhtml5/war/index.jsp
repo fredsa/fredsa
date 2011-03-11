@@ -1,4 +1,6 @@
 <!doctype html>
+<%@page import="com.google.appengine.api.users.UserService"%>
+<%@page import="com.google.appengine.api.users.UserServiceFactory"%>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -20,6 +22,23 @@
       </div>
     </noscript>
 
+    <div class="onebar">
+    <%
+    UserService us = UserServiceFactory.getUserService();
+    HttpServletRequest req = (HttpServletRequest) pageContext.getRequest();
+    String thisurl = req.getRequestURL().toString();
+    if (req.getQueryString() != null) {
+      thisurl += "?" + req.getQueryString();
+    }
+    if (us.isUserLoggedIn()) {
+      String url = us.createLogoutURL(thisurl);
+      %><a href="<%= url %>">logout</a><%
+    } else {
+      String url = us.createLoginURL(thisurl);
+      %><a href="<%= url %>">login</a><%
+    }
+    %>
+    </div>
     <div id="wait" class="wait">Initializing. Please wait...</div>
   </body>
 </html>

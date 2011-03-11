@@ -15,8 +15,18 @@
     <url-pattern>/fixhtml5/case</url-pattern>
   </servlet-mapping>
   
+  <servlet-mapping>
+    <servlet-name>caseServlet</servlet-name>
+    <url-pattern>/done</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>caseServlet</servlet-name>
+    <url-pattern>/fixhtml5/done</url-pattern>
+  </servlet-mapping>
+  
   <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 
 </web-app>
