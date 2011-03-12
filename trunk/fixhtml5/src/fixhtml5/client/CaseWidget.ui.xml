@@ -21,6 +21,16 @@
      .button {
        margin: 1em;
      }
+     .findings {
+       width: 40em;
+       height: 4em;
+      }
+      .useragent {
+        float: left;
+      }
+      .findings , .useragent {
+        valign:top;
+      }
   </ui:style>
   <g:HTMLPanel>
     <fieldset styleName="{style.fieldset}">
@@ -34,7 +44,10 @@
 
       <g:Button ui:field="save" styleName="{style.button}">Save and test changes</g:Button>
       
-      <h2>Result</h2>
+      <h2>Results</h2>
+      <g:TextBox ui:field="useragent" styleName="{style.useragent}"></g:TextBox>
+      <g:TextArea ui:field="findings" styleName="{style.findings}">OK?</g:TextArea>
+      
       <hr/>
       <g:HTML ui:field="result" styleName="{style.result}"></g:HTML>
       <hr/>
