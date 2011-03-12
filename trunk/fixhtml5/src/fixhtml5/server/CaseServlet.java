@@ -33,9 +33,9 @@ public class CaseServlet extends RemoteServiceServlet implements CaseService {
       Case c = new Case();
       c.setKey(keyName);
       c.setName("Simple case");
-      c.setHtml("<audio controls id=\"laser\" src=\"36846__EcoDTR__LaserRocket.mp3\"></audio><br/>\n"
-          + "<button onclick=\"play('laser')\">play</button>\n"
-          + "<div>Do not use the media controls. Instead, click on the 'play' save. Click several times, while the sound is playing.\n"
+      c.setHtml("<audio controls id=\"laser\" src=\"36846__EcoDTR__LaserRocket.mp3\"></audio><br/>\n\n"
+          + "<button onclick=\"play('laser')\">play</button>\n\n"
+          + "<div>Do not use the media controls. Instead, click on the 'play' save. Click several times, while the sound is playing."
           + "Note that the sound doesn't always play from the beginning. Sometimes it plays from somewhere in the middle.</div>\n");
       c.setScript("function play(id) {\n"
           //
