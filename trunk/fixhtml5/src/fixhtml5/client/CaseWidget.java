@@ -11,11 +11,14 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.Navigator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import fixhtml5.shared.Case;
@@ -54,7 +57,13 @@ public class CaseWidget extends Composite {
   TextArea scriptTextArea;
 
   @UiField
-  HTML result;
+  HTML testOutput;
+
+  @UiField
+  TextBox userAgent;
+
+  @UiField
+  TextArea findings;
 
   private final Case c;
 
@@ -83,36 +92,59 @@ public class CaseWidget extends Composite {
     scriptTextArea.addKeyDownHandler(keyDownHandler);
 
     save.addClickHandler(clickHandler);
-
-    run();
   }
 
-  private void run() {
-    result.setHTML(c.getHtml());
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    execute();
+  }
+
+  private void lookupUserAgent() {
+    String ua = Navigator.getUserAgent();
+
+    caseService.getPrettyUserAgent(ua, new AsyncCallback<String>() {
+      @Override
+      public void onSuccess(String result) {
+        userAgent.setValue("sadfsdfsd");
+      }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        testOutput.setHTML("Unable to lookup user agent: " + caught);
+        Window.alert("2");
+      }
+    });
+
+  }
+
+  private void execute() {
+    testOutput.setHTML(c.getHtml());
     try {
       eval(c.getScript());
     } catch (Throwable e) {
-      result.setHTML("eval threw: <pre>" + e + "</pre>");
+      testOutput.setHTML("eval threw: <pre>" + e + "</pre>");
     }
     clean();
+    lookupUserAgent();
   }
 
   protected void save() {
     clean();
-    result.setHTML("Saving...");
+    testOutput.setHTML("Saving...");
     c.setHtml(htmlTextArea.getValue());
     c.setScript(scriptTextArea.getValue());
     caseService.updateCase(c, new AsyncCallback<Void>() {
       @Override
       public void onSuccess(Void ignore) {
-        result.setHTML("Case saved");
-        run();
+        testOutput.setHTML("Case saved");
+        execute();
       }
 
       @Override
       public void onFailure(Throwable caught) {
         dirty();
-        result.setHTML("Save failed: " + caught);
+        testOutput.setHTML("Save failed: " + caught);
       }
     });
   }

@@ -11,4 +11,6 @@ public interface CaseService extends RemoteService {
   Case getCase(String key) throws NotLoggedInException;
 
   void updateCase(Case c) throws NotLoggedInException;
+
+  String getPrettyUserAgent(String userAgentString);
 }

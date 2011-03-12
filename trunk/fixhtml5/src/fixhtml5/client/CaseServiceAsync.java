@@ -8,4 +8,6 @@ public interface CaseServiceAsync {
   void updateCase(Case c, AsyncCallback<Void> callback);
 
   void getCase(String key, AsyncCallback<Case> callback);
+
+  void getPrettyUserAgent(String userAgentString, AsyncCallback<String> callback);
 }
