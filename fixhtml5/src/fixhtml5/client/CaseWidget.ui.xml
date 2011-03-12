@@ -45,11 +45,11 @@
       <g:Button ui:field="save" styleName="{style.button}">Save and test changes</g:Button>
       
       <h2>Results</h2>
-      <g:TextBox ui:field="useragent" styleName="{style.useragent}"></g:TextBox>
+      <g:TextBox ui:field="userAgent" styleName="{style.useragent}"></g:TextBox>
       <g:TextArea ui:field="findings" styleName="{style.findings}">OK?</g:TextArea>
       
       <hr/>
-      <g:HTML ui:field="result" styleName="{style.result}"></g:HTML>
+      <g:HTML ui:field="testOutput" styleName="{style.result}"></g:HTML>
       <hr/>
 
     </fieldset>

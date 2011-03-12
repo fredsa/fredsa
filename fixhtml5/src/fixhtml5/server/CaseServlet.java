@@ -6,8 +6,11 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import fixhtml5.client.CaseService;
@@ -64,7 +67,7 @@ public class CaseServlet extends RemoteServiceServlet implements CaseService {
   public void updateCase(Case c) throws NotLoggedInException {
     checkLoggedIn();
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    logger.info("udpateCase(" + c + ")");
+    //    logger.info("udpateCase(" + c + ")");
     ds.put(adapt(c));
   }
 
@@ -81,6 +84,25 @@ public class CaseServlet extends RemoteServiceServlet implements CaseService {
     entity.setUnindexedProperty("script", c.getScript());
     entity.setUnindexedProperty("html", c.getHtml());
     return entity;
+  }
+
+  @Override
+  public String getPrettyUserAgent(String userAgentString) {
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+
+    if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Development)
+    {
+      Key key = KeyFactory.createKey("UserAgentSummary", userAgentString);
+      Entity e = new Entity(key);
+      e.setProperty("prettyUserAgent", "thing 1.0");
+      ds.put(e);
+    }
+
+    Query query = new Query("UserAgentSummary");
+    query.addFilter("__KEY__", FilterOperator.EQUAL,
+        KeyFactory.createKey("UserAgentSummary", userAgentString));
+    Entity entity = ds.prepare(query).asSingleEntity();
+    return entity != null ? (String) entity.getProperty("prettyUserAgent") : "ua not found";
   }
 
 }
