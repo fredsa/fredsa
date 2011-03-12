@@ -29,7 +29,7 @@
       <h2>JavaScript</h2>
       <g:TextArea ui:field="scriptTextArea" styleName="{style.textarea}"></g:TextArea>
 
-      <g:Button ui:field="button" styleName="{style.button}">execute</g:Button>
+      <g:Button ui:field="save" styleName="{style.button}">save changes</g:Button>
       
       <h2>Result</h2>
       <hr/>
