@@ -43,6 +43,6 @@ public class Case implements Serializable {
 
   @Override
   public String toString() {
-    return "Case[key=" + key + ",name=" + name + ",script=" + script + "]";
+    return "Case[key=" + key + ",name=" + name + "]";
   }
 }

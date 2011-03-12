@@ -10,10 +10,12 @@
       padding: 0.6em;
       border: 1px solid #ccc;
      }
-     .textarea , .result {
+     .textarea {
        width: 60em;
-       height: 20em;
+       height: 15em;
        display: block;
+     }
+     .result {
      }
      .button {
        margin: 1em;

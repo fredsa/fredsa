@@ -6,6 +6,9 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -23,6 +26,20 @@ public class CaseWidget extends Composite {
   }
 
   private static CaseWidgetUiBinder uiBinder = GWT.create(CaseWidgetUiBinder.class);
+
+  private ChangeHandler changeHandler = new ChangeHandler() {
+    @Override
+    public void onChange(ChangeEvent event) {
+      dirty();
+    }
+  };
+
+  private ClickHandler clickHandler = new ClickHandler() {
+    @Override
+    public void onClick(ClickEvent event) {
+      save();
+    }
+  };
 
   @UiField
   Button save;
@@ -43,33 +60,29 @@ public class CaseWidget extends Composite {
 
   private CaseServiceAsync caseService;
 
+  private KeyDownHandler keyDownHandler = new KeyDownHandler() {
+    @Override
+    public void onKeyDown(KeyDownEvent event) {
+      if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER && event.isAnyModifierKeyDown()) {
+        save();
+      }
+    }
+  };
+
   public CaseWidget(Case c) {
     this.c = c;
     initWidget(uiBinder.createAndBindUi(this));
     caseTitle.setInnerHTML(c.getKey() + " - " + c.getName());
 
     htmlTextArea.setValue(c.getHtml());
-    htmlTextArea.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        dirty();
-      }
-    });
+    htmlTextArea.addChangeHandler(changeHandler);
+    htmlTextArea.addKeyDownHandler(keyDownHandler);
 
     scriptTextArea.setValue(c.getScript());
-    scriptTextArea.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        dirty();
-      }
-    });
+    scriptTextArea.addChangeHandler(changeHandler);
+    scriptTextArea.addKeyDownHandler(keyDownHandler);
 
-    save.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        save();
-      }
-    });
+    save.addClickHandler(clickHandler);
 
     run();
   }
@@ -77,9 +90,9 @@ public class CaseWidget extends Composite {
   private void run() {
     result.setHTML(c.getHtml());
     try {
-    eval(c.getScript());
+      eval(c.getScript());
     } catch (Throwable e) {
-      result.setHTML("eval threw: " + e);
+      result.setHTML("eval threw: <pre>" + e + "</pre>");
     }
     clean();
   }
