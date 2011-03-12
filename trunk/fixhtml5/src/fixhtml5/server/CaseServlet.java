@@ -33,18 +33,18 @@ public class CaseServlet extends RemoteServiceServlet implements CaseService {
       Case c = new Case();
       c.setKey(keyName);
       c.setName("Simple case");
-      c.setHtml("<audio controls id=\"laser\" src=\"36846__EcoDTR__LaserRocket.mp3\"></audio><br/>"
-          + "<save onclick=\"play('laser')\">play</save>"
-          + "<div>Do not use the media controls. Instead, click on the 'play' save. Click several times, while the sound is playing."
-          + "Note that the sound doesn't always play from the beginning. Sometimes it plays from somewhere in the middle.</div>");
-      c.setScript("function play(id) {"
+      c.setHtml("<audio controls id=\"laser\" src=\"36846__EcoDTR__LaserRocket.mp3\"></audio><br/>\n"
+          + "<button onclick=\"play('laser')\">play</button>\n"
+          + "<div>Do not use the media controls. Instead, click on the 'play' save. Click several times, while the sound is playing.\n"
+          + "Note that the sound doesn't always play from the beginning. Sometimes it plays from somewhere in the middle.</div>\n");
+      c.setScript("function play(id) {\n"
           //
-          + "var e = document.getElementById(id);"
-          + "try {e.pause();} catch(e) {alert(\"pause: \" + e);}"
-          + "try {e.currentTime = 0;} catch(e) {alert(\"currentTime: \" + e);}"
-          + "try {e.play();} catch(e) {alert(\"play: \" + e);}"
+          + "var e = document.getElementById(id);\n"
+          + "try { e.pause(); } catch(e) { alert(\"pause: \" + e); }\n"
+          + "try { e.currentTime = 0; } catch(e) { alert(\"currentTime: \" + e); }\n"
+          + "try { e.play(); } catch(e) { alert(\"play: \" + e); }\n"
           //
-          + "}");
+          + "}\n");
       updateCase(c);
       throw new RuntimeException(e);
       //      return c;
