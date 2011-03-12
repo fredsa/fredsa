@@ -57,20 +57,19 @@ public class Main implements EntryPoint {
   private void onModuleLoad2() {
     final Element wait = Document.get().getElementById("wait");
     wait.setInnerHTML("Fetching cases...");
-    caseService.getCase(null, new AsyncCallback<Case>() {
+    caseService.getCase("foo", new AsyncCallback<Case>() {
       @Override
       public void onSuccess(Case result) {
         wait.removeFromParent();
-        RootPanel.getBodyElement().appendChild(new CaseWidget(result).getElement());
+        CaseWidget w = new CaseWidget(result);
+        w.setService(caseService);
+        RootPanel.get().add(w);
       }
 
       @Override
       public void onFailure(Throwable caught) {
         if (caught instanceof NotLoggedInException) {
-          NotLoggedInException e = (NotLoggedInException) caught;
-          String url = e.getLoginURL();
-          wait.setInnerHTML("Sorry, you are not logged in. Please <a target=\"_blank\" href=\""
-              + url + "\">login</a> first.");
+          wait.setInnerHTML("Sorry, you are not logged in. Please login first.");
           return;
         }
         wait.setInnerHTML("FAILED TO LOAD CASES: " + caught);

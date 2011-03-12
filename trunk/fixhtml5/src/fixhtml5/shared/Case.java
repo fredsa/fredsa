@@ -40,4 +40,9 @@ public class Case implements Serializable {
   public String getKey() {
     return key;
   }
+
+  @Override
+  public String toString() {
+    return "Case[key=" + key + ",name=" + name + ",script=" + script + "]";
+  }
 }
