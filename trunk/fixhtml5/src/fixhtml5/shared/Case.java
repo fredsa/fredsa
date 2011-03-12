@@ -2,6 +2,7 @@ package fixhtml5.shared;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Case implements Serializable {
   private String key;
   private String name;
