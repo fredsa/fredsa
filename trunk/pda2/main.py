@@ -26,11 +26,11 @@ class MainHandler(webapp.RequestHandler):
 <html> 
 <head> 
   <title>PDA</title> 
-  <link rel="stylesheet" type="text/css" href="/site/sitelook.css"/> 
+  <link rel="stylesheet" type="text/css" href="main.css"/> 
 </head> 
 <body class="pda">
 <h1>App Engine PDA2</h1> 
-<form name="searchform" method="post"> 
+<form name="searchform" method="get"> 
 <!--
 <input type="checkbox" name="includedisabled" > Include Disabled Entries<br> 
 <br> 
@@ -38,9 +38,9 @@ class MainHandler(webapp.RequestHandler):
 <input type="radio" name="format"  value="compact"> Compact results<br> 
 <input type="radio" name="format"  value="json"> JSON results<br> 
 -->
-Search text: <input type="text" name="search" value=""> <input type="submit" value="Go"><br> 
+Search text: <input type="text" name="q" value=""> <input type="submit" value="Go"><br> 
 </form> 
-<script>document.searchform.search.focus(); document.searchform.search.select();</script> 
+<script>document.searchform.q.focus(); document.searchform.q.select();</script> 
 
 <hr> 
 [<a href=".?action=person">+Person</a>] 
@@ -50,12 +50,14 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
 -->
     """)
 
+    q=self.request.get("q")
+    if q:
+      query=db.Query(Person)
+      query.filter("words ==", q)
+      for person in query:
+        self.personForm(person)
     if self.request.get("action") == "person":
-      key = self.request.get("key")
-      if key:
-        person = db.get(key)
-      else:
-        person = Person()
+      person = self.requestToPerson(self.request)
       self.personForm(person)
 
     self.response.out.write("""
@@ -63,36 +65,44 @@ Search text: <input type="text" name="search" value=""> <input type="submit" val
 </html> 
     """)
 
-  def personForm(self, person):
+  def requestToPerson(self, req):
+      key = encoded=req.get("key")
+      person = Person()
+      if key:
+        key = db.Key(encoded=req.get("key"))
+        person = Person(key=key)
       props = Person.properties()
       words = []
       for propname in props:
         prop = props[propname]
         if isinstance(prop, db.BooleanProperty):
-          res = propname in self.request.arguments()
+          res = propname in req.arguments()
           setattr(person, propname, res)
         elif isinstance(prop, db.StringListProperty):
           setattr(person, propname, [])
         elif isinstance(prop, db.StringProperty):
-          value=self.request.get(propname)
+          value=req.get(propname)
           words.extend(value.lower().split())
           setattr(person, propname, value)
         else:
           self.response.out.write("HMMMM" + propname)
-          setattr(person, propname, self.request.get(propname))
+          setattr(person, propname, req.get(propname))
 
       setattr(person, "words", list(set(words)))
       if person.first_name or person.last_name or person.mailing_name:
         person.put()
+      return person
 
+  def personForm(self, person):
       self.response.out.write("""
 <hr>
 <form name="personform" method="get" action="."> 
-<input type="hidden" name="action" value="%s"> 
+<input type="hidden" name="action" value="person"> 
 <input type="text" name="key" value="%s"> 
 <table> 
-      """ % (self.request.get("action"), person.maybeKey()))
+      """ % person.maybeKey())
 
+      props = Person.properties()
       for propname in props:
         prop = props[propname]
 	label = props[propname].verbose_name

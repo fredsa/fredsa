@@ -1,11 +1,17 @@
-application: goschedule
-version: 1
+application: allen-sauer.com:pda
+version: pda2
 runtime: python
 api_version: 1
 
 builtins:
 - datastore_admin: on
+- appstats: on
 
 handlers:
 - url: /
   script: main.py
+
+- url: /main.css
+  static_files: main.css
+  upload: main.css
+
