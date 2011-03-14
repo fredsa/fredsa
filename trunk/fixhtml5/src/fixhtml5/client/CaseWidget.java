@@ -158,7 +158,7 @@ public class CaseWidget extends Composite {
   }
 
   private native void eval(String script)/*-{
-		$wnd.eval(script);
+    $wnd.eval(script);
   }-*/;
 
   public void setService(CaseServiceAsync caseService) {
