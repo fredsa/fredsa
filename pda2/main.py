@@ -19,6 +19,7 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from google.appengine.api import users
 
+import pprint
 
 class MainHandler(webapp.RequestHandler):
   def get(self):
@@ -36,7 +37,6 @@ class MainHandler(webapp.RequestHandler):
 <br> 
 <input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br> 
 <input type="radio" name="format"  value="compact"> Compact results<br> 
-<input type="radio" name="format"  value="json"> JSON results<br> 
 -->
 Search text: <input type="text" name="q" value=""> <input type="submit" value="Go"><br> 
 </form> 
@@ -56,7 +56,7 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
       query.filter("words ==", q)
       for person in query:
         self.personForm(person)
-    if self.request.get("action") == "person":
+    elif self.request.get("action") == "person":
       person = self.requestToPerson(self.request)
       self.personForm(person)
 
