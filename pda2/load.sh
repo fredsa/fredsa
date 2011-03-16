@@ -24,3 +24,7 @@ for kind in person contact address calendar
 do
   csv $kind
 done
+
+rm -f bulkloader-log-*
+rm -f bulkloader-error-*
+rm -f bulkloader-progress-*
