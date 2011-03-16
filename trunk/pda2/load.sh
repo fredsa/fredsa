@@ -11,16 +11,19 @@ function csv() {
   url
   url=http://pda2.ext.allen-sauer.com/_ah/remote_api
   url=http://localhost:8080/_ah/remote_api
+  set -x
   appcfg.py upload_data \
             --url=$url \
             --kind=$upper \
             --config_file=bulkloader.yaml \
             --filename=$kind.csv \
             --email=archer@allen-sauer.com \
-            --batch_size=50 \
+            --batch_size=20 \
             --rps_limit=100 \
             --num_threads=20 \
+            --http_limit=20 \
             .
+  set +x
   ls -l $kind.csv
 }
 

@@ -23,45 +23,70 @@ python_preamble:
 - import: google.appengine.api.users
 
 transformers:
+# "PERSON","person_id","category","comments","company_name","enabled","first_name","last_name","mailing_name","send_card","title",
+- kind: PERSON
+  connector: csv
+  connector_options:
+  property_map:
+  - property: __key__
+    external_name: person_id
+  - property: category
+    external_name: category
+  - property: comments
+    external_name: comments
+    import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
+  - property: company_name
+    external_name: company_name
+  - property: enabled
+    external_name: enabled
+    import_transform: "lambda x: x!='N'"
+  - property: first_name
+    external_name: first_name
+  - property: last_name
+    external_name: last_name
+  - property: mailing_name
+    external_name: mailing_name
+  - property: send_card
+    external_name: send_card
+    import_transform: "lambda x: x!='N'"
+  - property: title
+    external_name: title
 
 # "CALENDAR","person_id","calendar_id","comments","enabled","first_occurence","frequency","frequency_id","occasion","occasion_id",
 - kind: CALENDAR
   connector: csv
   connector_options:
   property_map:
-  - property: CALENDAR
-    external_name: CALENDAR
   - property: person_id
     external_name: person_id
-  - property: calendar_id
+    import_transform: transform.create_foreign_key('PERSON')
+  - property: __key__
     external_name: calendar_id
   - property: comments
     external_name: comments
+    import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
   - property: enabled
     external_name: enabled
+    import_transform: "lambda x: x!='N'"
   - property: first_occurence
     external_name: first_occurrence
   - property: frequency
     external_name: frequency
-  - property: frequency_id
-    external_name: frequency_id
   - property: occasion
     external_name: occasion
-  - property: occasion_id
-    external_name: occasion_id
 
 # "CONTACT","person_id","comments","contact_id","contact_method","contact_text","contact_type","enabled",
 - kind: CONTACT
   connector: csv
   connector_options:
   property_map:
-  - property: CONTACT
-    external_name: CONTACT
   - property: person_id
     external_name: person_id
+    import_transform: transform.create_foreign_key('PERSON')
   - property: comments
     external_name: comments
-  - property: contact_id
+    import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
+  - property: __key__
     external_name: contact_id
   - property: contact_method
     external_name: contact_method
@@ -71,17 +96,17 @@ transformers:
     external_name: contact_type
   - property: enabled
     external_name: enabled
+    import_transform: "lambda x: x!='N'"
 
 # "ADDRESS","person_id","address_id","address_line1","address_line2","address_type","city","comments","country","directions","enabled","postal_code","state_province",
 - kind: ADDRESS
   connector: csv
   connector_options:
   property_map:
-  - property: ADDRESS
-    external_name: ADDRESS
   - property: person_id
     external_name: person_id
-  - property: address_id
+    import_transform: transform.create_foreign_key('PERSON')
+  - property: __key__
     external_name: address_id
   - property: address_line1
     external_name: address_line1
@@ -93,45 +118,17 @@ transformers:
     external_name: city
   - property: comments
     external_name: comments
+    import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
   - property: country
     external_name: country
   - property: directions
     external_name: directions
+    import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
   - property: enabled
     external_name: enabled
+    import_transform: "lambda x: x!='N'"
   - property: postal_code
     external_name: postal_code
   - property: state_province
     external_name: state_province
-  - property: dummy
-    external_name: dummy
 
-# "PERSON","person_id","category","comments","company_name","enabled","first_name","last_name","mailing_name","send_card","title",
-- kind: PERSON
-  connector: csv
-  connector_options:
-  property_map:
-  - property: PERSON
-    external_name: PERSON
-  - property: person_id
-    external_name: person_id
-  - property: category
-    external_name: category
-  - property: comments
-    external_name: comments
-  - property: company_name
-    external_name: company_name
-  - property: enabled
-    external_name: enabled
-  - property: first_name
-    external_name: first_name
-  - property: last_name
-    external_name: last_name
-  - property: mailing_name
-    external_name: mailing_name
-  - property: send_card
-    external_name: send_card
-  - property: title
-    external_name: title
-  - property: dummy
-    external_name: dummy
