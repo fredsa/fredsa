@@ -1,11 +1,12 @@
-application: allen-sauer.com:pda
-version: pda2
+application: allen-sauer.com:pda2
+version: 1
 runtime: python
 api_version: 1
 
 builtins:
 - datastore_admin: on
 - appstats: on
+- remote_api: on
 
 handlers:
 - url: /
