@@ -8,10 +8,14 @@ function csv() {
   row=$(cat temp | head -1)
   (echo "$row"; cat temp | grep -v "$row") > $kind.csv
   rm temp
+  url
+  url=http://pda2.ext.allen-sauer.com/_ah/remote_api
+  url=http://localhost:8080/_ah/remote_api
   appcfg.py upload_data \
-            --url=http://pda2.ext.allen-sauer.com/_ah/remote_api \
+            --url=$url \
             --kind=$upper \
-            --config_file=bulkloader.yaml --file=$kind.csv \
+            --config_file=bulkloader.yaml \
+            --filename=$kind.csv \
             --email=archer@allen-sauer.com \
             --batch_size=50 \
             --rps_limit=100 \
