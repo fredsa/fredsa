@@ -2,11 +2,12 @@
 
 function csv() {
   kind=$1
+  lower=$(echo $1 | tr '[A-Z]' '[a-z]')
   upper=$(echo $1 | tr '[a-z]' '[A-Z]')
-  rm -f $kind.csv
+  rm -f $lower.csv
   cat pda.csv | grep $upper > temp
   row=$(cat temp | head -1)
-  (echo "$row"; cat temp | grep -v "$row") > $kind.csv
+  (echo "$row"; cat temp | grep -v "$row") > $lower.csv
   rm temp
   url
   url=http://pda2.ext.allen-sauer.com/_ah/remote_api
@@ -14,20 +15,20 @@ function csv() {
   set -x
   appcfg.py upload_data \
             --url=$url \
-            --kind=$upper \
+            --kind=$kind \
             --config_file=bulkloader.yaml \
-            --filename=$kind.csv \
+            --filename=$lower.csv \
             --email=archer@allen-sauer.com \
-            --batch_size=20 \
+            --batch_size=50 \
             --rps_limit=100 \
-            --num_threads=20 \
+            --num_threads=1 \
             --http_limit=20 \
             .
   set +x
-  ls -l $kind.csv
+  ls -l $lower.csv
 }
 
-for kind in person contact address calendar
+for kind in Person Contact Address Calendar
 do
   csv $kind
 done

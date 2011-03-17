@@ -24,7 +24,7 @@ python_preamble:
 
 transformers:
 # "PERSON","person_id","category","comments","company_name","enabled","first_name","last_name","mailing_name","send_card","title",
-- kind: PERSON
+- kind: Person
   connector: csv
   connector_options:
   property_map:
@@ -53,15 +53,13 @@ transformers:
     external_name: title
 
 # "CALENDAR","person_id","calendar_id","comments","enabled","first_occurence","frequency","frequency_id","occasion","occasion_id",
-- kind: CALENDAR
+- kind: Calendar
   connector: csv
   connector_options:
   property_map:
-  - property: person_id
-    external_name: person_id
-    import_transform: transform.create_foreign_key('PERSON')
   - property: __key__
     external_name: calendar_id
+    import_transform: "lambda x,bulkload_state: db.Key.from_path('Person', bulkload_state.current_dictionary['person_id'], 'Calendar', bulkload_state.current_dictionary['calendar_id'])"
   - property: comments
     external_name: comments
     import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
@@ -76,18 +74,16 @@ transformers:
     external_name: occasion
 
 # "CONTACT","person_id","comments","contact_id","contact_method","contact_text","contact_type","enabled",
-- kind: CONTACT
+- kind: Contact
   connector: csv
   connector_options:
   property_map:
-  - property: person_id
-    external_name: person_id
-    import_transform: transform.create_foreign_key('PERSON')
   - property: comments
     external_name: comments
     import_transform: 'lambda x: db.Text(x.replace("\\n","\n"))'
   - property: __key__
     external_name: contact_id
+    import_transform: "lambda x,bulkload_state: db.Key.from_path('Person', bulkload_state.current_dictionary['person_id'], 'Contact', bulkload_state.current_dictionary['contact_id'])"
   - property: contact_method
     external_name: contact_method
   - property: contact_text
@@ -99,15 +95,13 @@ transformers:
     import_transform: "lambda x: x!='N'"
 
 # "ADDRESS","person_id","address_id","address_line1","address_line2","address_type","city","comments","country","directions","enabled","postal_code","state_province",
-- kind: ADDRESS
+- kind: Address
   connector: csv
   connector_options:
   property_map:
-  - property: person_id
-    external_name: person_id
-    import_transform: transform.create_foreign_key('PERSON')
   - property: __key__
     external_name: address_id
+    import_transform: "lambda x,bulkload_state: db.Key.from_path('Person', bulkload_state.current_dictionary['person_id'], 'Address', bulkload_state.current_dictionary['address_id'])"
   - property: address_line1
     external_name: address_line1
   - property: address_line2
