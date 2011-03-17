@@ -56,10 +56,10 @@ public class BlobuploadServlet extends HttpServlet {
           int len = copyFile(item);
           log.warning("Got an uploaded file: " + item.getFieldName() + ", name = " + item.getName()
               + ", length = " + len);
+          res.getWriter().println("Stored file");
+          log.info("stored file");
         }
 
-        res.getWriter().println("Stored file");
-        log.info("stored file");
       }
     } catch (Exception ex) {
       throw new ServletException(ex);
