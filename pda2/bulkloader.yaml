@@ -15,6 +15,7 @@
 # change the kind properties to model_class.
 python_preamble:
 - import: base64
+- import: datetime
 - import: re
 - import: google.appengine.ext.bulkload.transform
 - import: google.appengine.ext.bulkload.bulkloader_wizard
@@ -67,7 +68,8 @@ transformers:
     external_name: enabled
     import_transform: "lambda x: x!='N'"
   - property: first_occurence
-    external_name: first_occurrence
+    external_name: first_occurence
+    import_transform: "lambda x: datetime.datetime.strptime(x, '%m/%d/%Y')"
   - property: frequency
     external_name: frequency
   - property: occasion
