@@ -2,6 +2,7 @@ package listen2spell.shared;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Word implements Serializable {
   private String url;
   private String word;
@@ -11,6 +12,7 @@ public class Word implements Serializable {
     this.url = url;
   }
 
+  @SuppressWarnings("unused")
   private Word() {
   }
 

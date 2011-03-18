@@ -28,6 +28,7 @@ public class Listen2spell implements EntryPoint {
     });
   }
 
+  @SuppressWarnings("deprecation")
   protected void show(Word w) {
     String word = w.getWord();
     SoundController sc = new SoundController();
@@ -38,11 +39,5 @@ public class Listen2spell implements EntryPoint {
         new HTML(word + " (<audio controls preload src='" + url + "'>" + url + "</audio>)"));
     Sound sound = sc.createSound("audio/mime", url);
     sound.play();
-  }
-
-  private String makeUrl(String word) {
-    return word;
-    //    return "http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q="
-    //        + URL.encodeQueryString(word);
   }
 }
