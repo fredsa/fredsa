@@ -39,9 +39,9 @@ public class BlobUploadServlet extends BaseUploadServlet {
           log.info("- creation: " + info.getCreation());
         }
 
-        resp.sendRedirect(req.getRequestURI() + "?" + PARAMETER_BLOBCOUNT + "=" + blobs.size());
-        return;
       }
+      resp.sendRedirect(req.getRequestURI() + "?" + PARAMETER_BLOBCOUNT + "=" + blobs.size());
+      return;
 
     } catch (Exception ex) {
       ex.printStackTrace();
