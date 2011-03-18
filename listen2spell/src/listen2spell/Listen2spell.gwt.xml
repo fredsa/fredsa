@@ -16,7 +16,7 @@
   <inherits name="com.allen_sauer.gwt.voices.gwt-voices" />
 
   <!-- Specify the app entry point class. -->
-  <entry-point class='listen2spell.client.Listen2spell' />
+  <entry-point class='listen2spell.client.Main' />
 
   <!-- Specify the paths for translatable code -->
   <source path='client' />

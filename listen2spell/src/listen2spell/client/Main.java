@@ -1,7 +1,7 @@
 package listen2spell.client;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.allen_sauer.gwt.voices.client.FlashSound;
+import com.allen_sauer.gwt.voices.client.Html5Sound;
 import com.allen_sauer.gwt.voices.client.Sound;
 import com.allen_sauer.gwt.voices.client.SoundController;
 
@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 import listen2spell.shared.Word;
 
-public class Listen2spell implements EntryPoint {
+public class Main implements EntryPoint {
   private final WordServiceAsync worService = GWT.create(WordService.class);
 
   public void onModuleLoad() {
@@ -32,12 +32,12 @@ public class Listen2spell implements EntryPoint {
   protected void show(Word w) {
     String word = w.getWord();
     SoundController sc = new SoundController();
-    sc.setPreferredSoundType(FlashSound.class);
+    sc.setPreferredSoundType(Html5Sound.class);
     String url = w.getUrl();
-    RootPanel.get().add(new HTML(word));
-    RootPanel.get().add(
-        new HTML(word + " (<audio controls preload src='" + url + "'>" + url + "</audio>)"));
-    Sound sound = sc.createSound("audio/mime", url);
+    HTML html = new HTML("<h1>" + word + "</h1>");
+    html.setStylePrimaryName("answer");
+    RootPanel.get().add(html);
+    Sound sound = sc.createSound("audio/mpeg", url);
     sound.play();
   }
 }

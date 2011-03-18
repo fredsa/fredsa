@@ -7,12 +7,12 @@
   
   <!-- Servlets -->
   <servlet>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>wordServlet</servlet-name>
     <servlet-class>listen2spell.server.WordServlet</servlet-class>
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>wordServlet</servlet-name>
     <url-pattern>/listen2spell/greet</url-pattern>
   </servlet-mapping>
   

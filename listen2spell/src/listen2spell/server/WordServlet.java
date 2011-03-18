@@ -5,6 +5,7 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.urlfetch.HTTPResponse;
@@ -29,18 +30,26 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
     try {
       String word = "squid";
 
-      Entity entity = ds.get(KeyFactory.createKey(KIND, word));
-      URL url = new URL("http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q="
-          + word);
-      HTTPResponse resp = fs.fetch(url);
-      byte[] content = resp.getContent();
-      String dataUrl = "data:audio/mpeg;base64," + Base64.encode(content);
+      Entity entity;
+      String dataUrl;
+      try {
+        Log.debug("get()...");
+        entity = ds.get(KeyFactory.createKey(KIND, word));
+        dataUrl = (String) entity.getProperty("dataUrl");
+      } catch (EntityNotFoundException e) {
+        URL url = new URL("http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q="
+            + word);
+        Log.debug("fetch(" + url + ")...");
+        HTTPResponse resp = fs.fetch(url);
+        byte[] content = resp.getContent();
+        dataUrl = "data:audio/mpeg;base64," + Base64.encode(content);
 
-      entity = new Entity(KIND);
-      entity.setProperty("word", word);
-      entity.setUnindexedProperty("dataUrl", new Text(dataUrl));
-      ds.put(entity);
-      Log.debug("put(Word)");
+        entity = new Entity(KIND);
+        entity.setProperty("word", word);
+        entity.setUnindexedProperty("dataUrl", new Text(dataUrl));
+        Log.debug("put()...");
+        ds.put(entity);
+      }
 
       Word w = new Word(word, dataUrl);
       return new Word[] {w};
