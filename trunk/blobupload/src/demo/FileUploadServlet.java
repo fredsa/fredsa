@@ -1,4 +1,4 @@
-package blobupload;
+package demo;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -16,36 +16,26 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
-public class BlobuploadServlet extends HttpServlet {
-  private static final int MAX_UPLOAD_FILE_SIZE = 500 * 1000; // 500KB
+public class FileUploadServlet extends BaseUploadServlet {
 
-  private static final Logger log = Logger.getLogger(BlobuploadServlet.class.getName());
-
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    resp.setContentType("text/html");
-    resp.getWriter().println(
-        "<html><body><form name=test method=post enctype='multipart/form-data'>"
-            + "<input type=text name=mytext value='txt'>" + "<input type=file name=myfile>"
-            + "<input type=file name=myfile2>" + "<input type=submit value='submit'>" + "</form>");
-  }
+  private static final Logger log = Logger.getLogger(BaseUploadServlet.class.getName());
 
   @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException {
+  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
     try {
       ServletFileUpload upload = new ServletFileUpload();
-      res.setContentType("text/plain");
+      resp.setContentType("text/plain");
       if (ServletFileUpload.isMultipartContent(req)) {
-        res.getWriter().println("multipart");
+        log.info("multipart");
       } else {
-        res.getWriter().println("! multipart");
+        log.info("! multipart");
       }
 
+      int count = 0;
       FileItemIterator iterator = upload.getItemIterator(req);
       while (iterator.hasNext()) {
         FileItemStream item = iterator.next();
@@ -53,15 +43,20 @@ public class BlobuploadServlet extends HttpServlet {
         if (item.isFormField()) {
           log.info("Got a form field: " + item.getFieldName());
         } else {
+          count++;
           int len = copyFile(item);
-          log.warning("Got an uploaded file: " + item.getFieldName() + ", name = " + item.getName()
+          log.info("Got an uploaded file: " + item.getFieldName() + ", name = " + item.getName()
               + ", length = " + len);
-          res.getWriter().println("Stored file");
           log.info("stored file");
         }
-
       }
+      resp.setContentType("text/html");
+      resp.getWriter().println(
+          "<div style='font-weight:bold;color:green;'>Thank you for uploading " + count
+              + " file(s).</div>");
+      return;
     } catch (Exception ex) {
+      ex.printStackTrace();
       throw new ServletException(ex);
     }
   }

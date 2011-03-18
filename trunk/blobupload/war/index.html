@@ -1,27 +1,36 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- The HTML 4.01 Transitional DOCTYPE declaration-->
-<!-- above set at the top of the file will set     -->
-<!-- the browser's rendering engine into           -->
-<!-- "Quirks Mode". Replacing this declaration     -->
-<!-- with a "Standards Mode" doctype is supported, -->
-<!-- but may lead to some differences in layout.   -->
-
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Hello App Engine</title>
-  </head>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Hello App Engine</title>
+</head>
 
-  <body>
-    <h1>Hello App Engine!</h1>
-	
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Servlets:</td>        
-      </tr>
-      <tr>
-        <td><a href="blobupload">Blobupload</a></td>
-      </tr>
-    </table>
-  </body>
+<body>
+  <fieldset>
+    <legend style='font-weight: bold;'>
+      Do-it-yourself (thanks to Apache Commons fileupload)
+    </legend>
+    <form method='post' enctype='multipart/form-data' action=/upload>
+      <input type=text name=mytext value='Your comment here'><input
+        type=file name=myfile><input type=file name=myfile2><input
+        type=submit value='/upload'>
+    </form>
+  </fieldset>
+
+  <br />
+
+  <fieldset>
+    <legend style='font-weight: bold;'>
+      Using blobstore
+    </legend>
+    <form method='post' enctype='multipart/form-data'
+      action=http://upload.fredsa.appspot.com/_ah/upload/AMmfu6YPjFV1fFkVYGEHhjc63N8v8TBxgoN-XrAuQQoabKsjH9J-b89kB8x4jKA1SpMHSJAnpdkXOF1wN9CSha7qaZeDIZ6R_g/ALBNUaYAAAAATYPNFKAU3FLBMJYwZm-FhnUGhp-ln12n />
+    <input type=text name=mytext value='Your comment here'><input
+      type=file name=myfile><input type=file name=myfile2><input
+      type=submit
+      value='http://upload.fredsa.appspot.com/_ah/upload/AMmfu6YPjFV1fFkVYGEHhjc63N8v8TBxgoN-XrAuQQoabKsjH9J-b89kB8x4jKA1SpMHSJAnpdkXOF1wN9CSha7qaZeDIZ6R_g/ALBNUaYAAAAATYPNFKAU3FLBMJYwZm-FhnUGhp-ln12n/'>
+    </form>
+  </fieldset>
+  <br />
+</body>
 </html>
