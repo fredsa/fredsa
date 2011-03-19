@@ -17,6 +17,7 @@ public class Main implements EntryPoint {
   private final WordServiceAsync worService = GWT.create(WordService.class);
 
   public void onModuleLoad() {
+    Log.setUncaughtExceptionHandler();
     worService.getWords(null, new AsyncCallback<Word[]>() {
       public void onFailure(Throwable e) {
         Log.error("failed to get words from server", e);
@@ -36,7 +37,7 @@ public class Main implements EntryPoint {
     String url = w.getUrl();
     HTML html = new HTML("<h1>" + word + "</h1>");
     RootPanel.get().setStylePrimaryName("answer");
-    RootPanel.get().add(html);
+    //    RootPanel.get().add(html);
     Challenge challenge = new Challenge(word);
     RootPanel.get().add(challenge);
     Sound sound = sc.createSound("audio/mpeg", url);

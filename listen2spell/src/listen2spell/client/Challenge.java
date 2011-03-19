@@ -10,11 +10,14 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 
 public class Challenge extends Composite {
-  protected String html ="";
+  private static final String SPACES = "---------------------------------------";
   private FocusPanel focusPanel;
+  private String html;
   private HTML label;
+  private final String word;
 
   public Challenge(String word) {
+    this.word = word;
     focusPanel = new FocusPanel();
     focusPanel.setStylePrimaryName("answerbox");
     label = new HTML();
@@ -26,23 +29,36 @@ public class Challenge extends Composite {
         if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           event.preventDefault();
           if (html.length() > 0) {
-            html = html.substring(0, html.length() - 1);
-            label.setHTML(html);
+            setText(html.substring(0, html.length() - 1));
           }
         }
       }
+
     });
 
     focusPanel.addKeyPressHandler(new KeyPressHandler() {
       public void onKeyPress(KeyPressEvent event) {
-        html += event.getCharCode();
-        label.setHTML(html);
+        setText(html + event.getCharCode());
       }
     });
+    setText("");
   }
 
   @Override
   protected void onLoad() {
     focusPanel.setFocus(true);
+  }
+
+  protected String pad(String txt) {
+    return (txt + SPACES).substring(0, word.length());
+  }
+
+  private void setText(String txt) {
+    html = trim(txt, word.length());
+    label.setHTML(pad(txt));
+  }
+
+  private String trim(String txt, int len) {
+    return txt.length() > len ? txt.substring(0, len) : txt;
   }
 }
