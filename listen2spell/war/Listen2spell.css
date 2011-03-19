@@ -2,3 +2,12 @@
   font-size: 200%;
   text-align: center;
 }
+
+.answerbox {
+  font-size: 200%;
+  background-color: red;
+  width: 20em;
+  height: 1.2em;
+  text-align: center;
+  font-family: monospace;
+}

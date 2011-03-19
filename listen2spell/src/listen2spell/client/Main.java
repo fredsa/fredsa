@@ -35,9 +35,12 @@ public class Main implements EntryPoint {
     sc.setPreferredSoundType(Html5Sound.class);
     String url = w.getUrl();
     HTML html = new HTML("<h1>" + word + "</h1>");
-    html.setStylePrimaryName("answer");
+    RootPanel.get().setStylePrimaryName("answer");
     RootPanel.get().add(html);
+    Challenge challenge = new Challenge(word);
+    RootPanel.get().add(challenge);
     Sound sound = sc.createSound("audio/mpeg", url);
     sound.play();
+    //    RootPanel.get().add(new TextBox());
   }
 }
