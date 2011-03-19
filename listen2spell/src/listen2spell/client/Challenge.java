@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HTML;
 public class Challenge extends Composite {
   private static final String SPACES = "---------------------------------------";
   private FocusPanel focusPanel;
-  private String html;
+  private String answer;
   private HTML label;
   private Speaker speaker;
   private final String word;
@@ -29,10 +29,14 @@ public class Challenge extends Composite {
       public void onKeyDown(KeyDownEvent event) {
         if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           event.preventDefault();
-          if (html.length() > 0) {
-            setText(html.substring(0, html.length() - 1));
+          if (answer.length() > 0) {
+            setText(answer.substring(0, answer.length() - 1));
           }
+        } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          event.preventDefault();
+          speaker.speak(answer);
         }
+
       }
 
     });
@@ -42,7 +46,7 @@ public class Challenge extends Composite {
         char code = event.getCharCode();
         if (code >= 'a' && code <= 'z' || code >= 'A' && code <= 'Z') {
           speaker.speak("" + code);
-          setText(html + code);
+          setText(answer + code);
         }
       }
     });
@@ -64,7 +68,7 @@ public class Challenge extends Composite {
 
   private void setText(String txt) {
     // allow up to 2x the word length
-    html = trim(txt, word.length() * 2);
+    answer = trim(txt, word.length() * 2);
     label.setHTML(pad(txt));
   }
 

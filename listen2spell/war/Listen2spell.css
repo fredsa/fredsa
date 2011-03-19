@@ -11,9 +11,8 @@
   margin-left: -11em;
   padding: 4px;
   
-  font-size: 200%;
-  background-color: red;
+  font-size: 250%;
+  background-color: #eee;
   height: 1.2em;
-  xtext-align: center;
   font-family: monospace;
 }

@@ -15,6 +15,7 @@ import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import java.net.URL;
+import java.util.HashMap;
 
 import listen2spell.client.WordService;
 import listen2spell.shared.Word;
@@ -23,9 +24,15 @@ import listen2spell.shared.Word;
 public class WordServlet extends RemoteServiceServlet implements WordService {
 
   private static final String KIND = "Word";
+  private HashMap<String, String> wordMap;
+
+  public WordServlet() {
+    wordMap = new HashMap<String, String>();
+    wordMap.put("a", "eh"); // say 'eh', not 'uh'
+  }
 
   public Word[] getWords(String word) throws IllegalArgumentException {
-    word = word.toLowerCase();
+    word = map(word.toLowerCase());
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     URLFetchService fs = URLFetchServiceFactory.getURLFetchService();
     try {
@@ -34,7 +41,7 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
       try {
         Log.debug("get()...");
         entity = ds.get(KeyFactory.createKey(KIND, word));
-        dataUrl = (String) entity.getProperty("dataUrl");
+        dataUrl = ((Text) entity.getProperty("dataUrl")).getValue();
       } catch (EntityNotFoundException e) {
         URL url = new URL("http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q="
             + word);
@@ -43,7 +50,7 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
         byte[] content = resp.getContent();
         dataUrl = "data:audio/mpeg;base64," + Base64.encode(content);
 
-        entity = new Entity(KIND);
+        entity = new Entity(KIND, word);
         entity.setProperty("word", word);
         entity.setUnindexedProperty("dataUrl", new Text(dataUrl));
         Log.debug("put()...");
@@ -56,5 +63,10 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
       Log.error("oops", e);
       throw new RuntimeException(e.toString());
     }
+  }
+
+  private String map(String word) {
+    String mappedWord = wordMap.get(word);
+    return mappedWord != null ? mappedWord : word;
   }
 }

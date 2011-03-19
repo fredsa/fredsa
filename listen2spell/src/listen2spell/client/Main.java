@@ -1,5 +1,6 @@
 package listen2spell.client;
 
+import com.allen_sauer.gwt.log.client.DivLogger;
 import com.allen_sauer.gwt.log.client.Log;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -16,6 +17,7 @@ public class Main implements EntryPoint {
 
   public void onModuleLoad() {
     Log.setUncaughtExceptionHandler();
+    RootPanel.get().add(Log.getLogger(DivLogger.class).getWidget());
     wordService.getWords("beautiful", new AsyncCallback<Word[]>() {
       public void onFailure(Throwable e) {
         Log.error("failed to get words from server", e);

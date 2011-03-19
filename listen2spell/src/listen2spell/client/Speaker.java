@@ -4,6 +4,9 @@ import com.allen_sauer.gwt.log.client.Log;
 import com.allen_sauer.gwt.voices.client.Html5Sound;
 import com.allen_sauer.gwt.voices.client.Sound;
 import com.allen_sauer.gwt.voices.client.SoundController;
+import com.allen_sauer.gwt.voices.client.handler.PlaybackCompleteEvent;
+import com.allen_sauer.gwt.voices.client.handler.SoundHandler;
+import com.allen_sauer.gwt.voices.client.handler.SoundLoadStateChangeEvent;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -28,7 +31,7 @@ public class Speaker {
     this.wordService = wordService;
   }
 
-  public void speak(String word) {
+  public void speak(final String word) {
     Sound sound = soundMap.get(word);
     if (sound != null) {
       sound.play();
@@ -42,6 +45,17 @@ public class Speaker {
       public void onSuccess(Word[] result) {
         String url = result[0].getUrl();
         Sound sound = sc.createSound("audio/mpeg", url);
+        sound.addEventHandler(new SoundHandler() {
+
+          public void onPlaybackComplete(PlaybackCompleteEvent event) {
+            Log.debug("complete");
+          }
+
+          public void onSoundLoadStateChange(SoundLoadStateChangeEvent event) {
+            Log.debug("" + event.getLoadStateAsString());
+          }
+        });
+        soundMap.put(word, sound);
         sound.play();
       }
     });
