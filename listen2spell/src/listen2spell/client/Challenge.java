@@ -14,6 +14,7 @@ public class Challenge extends Composite {
   private FocusPanel focusPanel;
   private String html;
   private HTML label;
+  private Speaker speaker;
   private final String word;
 
   public Challenge(String word) {
@@ -38,10 +39,18 @@ public class Challenge extends Composite {
 
     focusPanel.addKeyPressHandler(new KeyPressHandler() {
       public void onKeyPress(KeyPressEvent event) {
-        setText(html + event.getCharCode());
+        char code = event.getCharCode();
+        if (code >= 'a' && code <= 'z' || code >= 'A' && code <= 'Z') {
+          speaker.speak("" + code);
+          setText(html + code);
+        }
       }
     });
     setText("");
+  }
+
+  public void setSpeaker(Speaker speaker) {
+    this.speaker = speaker;
   }
 
   @Override
@@ -50,15 +59,17 @@ public class Challenge extends Composite {
   }
 
   protected String pad(String txt) {
-    return (txt + SPACES).substring(0, word.length());
+    return txt + trim(SPACES, word.length() - txt.length());
   }
 
   private void setText(String txt) {
-    html = trim(txt, word.length());
+    // allow up to 2x the word length
+    html = trim(txt, word.length() * 2);
     label.setHTML(pad(txt));
   }
 
   private String trim(String txt, int len) {
+    len = Math.max(len, 0);
     return txt.length() > len ? txt.substring(0, len) : txt;
   }
 }

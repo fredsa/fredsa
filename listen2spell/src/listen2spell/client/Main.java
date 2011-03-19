@@ -1,9 +1,6 @@
 package listen2spell.client;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.allen_sauer.gwt.voices.client.Html5Sound;
-import com.allen_sauer.gwt.voices.client.Sound;
-import com.allen_sauer.gwt.voices.client.SoundController;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -14,11 +11,12 @@ import com.google.gwt.user.client.ui.RootPanel;
 import listen2spell.shared.Word;
 
 public class Main implements EntryPoint {
-  private final WordServiceAsync worService = GWT.create(WordService.class);
+  private Speaker speaker;
+  private final WordServiceAsync wordService = GWT.create(WordService.class);
 
   public void onModuleLoad() {
     Log.setUncaughtExceptionHandler();
-    worService.getWords(null, new AsyncCallback<Word[]>() {
+    wordService.getWords("beautiful", new AsyncCallback<Word[]>() {
       public void onFailure(Throwable e) {
         Log.error("failed to get words from server", e);
       }
@@ -27,21 +25,19 @@ public class Main implements EntryPoint {
         show(result[0]);
       }
     });
+    speaker = new Speaker();
+    speaker.setService(wordService);
   }
 
   @SuppressWarnings("deprecation")
   protected void show(Word w) {
     String word = w.getWord();
-    SoundController sc = new SoundController();
-    sc.setPreferredSoundType(Html5Sound.class);
     String url = w.getUrl();
     HTML html = new HTML("<h1>" + word + "</h1>");
     RootPanel.get().setStylePrimaryName("answer");
-    //    RootPanel.get().add(html);
     Challenge challenge = new Challenge(word);
+    challenge.setSpeaker(speaker);
     RootPanel.get().add(challenge);
-    Sound sound = sc.createSound("audio/mpeg", url);
-    sound.play();
-    //    RootPanel.get().add(new TextBox());
+    speaker.speak("beautiful");
   }
 }

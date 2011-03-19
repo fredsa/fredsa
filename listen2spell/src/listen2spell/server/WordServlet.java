@@ -24,12 +24,11 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
 
   private static final String KIND = "Word";
 
-  public Word[] getWords(String input) throws IllegalArgumentException {
+  public Word[] getWords(String word) throws IllegalArgumentException {
+    word = word.toLowerCase();
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     URLFetchService fs = URLFetchServiceFactory.getURLFetchService();
     try {
-      String word = "squid";
-
       Entity entity;
       String dataUrl;
       try {
