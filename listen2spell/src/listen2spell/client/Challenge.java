@@ -71,6 +71,9 @@ public class Challenge extends Composite {
   private void setText(String txt) {
     // allow up to 2x the word length
     answer = trim(txt, word.length() * 2);
+    if (word.equals(txt)) {
+      speaker.speak(txt);
+    }
     label.setHTML(pad(txt));
   }
 

@@ -18,7 +18,7 @@ public class Main implements EntryPoint {
   public void onModuleLoad() {
     Log.setUncaughtExceptionHandler();
     RootPanel.get().add(Log.getLogger(DivLogger.class).getWidget());
-    wordService.getWords("beautiful", new AsyncCallback<Word[]>() {
+    wordService.getWords("squid", new AsyncCallback<Word[]>() {
       public void onFailure(Throwable e) {
         Log.error("failed to get words from server", e);
       }
@@ -40,6 +40,6 @@ public class Main implements EntryPoint {
     Challenge challenge = new Challenge(word);
     challenge.setSpeaker(speaker);
     RootPanel.get().add(challenge);
-    speaker.speak("beautiful");
+    speaker.speak(word);
   }
 }
