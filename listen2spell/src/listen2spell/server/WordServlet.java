@@ -26,6 +26,7 @@ import listen2spell.shared.Word;
 public class WordServlet extends RemoteServiceServlet implements WordService {
 
   private static final String KIND = "Word";
+  private Word nothing = new Word("", "data:");
   private HashMap<String, String> wordMap;
 
   public WordServlet() {
@@ -34,6 +35,9 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
   }
 
   public Word[] getWords(String word) throws IllegalArgumentException {
+    if (word == null || word.trim().length() == 0) {
+      return new Word[] {nothing};
+    }
     word = map(word.toLowerCase());
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     URLFetchService fs = URLFetchServiceFactory.getURLFetchService();

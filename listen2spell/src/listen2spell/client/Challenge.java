@@ -11,13 +11,13 @@ import com.google.gwt.user.client.ui.HTML;
 
 public class Challenge extends Composite {
   private static final String SPACES = "---------------------------------------";
-  private FocusPanel focusPanel;
   private String answer;
+  private FocusPanel focusPanel;
   private HTML label;
   private Speaker speaker;
   private final String word;
 
-  public Challenge(String word) {
+  public Challenge(final String word) {
     this.word = word;
     focusPanel = new FocusPanel();
     focusPanel.setStylePrimaryName("answerbox");
@@ -35,8 +35,10 @@ public class Challenge extends Composite {
         } else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
           event.preventDefault();
           speaker.speak(answer);
+        } else if (event.getNativeKeyCode() == ' ') {
+          event.preventDefault();
+          speaker.speak(word);
         }
-
       }
 
     });
