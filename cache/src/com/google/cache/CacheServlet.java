@@ -74,9 +74,9 @@ public class CacheServlet extends HttpServlet {
       writer.println("<li>" + makeUrl(baseUrl + "/static.html")
           + " (default cache headers for a static request)</li>");
       writer.println("<li>" + makeUrl(baseUrl + "?cache=0") + " (do not cache)</li>");
-      writer.println("<li>" + makeUrl(baseUrl + "?delay=10&cache=3600")
-          + " (sleep for 10 seconds, then respond with 10 minute (3600 seconds) cachable result)</li>");
-      writer.println("<li>" + makeUrl(baseUrl + "?delay=10&cache=3600&headers=true")
+      writer.println("<li>" + makeUrl(baseUrl + "?delay=10&cache=600")
+          + " (sleep for 10 seconds, then respond with 10 minute (600 seconds) cachable result)</li>");
+      writer.println("<li>" + makeUrl(baseUrl + "?delay=10&cache=600&headers=true")
           + " (same, but show HTTP request headers received)</li>");
       writer.println("</ul>");
     }
