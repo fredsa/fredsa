@@ -16,7 +16,6 @@
   <!-- Default log level for our code -->
   <logger name="gwt-log">
     <level value="debug" />
-    <appender-ref ref="CONSOLE" />
   </logger>
 
   <!-- Default for everyone else's code -->
