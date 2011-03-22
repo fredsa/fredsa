@@ -7,18 +7,13 @@
   
   <!-- Servlets -->
   <servlet>
-    <servlet-name>UploadSerlvet</servlet-name>
-    <servlet-class>filemanager.server.UploadSerlvet</servlet-class>
+    <servlet-name>FileServlet</servlet-name>
+    <servlet-class>filemanager.server.FileServlet</servlet-class>
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>UploadSerlvet</servlet-name>
-    <url-pattern>/filemanager/upload</url-pattern>
+    <servlet-name>FileServlet</servlet-name>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
   
-  <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>Filemanager.html</welcome-file>
-  </welcome-file-list>
-
 </web-app>
