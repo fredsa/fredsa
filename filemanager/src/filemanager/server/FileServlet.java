@@ -29,6 +29,11 @@ public class FileServlet extends HttpServlet {
 
 
   /**
+   *
+   */
+  private static final String URI_OK = "/ok";
+
+  /**
    * Datastore kind representing raw file assets.
    */
   private static final String KIND_ASSET = "Asset";
@@ -44,6 +49,9 @@ public class FileServlet extends HttpServlet {
    */
   private static final String PROPERTY_MIME_TYPE = "mimeType";
 
+  /**
+   * Datastore property for storing the BlobKey.
+   */
   private static final String PROPERTY_BLOBKEY = "blobkey";
 
   @Override
@@ -52,19 +60,21 @@ public class FileServlet extends HttpServlet {
     String filename = lastPathComponent(uri);
     Log.info("doGet(" + filename + ")");
 
-    if (uri.equals("/ok")) {
+    if (uri.equals(URI_OK)) {
       Log.info("ok");
       return;
     }
 
+    // User has requested upload URL
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
       Log.info("request upload url");
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
-      String url = bs.createUploadUrl("/ok");
+      String url = bs.createUploadUrl(URI_OK);
       resp.getWriter().println(url);
       return;
     }
 
+    // Serve the requested asset
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     try {
       Entity entity = ds.get(KeyFactory.createKey(KIND_ASSET, filename));
@@ -88,10 +98,20 @@ public class FileServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+    Log.info("Trying blobstore service...");
+    BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
     try {
-      Log.info("Trying blobstore service...");
-      BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
-      Map<String, BlobKey> blobs = bs.getUploadedBlobs(req);
+      Map<String, BlobKey> blobs;
+      try {
+        blobs = bs.getUploadedBlobs(req);
+      } catch (IllegalStateException ignore) {
+        // User posted directly to us instead of requesting an upload URL
+        String url = bs.createUploadUrl(URI_OK);
+        resp.sendRedirect(url);
+        return;
+      }
+
+      // User posted to blobstore and got redirect here
       if (!blobs.isEmpty()) {
         BlobKey blobKey = blobs.get("myFile");
         for (Entry<String, BlobKey> entry : blobs.entrySet()) {
@@ -102,6 +122,8 @@ public class FileServlet extends HttpServlet {
           Log.info("- filename: " + info.getFilename());
           Log.info("- size: " + info.getSize());
           Log.info("- creation: " + info.getCreation());
+
+          // Persist the asset information to the datastore
           Entity entity = new Entity(KIND_ASSET, info.getFilename());
           entity.setProperty(PROPERTY_MIME_TYPE, info.getContentType());
           entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
