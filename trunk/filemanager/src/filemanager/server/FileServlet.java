@@ -29,7 +29,7 @@ public class FileServlet extends HttpServlet {
 
 
   /**
-   *
+   * URI which we can redirect to post upload.
    */
   private static final String URI_OK = "/ok";
 
