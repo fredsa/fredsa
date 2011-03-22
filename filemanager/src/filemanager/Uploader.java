@@ -27,6 +27,10 @@ public class Uploader {
   /**
    *
    */
+  private static final String MIME_TYPE_FALLBACK = "application/octet-stream";
+  /**
+   *
+   */
   private static final int MAX_RETRIES = 3;
 
   public static void main(String[] args) throws IOException {
@@ -76,6 +80,11 @@ public class Uploader {
           URLConnection.guessContentTypeFromStream(new BufferedInputStream(fileStream));
       if (mimeType == null) {
         mimeType = URLConnection.guessContentTypeFromName(file.getName());
+      }
+      if (mimeType == null) {
+        Log.warn("- Unable to determine MIME type from stream or filename; will proceed with "
+            + MIME_TYPE_FALLBACK);
+        mimeType = MIME_TYPE_FALLBACK;
       }
       Log.info("- MIME Type: " + mimeType);
 
