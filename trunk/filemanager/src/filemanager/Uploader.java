@@ -1,4 +1,5 @@
-package filemanager.client;
+package filemanager;
+
 import com.allen_sauer.gwt.log.client.Log;
 
 import filemanager.shared.FileManagerConstants;
@@ -26,7 +27,7 @@ public class Uploader {
   /**
    *
    */
-  private static final int MAX_RETRIES = 5;
+  private static final int MAX_RETRIES = 3;
 
   public static void main(String[] args) throws IOException {
     if (args.length < 2) {
@@ -37,42 +38,46 @@ public class Uploader {
     if (baseUrl.endsWith("/")) {
       baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
     }
-    Log.debug("Using base URL: " + baseUrl);
+    Log.debug("Will submit to base URL: " + baseUrl);
 
-    String filename = args[1];
-    Log.debug("Using filename: " + filename);
+    for (int i = 1; i < args.length; i++) {
+      String filename = args[i];
+      Log.debug("Filename: " + filename);
 
-
-    String uploadUrl = getUploadUrl(baseUrl);
-    Log.debug("Using upload URL: " + uploadUrl);
-
-    int count = 0;
-    boolean success = false;
-    while (!success && ++count < MAX_RETRIES) {
-      if (count > 1) {
-        Log.info("ATTEMPT " + count + " of " + MAX_RETRIES + "....");
+      File file = new File(filename);
+      if (!file.canRead()) {
+        Log.error("- File is not readable: " + filename);
+        continue;
       }
-      success = doUpload(baseUrl + uploadUrl, filename);
+
+      int count = 0;
+      boolean success = false;
+      while (!success && ++count < MAX_RETRIES) {
+        if (count > 1) {
+          Log.info("- ATTEMPT " + count + " of " + MAX_RETRIES + "....");
+        }
+        success = doUpload(baseUrl, file);
+      }
+      if (!success) {
+        Log.fatal("ABORTING");
+        System.exit(1);
+      }
     }
   }
 
 
-  private static boolean doUpload(String uploadUrl, String filename) throws IOException {
+  private static boolean doUpload(String baseUrl, File file) throws IOException {
     HttpClient httpclient = new DefaultHttpClient();
     try {
-      Log.info("Posting file: " + filename);
-      File file = new File(filename);
-      if (!file.canRead()) {
-        Log.error("- File is not readable: " + filename);
-        return false;
-      }
-
       FileInputStream fileStream = new FileInputStream(file);
 
       // Determine MIME Type
       String mimeType =
           URLConnection.guessContentTypeFromStream(new BufferedInputStream(fileStream));
       Log.info("- MIME Type: " + mimeType);
+
+      String uploadUrl = baseUrl + getUploadUrl(baseUrl);
+      Log.debug("- Blobstore upload URL: " + uploadUrl);
 
       HttpPost httppost = new HttpPost(uploadUrl);
       FileBody fileBody = new FileBody(file, mimeType);
@@ -83,16 +88,16 @@ public class Uploader {
 
       httppost.setEntity(reqEntity);
 
-      Log.debug("Executing request " + httppost.getRequestLine());
+      Log.debug("- " + httppost.getRequestLine());
       HttpResponse response = httpclient.execute(httppost);
       HttpEntity resEntity = response.getEntity();
 
       int statusCode = response.getStatusLine().getStatusCode();
       if (statusCode != HttpServletResponse.SC_OK) {
-        Log.error("Upload failed due to server response: " + response.getStatusLine());
+        Log.error("- Upload failed due to server response: " + response.getStatusLine());
         return false;
       }
-      Log.info("Upload successful");
+      Log.info("- Done");
     } finally {
       try {
         httpclient.getConnectionManager().shutdown();
