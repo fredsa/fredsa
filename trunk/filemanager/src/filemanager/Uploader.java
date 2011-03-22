@@ -16,6 +16,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -73,19 +74,8 @@ public class Uploader {
   private static boolean doUpload(String baseUrl, File file) throws IOException {
     HttpClient httpclient = new DefaultHttpClient();
     try {
-      FileInputStream fileStream = new FileInputStream(file);
 
-      // Determine MIME Type
-      String mimeType =
-          URLConnection.guessContentTypeFromStream(new BufferedInputStream(fileStream));
-      if (mimeType == null) {
-        mimeType = URLConnection.guessContentTypeFromName(file.getName());
-      }
-      if (mimeType == null) {
-        Log.warn("- Unable to determine MIME type from stream or filename; will proceed with "
-            + MIME_TYPE_FALLBACK);
-        mimeType = MIME_TYPE_FALLBACK;
-      }
+      String mimeType = guessMimeType(file);
       Log.info("- MIME Type: " + mimeType);
 
       String uploadUrl = baseUrl + getUploadUrl(baseUrl);
@@ -117,6 +107,22 @@ public class Uploader {
       }
     }
     return true;
+  }
+
+
+  private static String guessMimeType(File file) throws FileNotFoundException, IOException {
+    String mimeType;
+    FileInputStream fileStream = new FileInputStream(file);
+    mimeType = URLConnection.guessContentTypeFromStream(new BufferedInputStream(fileStream));
+    if (mimeType == null) {
+      mimeType = URLConnection.guessContentTypeFromName(file.getName());
+    }
+    if (mimeType == null) {
+      Log.warn("- Unable to determine MIME type from stream or filename; will proceed with "
+          + MIME_TYPE_FALLBACK);
+      mimeType = MIME_TYPE_FALLBACK;
+    }
+    return mimeType;
   }
 
   private static String getUploadUrl(String baseUrl) throws IOException {
