@@ -118,7 +118,7 @@ public class Uploader {
       mimeType = URLConnection.guessContentTypeFromName(file.getName());
     }
     if (mimeType == null) {
-      Log.warn("- Unable to determine MIME type from stream or filename; will proceed with "
+      Log.warn("- Unable to determine MIME Type from stream or filename; will proceed with "
           + MIME_TYPE_FALLBACK);
       mimeType = MIME_TYPE_FALLBACK;
     }
