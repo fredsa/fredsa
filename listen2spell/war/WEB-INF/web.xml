@@ -5,7 +5,6 @@
 
 <web-app>
   
-  <!-- Servlets -->
   <servlet>
     <servlet-name>wordServlet</servlet-name>
     <servlet-class>listen2spell.server.WordServlet</servlet-class>
@@ -16,6 +15,18 @@
     <url-pattern>/listen2spell/greet</url-pattern>
   </servlet-mapping>
   
+
+  <servlet>
+    <servlet-name>speechServlet</servlet-name>
+    <servlet-class>listen2spell.server.SpeechServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>speechServlet</servlet-name>
+    <url-pattern>/listen2spell/speech</url-pattern>
+  </servlet-mapping>
+  
+
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>Listen2spell.html</welcome-file>
