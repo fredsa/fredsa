@@ -78,7 +78,13 @@ public class Uploader {
       String mimeType = guessMimeType(file);
       Log.info("- MIME Type: " + mimeType);
 
-      String uploadUrl = baseUrl + getUploadUrl(baseUrl);
+      String uploadUrl = getUploadUrl(baseUrl);
+
+      if (!uploadUrl.startsWith("http")) {
+        // fix for devappserver lacking scheme/host/port
+        uploadUrl = baseUrl + uploadUrl;
+      }
+
       Log.debug("- Blobstore upload URL: " + uploadUrl);
 
       HttpPost httppost = new HttpPost(uploadUrl);
