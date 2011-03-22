@@ -108,8 +108,6 @@ public class FileServlet extends HttpServlet {
           DatastoreServiceFactory.getDatastoreService().put(entity);
           Log.info("datastore.put(" + info.getFilename() + ")");
         }
-
-        resp.sendError(500);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
