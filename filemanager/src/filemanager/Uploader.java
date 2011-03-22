@@ -74,6 +74,9 @@ public class Uploader {
       // Determine MIME Type
       String mimeType =
           URLConnection.guessContentTypeFromStream(new BufferedInputStream(fileStream));
+      if (mimeType == null) {
+        mimeType = URLConnection.guessContentTypeFromName(file.getName());
+      }
       Log.info("- MIME Type: " + mimeType);
 
       String uploadUrl = baseUrl + getUploadUrl(baseUrl);
