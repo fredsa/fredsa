@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 
 public class FileServlet extends HttpServlet {
 
-
   /**
    * Datastore kind representing raw file assets.
    */
@@ -56,6 +55,8 @@ public class FileServlet extends HttpServlet {
    * URI used by task queue to guarantee deletion of orphaned blobs.
    */
   private static final String URI_DELETE_BLOB = "/delete-blob";
+
+  private static final String PARAMETER_BLOB_COUNT = "blobcount";
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
@@ -108,19 +109,25 @@ public class FileServlet extends HttpServlet {
         persistAsset(info);
       }
       // We are required to send a redirect in response to a blobstore upload
-      resp.sendRedirect(URI_UPLOAD_COMPLETE);
+      resp.sendRedirect(URI_UPLOAD_COMPLETE + "?" + PARAMETER_BLOB_COUNT + "=" + blobs.size());
       return;
     } catch (IOException ex) {
       throw new ServletException(ex);
     }
   }
 
-  private void persistAsset(BlobInfo info) {
-    String filename = info.getFilename();
+  /**
+   * Persist a new asset entity to the datastore and ensure existing blob is not
+   * orphaned.
+   *
+   * @param blobInfo a new blob info
+   */
+  private void persistAsset(BlobInfo blobInfo) {
+    String filename = blobInfo.getFilename();
     Log.info("Persisting asset: " + filename);
     Key key = KeyFactory.createKey(KIND_ASSET, filename);
     Entity entity = new Entity(key);
-    entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
+    entity.setProperty(PROPERTY_BLOBKEY, blobInfo.getBlobKey());
 
     BlobKey oldBlobKey = getBlobKey(key);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -171,12 +178,9 @@ public class FileServlet extends HttpServlet {
     String uri = req.getRequestURI();
     String filename = lastPathComponent(uri);
 
-    if (uri.equals(URI_UPLOAD_COMPLETE)) {
-      resp.setContentType("text/plain");
-      resp.getWriter().println("Assets have been uploaded.");
-    }
-
-    // User has requested upload URL
+    /**
+     * User has requested a single-use blob upload URL.
+     */
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
       Log.info("Creating one-time use upload URL...");
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
@@ -186,21 +190,36 @@ public class FileServlet extends HttpServlet {
       return;
     }
 
-    // Serve the requested asset
-    Log.info("Serving requested URI: " + uri);
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    try {
-      BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
-      Entity entity = ds.get(KeyFactory.createKey(KIND_ASSET, filename));
-      BlobKey blobkey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
-      bs.serve(blobkey, resp);
-    } catch (EntityNotFoundException e) {
-      Log.info("Blob info not found. Sending " + HttpServletResponse.SC_NOT_FOUND);
+    /**
+     * We serve a success page when content has been successfully uploaded.
+     */
+    if (uri.equals(URI_UPLOAD_COMPLETE)) {
+      String count = req.getParameter(PARAMETER_BLOB_COUNT);
+      resp.setContentType("text/plain");
+      resp.getWriter().println("- Assets successfullly uploaded: " + count);
+    }
+
+    /**
+     * We have a valid request for an asset.
+     */
+    Key assetEntityKey = KeyFactory.createKey(KIND_ASSET, filename);
+    BlobKey blobkey = getBlobKey(assetEntityKey);
+    if (blobkey == null) {
+      Log.info("Asset not found: " + filename);
       resp.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
+    BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
+    Log.info("Serving asset '" + filename + "' using blob key: " + blobkey);
+    bs.serve(blobkey, resp);
   }
 
+  /**
+   * Determine the filename based on the last path component of a request URI.
+   *
+   * @param uri the URI for a requested resource
+   * @return the last path component in the provided URI
+   */
   private String lastPathComponent(String uri) {
     int pos = uri.lastIndexOf('/');
     return (pos == -1) ? uri : uri.substring(pos + 1);
