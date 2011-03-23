@@ -54,7 +54,7 @@ public class FileServlet extends HttpServlet {
   /**
    * URI which we can redirect to post upload.
    */
-  private static final String URI_OK = "/ok";
+  private static final String URI_STORE_BLOB_INFO = "/store-blob-info";
 
   /**
    * URI which we redirect to upon successful upload.
@@ -70,8 +70,9 @@ public class FileServlet extends HttpServlet {
       try {
         blobs = bs.getUploadedBlobs(req);
       } catch (IllegalStateException ignore) {
-        // User posted directly to us instead of requesting an upload URL
-        String url = bs.createUploadUrl(URI_OK);
+        // User posted file(s) directly to us instead of requesting an upload
+        // URL
+        String url = bs.createUploadUrl(URI_STORE_BLOB_INFO);
         resp.sendRedirect(url);
         return;
       }
@@ -117,16 +118,16 @@ public class FileServlet extends HttpServlet {
       resp.getWriter().println("Assets have been uploaded.");
     }
 
-    if (uri.equals(URI_OK)) {
-      Log.info("ok");
-      return;
-    }
+    // if (uri.equals(URI_STORE_BLOB_INFO)) {
+    // Log.info("ok");
+    // return;
+    // }
 
     // User has requested upload URL
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
       Log.info("request upload url");
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
-      String url = bs.createUploadUrl(URI_OK);
+      String url = bs.createUploadUrl(URI_STORE_BLOB_INFO);
       resp.getWriter().println(url);
       return;
     }
