@@ -11,6 +11,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 import com.allen_sauer.gwt.log.client.Log;
 
@@ -48,17 +52,33 @@ public class FileServlet extends HttpServlet {
    */
   private static final String URI_UPLOAD_COMPLETE = "/upload-complete";
 
+  /**
+   * URI used by task queue to guarantee deletion of orphaned blobs.
+   */
+  private static final String URI_DELETE_BLOB = "/delete-blob";
+
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
     BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
+    String uri = req.getRequestURI();
+
+    /**
+     * Task queue based deletion of orphaned blobs.
+     */
+    if (uri.equals(URI_DELETE_BLOB)) {
+      String blobKeyString = req.getParameter(PROPERTY_BLOBKEY);
+      Log.debug("Delete orphaned blob with key: " + blobKeyString);
+      bs.delete(new BlobKey(blobKeyString));
+      return;
+    }
+
+
     Map<String, BlobKey> blobs;
     try {
-
       /**
-       * Ensure that this request is a result of POST to a blobstore upload URL
+       * Ensure that this request is a result of POST to a blobstore upload URL.
        */
       try {
-        Log.debug("Checking for uploaded blobs...");
         blobs = bs.getUploadedBlobs(req);
       } catch (IllegalStateException ignore) {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED,
@@ -75,55 +95,77 @@ public class FileServlet extends HttpServlet {
       }
 
       /**
-       * We have a valid upload request with at least one file available to us
-       * in blobstore.
+       * We now have a valid upload request with at least one file available to
+       * us in blobstore.
        */
-      BlobKey oldBlobKey = null;
       for (Entry<String, BlobKey> entry : blobs.entrySet()) {
-        Log.info("Got blob:");
         BlobInfo info = new BlobInfoFactory().loadBlobInfo(entry.getValue());
-        Log.info("- blobkey: " + info.getBlobKey());
-        Log.info("- content type: " + info.getContentType());
-        Log.info("- filename: " + info.getFilename());
-        Log.info("- size: " + info.getSize());
-        Log.info("- creation: " + info.getCreation());
-
-        // Make sure we don't orphan existing blobs
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-        Key key = KeyFactory.createKey(KIND_ASSET, info.getFilename());
-        oldBlobKey = getOldBlobKey(key);
+        Log.info("Got blob: blobkey=" + info.getBlobKey() + ", content type="
+            + info.getContentType() + ", filename=" + info.getFilename() + ", size="
+            + info.getSize() + ", creation=" + info.getCreation());
 
         // Persist the asset information to the datastore
-        Entity entity = new Entity(key);
-        entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
-        Log.info("datastore.put(" + info.getFilename() + ")...");
-        DatastoreServiceFactory.getDatastoreService().put(entity);
-
-        if (oldBlobKey != null) {
-          Log.info("delete orphaned blob key: " + oldBlobKey);
-          bs.delete(oldBlobKey);
-        }
+        persistAsset(info);
       }
       // We are required to send a redirect in response to a blobstore upload
       resp.sendRedirect(URI_UPLOAD_COMPLETE);
       return;
-    } catch (Exception ex) {
-      ex.printStackTrace();
+    } catch (IOException ex) {
       throw new ServletException(ex);
     }
   }
 
-  private BlobKey getOldBlobKey(Key key) {
+  private void persistAsset(BlobInfo info) {
+    String filename = info.getFilename();
+    Log.info("Persisting asset: " + filename);
+    Key key = KeyFactory.createKey(KIND_ASSET, filename);
+    Entity entity = new Entity(key);
+    entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
+
+    BlobKey oldBlobKey = getBlobKey(key);
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    if (oldBlobKey == null) {
+      /**
+       * There is no existing blob which would be orphaned, so simply put()
+       * asset.
+       */
+      Log.debug("write new asset entity for '" + filename + "'");
+      ds.put(entity);
+    } else {
+      /**
+       * Use of transactional task ensures that task is created if, and only if,
+       * datastore transaction succeeds.
+       */
+      Log.debug("write new asset entity and (transactionally) request deletion of orphaned blob key: "
+          + oldBlobKey);
+      Queue queue = QueueFactory.getDefaultQueue();
+      Transaction txn = ds.beginTransaction();
+      ds.put(entity);
+      queue.add(TaskOptions.Builder.withUrl(URI_DELETE_BLOB).param(PROPERTY_BLOBKEY,
+          oldBlobKey.getKeyString()));
+      txn.commit();
+    }
+  }
+
+  /**
+   * Get blob key for an existing asset.
+   *
+   * @param assetEntityKey the entity key for the asset
+   * @return an existing blob key or null of the asset does not yet exist
+   */
+  private BlobKey getBlobKey(Key assetEntityKey) {
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     try {
-      Entity entity = ds.get(key);
+      Entity entity = ds.get(assetEntityKey);
       return (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
     } catch (EntityNotFoundException ignore) {
-      // good news: no existing entity found, so no blob to orphan
       return null;
     }
   }
 
+  /**
+   * Serve assets from blobstore.
+   */
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     String uri = req.getRequestURI();
@@ -133,11 +175,6 @@ public class FileServlet extends HttpServlet {
       resp.setContentType("text/plain");
       resp.getWriter().println("Assets have been uploaded.");
     }
-
-    // if (uri.equals(URI_STORE_BLOB_INFO)) {
-    // Log.info("ok");
-    // return;
-    // }
 
     // User has requested upload URL
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
