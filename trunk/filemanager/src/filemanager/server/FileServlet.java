@@ -139,7 +139,7 @@ public class FileServlet extends HttpServlet {
      * User has requested a single-use blob upload URL.
      */
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
-      Log.info("Creating one-time use upload URL...");
+      Log.info("Creating single use upload URL...");
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
       String url = bs.createUploadUrl(URI_STORE_BLOB_INFO);
       Log.info("- Upload URL: " + url);
@@ -258,7 +258,8 @@ public class FileServlet extends HttpServlet {
        * Use of transactional task ensures that the task to delete the orphaned
        * blob is created if, and only if, the datastore transaction succeeds.
        */
-      Log.debug("- Write new asset entity and (transactionally) request deletion of orphaned blob key: "
+      Log.debug("- Write new asset entity for '" + filename
+          + "' and (transactionally) request deletion of orphaned blob key: "
           + oldBlobKey);
       Queue queue = QueueFactory.getDefaultQueue();
       Transaction txn = ds.beginTransaction();
