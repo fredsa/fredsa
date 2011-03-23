@@ -14,8 +14,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 import com.allen_sauer.gwt.log.client.Log;
 
-import org.apache.http.HttpResponse;
-
 import filemanager.shared.FileManagerConstants;
 
 import java.io.IOException;
@@ -106,12 +104,10 @@ public class FileServlet extends HttpServlet {
     }
   }
 
-
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     String uri = req.getRequestURI();
     String filename = lastPathComponent(uri);
-    Log.info("doGet(" + filename + ")");
 
     if (uri.equals(URI_UPLOAD_COMPLETE)) {
       resp.setContentType("text/plain");
@@ -125,14 +121,16 @@ public class FileServlet extends HttpServlet {
 
     // User has requested upload URL
     if (uri.endsWith(FileManagerConstants.REQUEST_BLOBSTORE_UPLOAD_URL)) {
-      Log.info("request upload url");
+      Log.info("Creating one-time use upload URL...");
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
       String url = bs.createUploadUrl(URI_STORE_BLOB_INFO);
+      Log.info("- Upload URL: " + url);
       resp.getWriter().println(url);
       return;
     }
 
     // Serve the requested asset
+    Log.info("Serving requested URI: " + uri);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     try {
       Entity entity = ds.get(KeyFactory.createKey(KIND_ASSET, filename));
@@ -142,11 +140,11 @@ public class FileServlet extends HttpServlet {
       BlobKey blobkey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
       bs.serve(blobkey, resp);
     } catch (EntityNotFoundException e) {
+      Log.info("Blob info not found. Sending " + HttpServletResponse.SC_NOT_FOUND);
       resp.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
   }
-
 
   private String lastPathComponent(String uri) {
     int pos = uri.lastIndexOf('/');
