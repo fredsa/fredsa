@@ -50,62 +50,77 @@ public class FileServlet extends HttpServlet {
 
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
-    Log.info("Trying blobstore service...");
     BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
+    Map<String, BlobKey> blobs;
     try {
-      Map<String, BlobKey> blobs;
+
+      /**
+       * Ensure that this request is a result of POST to a blobstore upload URL
+       */
       try {
+        Log.debug("Checking for uploaded blobs...");
         blobs = bs.getUploadedBlobs(req);
       } catch (IllegalStateException ignore) {
-        // User posted file(s) directly to us instead of requesting an upload
-        // URL
-        String url = bs.createUploadUrl(URI_STORE_BLOB_INFO);
-        resp.sendRedirect(url);
+        resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED,
+            "File uploads must POST to a blobstore service provided upload URL");
         return;
       }
 
-      // User posted to blobstore upload URL and got redirected here
-      if (!blobs.isEmpty()) {
-        BlobKey oldBlobKey = null;
-        for (Entry<String, BlobKey> entry : blobs.entrySet()) {
-          Log.info("Got blob:");
-          BlobInfo info = new BlobInfoFactory().loadBlobInfo(entry.getValue());
-          Log.info("- blobkey: " + info.getBlobKey());
-          Log.info("- content type: " + info.getContentType());
-          Log.info("- filename: " + info.getFilename());
-          Log.info("- size: " + info.getSize());
-          Log.info("- creation: " + info.getCreation());
+      /**
+       * Ensure that at least one file was uploaded.
+       */
+      if (blobs.isEmpty()) {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing one or more uploaded files");
+        return;
+      }
 
-          // Make sure we don't orphan existing blobs
-          DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-          Key key = KeyFactory.createKey(KIND_ASSET, info.getFilename());
-          Entity entity;
-          try {
-            entity = ds.get(key);
-            oldBlobKey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
-            // found an existing entity with an existing blob
-          } catch (EntityNotFoundException ignore) {
-            // good news: no existing entity found, so no blob to orphan
-          }
+      /**
+       * We have a valid upload request with at least one file available to us
+       * in blobstore.
+       */
+      BlobKey oldBlobKey = null;
+      for (Entry<String, BlobKey> entry : blobs.entrySet()) {
+        Log.info("Got blob:");
+        BlobInfo info = new BlobInfoFactory().loadBlobInfo(entry.getValue());
+        Log.info("- blobkey: " + info.getBlobKey());
+        Log.info("- content type: " + info.getContentType());
+        Log.info("- filename: " + info.getFilename());
+        Log.info("- size: " + info.getSize());
+        Log.info("- creation: " + info.getCreation());
 
-          // Persist the asset information to the datastore
-          entity = new Entity(KIND_ASSET, info.getFilename());
-          entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
-          Log.info("datastore.put(" + info.getFilename() + ")...");
-          DatastoreServiceFactory.getDatastoreService().put(entity);
+        // Make sure we don't orphan existing blobs
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        Key key = KeyFactory.createKey(KIND_ASSET, info.getFilename());
+        oldBlobKey = getOldBlobKey(key);
 
-          if (oldBlobKey != null) {
-            Log.info("delete orphaned blob key: " + oldBlobKey);
-            bs.delete(oldBlobKey);
-          }
+        // Persist the asset information to the datastore
+        Entity entity = new Entity(key);
+        entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
+        Log.info("datastore.put(" + info.getFilename() + ")...");
+        DatastoreServiceFactory.getDatastoreService().put(entity);
+
+        if (oldBlobKey != null) {
+          Log.info("delete orphaned blob key: " + oldBlobKey);
+          bs.delete(oldBlobKey);
         }
-        // We are required to send a redirect in response to a blobstore upload
-        resp.sendRedirect(URI_UPLOAD_COMPLETE);
-        return;
       }
+      // We are required to send a redirect in response to a blobstore upload
+      resp.sendRedirect(URI_UPLOAD_COMPLETE);
+      return;
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new ServletException(ex);
+    }
+  }
+
+  private BlobKey getOldBlobKey(Key key) {
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    try {
+      Entity entity = ds.get(key);
+      return (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
+    } catch (EntityNotFoundException ignore) {
+      // good news: no existing entity found, so no blob to orphan
+      return null;
     }
   }
 
