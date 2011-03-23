@@ -197,6 +197,7 @@ public class FileServlet extends HttpServlet {
       String count = req.getParameter(PARAMETER_BLOB_COUNT);
       resp.setContentType("text/plain");
       resp.getWriter().println("- Assets successfullly uploaded: " + count);
+      return;
     }
 
     /**
