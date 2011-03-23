@@ -9,7 +9,10 @@ then
   echo "App Engine asset uploader."
   echo ""
 	echo "Usage:"
-	echo "  $0 <url> <file1> [file2] ..."
+	echo "  $0 [-url <url>] <file1> [file2] ..."
+	echo ""
+  echo "  find . -type f | xargs $0"
+  echo "  find . -type f -exec $0 {} \\;"
 	exit 1
 fi
 
