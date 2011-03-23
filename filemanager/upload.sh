@@ -3,40 +3,52 @@
 set -e
 
 GET_UPLOAD_URL="/get-upload-url"
+DEFAULT_URL=http://assets.fredsa.appspot.com/
 
-if [ $# -lt 2 ]
+
+url="$DEFAULT_URL"
+if [ "$1" = "-url" ]
 then
-  echo "App Engine asset uploader."
-  echo ""
-	echo "Usage:"
-	echo "  $0 [-url <url>] <file1> [file2] ..."
-	echo ""
-  echo "  find . -type f | xargs $0"
-  echo "  find . -type f -exec $0 {} \\;"
-	exit 1
+  shift
+  url=$1
+  shift
 fi
 
-url=$1
-shift
+if [ $# -lt 1 -o "$1" = "-?" ]
+then
+  [ "$url" != "$DEFAULT_URL" ] && urlargs="-url $url " || urlargs=""
+  echo "App Engine asset uploader."
+  echo ""
+  echo "Usage:"
+  echo "Manually upload one or more files:"
+  echo "  $0 [-url <url>] <file1> [file2] ..."
+  echo ""
+  echo "Upload a moderate number of files, which all fit on a single command line:"
+  echo "  find . -type f -exec $urlargs$0 {} \\;"
+  echo ""
+  echo "Upload a very large number of files one by one:"
+  echo "  find . -type f | xargs $0 $urlargs"
+  exit 1
+fi
 
 while [ $# -gt 0 ]
 do
-	file=$1
-	shift
-	echo "FILE: $file"
+  file=$1
+  shift
+  echo "FILE: $file"
 
-	# determine MIME Type
-	mime_type=$(file --brief --mime-type $file)
-	echo "- MIME Type: $mime_type"
+  # determine MIME Type
+  mime_type=$(file --brief --mime-type $file)
+  echo "- MIME Type: $mime_type"
 
-	# request blobstore upload URL
-	upload_url=$(curl -s $url$GET_UPLOAD_URL)
+  # request blobstore upload URL
+  upload_url=$(curl -s $url$GET_UPLOAD_URL)
 
-	# fix for devappserver lacking scheme/host/port
-	upload_url=${url}${upload_url#${url}}
+  # fix for devappserver lacking scheme/host/port
+  upload_url=${url}${upload_url#${url}}
 
-	echo "- Upload URL: $upload_url"
+  echo "- Upload URL: $upload_url"
 
-	# upload content
-	curl -F "file=@$file;filename=$file;type=$mime_type" $upload_url
+  # upload content
+  curl -F "file=@$file;filename=$file;type=$mime_type" $upload_url
 done
