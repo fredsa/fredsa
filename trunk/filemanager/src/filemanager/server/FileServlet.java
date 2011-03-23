@@ -12,6 +12,8 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
@@ -37,9 +39,24 @@ public class FileServlet extends HttpServlet {
   private static final String KIND_ASSET = "Asset";
 
   /**
+   * URL parameter for the blob upload count.
+   */
+  private static final String PARAMETER_BLOB_UPLOAD_COUNT = "blob-upload-count";
+
+  /**
    * Datastore property for storing the BlobKey.
    */
   private static final String PROPERTY_BLOBKEY = "blobkey";
+
+  /**
+   * URL parameter for storing the BlobKey string.
+   */
+  private static final String PARAMETER_BLOBKEY_STRING = "blob-key-string";
+
+  /**
+   * URI used by task queue to guarantee deletion of orphaned blobs.
+   */
+  private static final String URI_DELETE_BLOB = "/delete-blob";
 
   /**
    * URI which we can redirect to post upload.
@@ -51,13 +68,6 @@ public class FileServlet extends HttpServlet {
    */
   private static final String URI_UPLOAD_COMPLETE = "/upload-complete";
 
-  /**
-   * URI used by task queue to guarantee deletion of orphaned blobs.
-   */
-  private static final String URI_DELETE_BLOB = "/delete-blob";
-
-  private static final String PARAMETER_BLOB_COUNT = "blobcount";
-
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
     BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
@@ -67,7 +77,7 @@ public class FileServlet extends HttpServlet {
      * Task queue based deletion of orphaned blobs.
      */
     if (uri.equals(URI_DELETE_BLOB)) {
-      String blobKeyString = req.getParameter(PROPERTY_BLOBKEY);
+      String blobKeyString = req.getParameter(PARAMETER_BLOBKEY_STRING);
       Log.debug("Delete orphaned blob with key: " + blobKeyString);
       bs.delete(new BlobKey(blobKeyString));
       return;
@@ -109,64 +119,11 @@ public class FileServlet extends HttpServlet {
         persistAsset(info);
       }
       // We are required to send a redirect in response to a blobstore upload
-      resp.sendRedirect(URI_UPLOAD_COMPLETE + "?" + PARAMETER_BLOB_COUNT + "=" + blobs.size());
+      resp.sendRedirect(URI_UPLOAD_COMPLETE + "?" + PARAMETER_BLOB_UPLOAD_COUNT + "="
+          + blobs.size());
       return;
     } catch (IOException ex) {
       throw new ServletException(ex);
-    }
-  }
-
-  /**
-   * Persist a new asset entity to the datastore and ensure existing blob is not
-   * orphaned.
-   *
-   * @param blobInfo a new blob info
-   */
-  private void persistAsset(BlobInfo blobInfo) {
-    String filename = blobInfo.getFilename();
-    Log.info("Persisting asset: " + filename);
-    Key key = KeyFactory.createKey(KIND_ASSET, filename);
-    Entity entity = new Entity(key);
-    entity.setProperty(PROPERTY_BLOBKEY, blobInfo.getBlobKey());
-
-    BlobKey oldBlobKey = getBlobKey(key);
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    if (oldBlobKey == null) {
-      /**
-       * There is no existing blob which would be orphaned, so simply put()
-       * asset.
-       */
-      Log.debug("write new asset entity for '" + filename + "'");
-      ds.put(entity);
-    } else {
-      /**
-       * Use of transactional task ensures that task is created if, and only if,
-       * datastore transaction succeeds.
-       */
-      Log.debug("write new asset entity and (transactionally) request deletion of orphaned blob key: "
-          + oldBlobKey);
-      Queue queue = QueueFactory.getDefaultQueue();
-      Transaction txn = ds.beginTransaction();
-      ds.put(entity);
-      queue.add(TaskOptions.Builder.withUrl(URI_DELETE_BLOB).param(PROPERTY_BLOBKEY,
-          oldBlobKey.getKeyString()));
-      txn.commit();
-    }
-  }
-
-  /**
-   * Get blob key for an existing asset.
-   *
-   * @param assetEntityKey the entity key for the asset
-   * @return an existing blob key or null of the asset does not yet exist
-   */
-  private BlobKey getBlobKey(Key assetEntityKey) {
-    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-    try {
-      Entity entity = ds.get(assetEntityKey);
-      return (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
-    } catch (EntityNotFoundException ignore) {
-      return null;
     }
   }
 
@@ -194,7 +151,7 @@ public class FileServlet extends HttpServlet {
      * We serve a success page when content has been successfully uploaded.
      */
     if (uri.equals(URI_UPLOAD_COMPLETE)) {
-      String count = req.getParameter(PARAMETER_BLOB_COUNT);
+      String count = req.getParameter(PARAMETER_BLOB_UPLOAD_COUNT);
       resp.setContentType("text/plain");
       resp.getWriter().println("- Assets successfullly uploaded: " + count);
       return;
@@ -216,6 +173,40 @@ public class FileServlet extends HttpServlet {
   }
 
   /**
+   * Get blob key for an existing asset.
+   *
+   * @param assetEntityKey the entity key for the asset
+   * @return an existing blob key or null of the asset does not yet exist
+   */
+  private BlobKey getBlobKey(Key assetEntityKey) {
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
+
+    /**
+     * Lookup blobkey in memcache.
+     */
+    BlobKey blobkey = (BlobKey) ms.get(assetEntityKey);
+    if (blobkey != null) {
+      return blobkey;
+    }
+
+    /**
+     * Lookup blobkey in datastore.
+     */
+    try {
+      Entity entity = ds.get(assetEntityKey);
+      blobkey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
+      /**
+       * Store blobkey in memcache.
+       */
+      ms.put(assetEntityKey, blobkey);
+      return blobkey;
+    } catch (EntityNotFoundException ignore) {
+      return null;
+    }
+  }
+
+  /**
    * Determine the filename based on the last path component of a request URI.
    *
    * @param uri the URI for a requested resource
@@ -224,5 +215,63 @@ public class FileServlet extends HttpServlet {
   private String lastPathComponent(String uri) {
     int pos = uri.lastIndexOf('/');
     return (pos == -1) ? uri : uri.substring(pos + 1);
+  }
+
+  /**
+   * Persist a new asset entity to the datastore and ensure existing blob is not
+   * orphaned.
+   *
+   * @param blobInfo a new blob info
+   */
+  private void persistAsset(BlobInfo blobInfo) {
+    DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+    MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
+
+    String filename = blobInfo.getFilename();
+    Log.info("Persisting asset: " + filename);
+
+    /**
+     * Construct a new datastore entity, which we will persist.
+     */
+    Key assetEntityKey = KeyFactory.createKey(KIND_ASSET, filename);
+    Entity entity = new Entity(assetEntityKey);
+    BlobKey newBlobKey = blobInfo.getBlobKey();
+    entity.setProperty(PROPERTY_BLOBKEY, newBlobKey);
+
+    /**
+     * Check whether there's an existing entity which will be orphaned.
+     */
+    BlobKey oldBlobKey = getBlobKey(assetEntityKey);
+
+    /**
+     * Update datastore.
+     */
+    if (oldBlobKey == null) {
+      /**
+       * There is no existing blob which would be orphaned, so simply put()
+       * asset.
+       */
+      Log.debug("- Write new asset entity for '" + filename + "'");
+      ds.put(entity);
+    } else {
+      /**
+       * Use of transactional task ensures that the task to delete the orphaned
+       * blob is created if, and only if, the datastore transaction succeeds.
+       */
+      Log.debug("- Write new asset entity and (transactionally) request deletion of orphaned blob key: "
+          + oldBlobKey);
+      Queue queue = QueueFactory.getDefaultQueue();
+      Transaction txn = ds.beginTransaction();
+      ds.put(entity);
+      queue.add(TaskOptions.Builder.withUrl(URI_DELETE_BLOB).param(PARAMETER_BLOBKEY_STRING,
+          oldBlobKey.getKeyString()));
+      txn.commit();
+    }
+
+    /**
+     * Update memcache.
+     */
+    Log.debug("- Update memcache with new blob key: " + newBlobKey);
+    ms.put(assetEntityKey, newBlobKey);
   }
 }
