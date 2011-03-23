@@ -49,6 +49,9 @@ do
 
   echo "- Upload URL: $upload_url"
 
+  basename=$(basename $file)
+  echo "- basename: $basename"
+
   # upload content
-  curl -F "file=@$file;filename=$file;type=$mime_type" $upload_url
+  curl -F "file=@$file;filename=$basename;type=$mime_type" $upload_url
 done
