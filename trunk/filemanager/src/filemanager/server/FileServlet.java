@@ -10,6 +10,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -39,17 +40,6 @@ public class FileServlet extends HttpServlet {
   private static final String PROPERTY_BLOBKEY = "blobkey";
 
   /**
-   * Datastore property for storing file contents.
-   */
-
-  private static final String PROPERTY_CONTENT = "content";
-
-  /**
-   * Datastore property for storing file MIME Type.
-   */
-  private static final String PROPERTY_MIME_TYPE = "mimeType";
-
-  /**
    * URI which we can redirect to post upload.
    */
   private static final String URI_STORE_BLOB_INFO = "/store-blob-info";
@@ -77,7 +67,7 @@ public class FileServlet extends HttpServlet {
 
       // User posted to blobstore upload URL and got redirected here
       if (!blobs.isEmpty()) {
-        BlobKey blobKey = blobs.get("myFile");
+        BlobKey oldBlobKey = null;
         for (Entry<String, BlobKey> entry : blobs.entrySet()) {
           Log.info("Got blob:");
           BlobInfo info = new BlobInfoFactory().loadBlobInfo(entry.getValue());
@@ -87,12 +77,28 @@ public class FileServlet extends HttpServlet {
           Log.info("- size: " + info.getSize());
           Log.info("- creation: " + info.getCreation());
 
+          // Make sure we don't orphan existing blobs
+          DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+          Key key = KeyFactory.createKey(KIND_ASSET, info.getFilename());
+          Entity entity;
+          try {
+            entity = ds.get(key);
+            oldBlobKey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
+            // found an existing entity with an existing blob
+          } catch (EntityNotFoundException ignore) {
+            // good news: no existing entity found, so no blob to orphan
+          }
+
           // Persist the asset information to the datastore
-          Entity entity = new Entity(KIND_ASSET, info.getFilename());
-          entity.setProperty(PROPERTY_MIME_TYPE, info.getContentType());
+          entity = new Entity(KIND_ASSET, info.getFilename());
           entity.setProperty(PROPERTY_BLOBKEY, info.getBlobKey());
+          Log.info("datastore.put(" + info.getFilename() + ")...");
           DatastoreServiceFactory.getDatastoreService().put(entity);
-          Log.info("datastore.put(" + info.getFilename() + ")");
+
+          if (oldBlobKey != null) {
+            Log.info("delete orphaned blob key: " + oldBlobKey);
+            bs.delete(oldBlobKey);
+          }
         }
         // We are required to send a redirect in response to a blobstore upload
         resp.sendRedirect(URI_UPLOAD_COMPLETE);
@@ -133,10 +139,8 @@ public class FileServlet extends HttpServlet {
     Log.info("Serving requested URI: " + uri);
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
     try {
-      Entity entity = ds.get(KeyFactory.createKey(KIND_ASSET, filename));
-      Blob data = (Blob) entity.getProperty(PROPERTY_CONTENT);
-      String mimeType = (String) entity.getProperty(PROPERTY_MIME_TYPE);
       BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
+      Entity entity = ds.get(KeyFactory.createKey(KIND_ASSET, filename));
       BlobKey blobkey = (BlobKey) entity.getProperty(PROPERTY_BLOBKEY);
       bs.serve(blobkey, resp);
     } catch (EntityNotFoundException e) {
