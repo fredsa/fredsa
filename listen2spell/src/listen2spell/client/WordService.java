@@ -10,5 +10,7 @@ import listen2spell.shared.Word;
  */
 @RemoteServiceRelativePath("greet")
 public interface WordService extends RemoteService {
-  Word[] getWords(String name) throws IllegalArgumentException;
+  Word getSpokenWord(String name);
+
+  String[] getWordList();
 }

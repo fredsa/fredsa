@@ -44,13 +44,16 @@ public class Speaker {
       maybePlay();
       return;
     }
-    wordService.getWords(word, new AsyncCallback<Word[]>() {
+    wordService.getSpokenWord(word, new AsyncCallback<Word>() {
+
+      @Override
       public void onFailure(Throwable e) {
         Log.warn("Unable to get word", e);
       }
 
-      public void onSuccess(Word[] result) {
-        String url = result[0].getUrl();
+      @Override
+      public void onSuccess(Word w) {
+        String url = w.getUrl();
         Sound sound = sc.createSound("audio/mpeg", url);
         Log.debug("sound: " + sound);
         sound.addEventHandler(new SoundHandler() {
