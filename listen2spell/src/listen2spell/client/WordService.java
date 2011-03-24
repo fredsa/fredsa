@@ -3,14 +3,14 @@ package listen2spell.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-import listen2spell.shared.Word;
+import listen2spell.shared.Spoken;
 
 /**
  * The client side stub for the RPC service.
  */
 @RemoteServiceRelativePath("greet")
 public interface WordService extends RemoteService {
-  Word getSpokenWord(String name);
+  Spoken getSpokenWord(String name);
 
   String[] getWordList();
 }

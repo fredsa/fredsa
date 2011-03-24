@@ -18,10 +18,10 @@ import com.google.appengine.repackaged.com.google.common.util.Base64;
 import java.net.URL;
 import java.util.HashMap;
 
-import listen2spell.shared.Word;
+import listen2spell.shared.Spoken;
 
 public class Speech {
-  private static final String KIND = "Word";
+  private static final String KIND = "Spoken";
 
   private static HashMap<String, String> wordMap;
 
@@ -30,9 +30,9 @@ public class Speech {
     wordMap.put("a", "eh"); // say 'eh', not 'uh'
   }
 
-  static Word getWord(String word) {
+  static Spoken getWord(String word) {
     if (word == null || word.trim().length() == 0) {
-      return null;
+      return Spoken.EMPTY;
     }
     word = map(word.toLowerCase());
     DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -42,17 +42,17 @@ public class Speech {
       Entity entity;
       byte[] data;
       String url;
-      Word w;
+      Spoken spoken;
       Log.debug("memcache get()...");
-      w = (Word) ms.get(word);
-      if (w == null) {
+      spoken = (Spoken) ms.get(word);
+      if (spoken == null) {
         try {
           Log.debug("datastore get()...");
           entity = ds.get(KeyFactory.createKey(KIND, word));
           data = ((Blob) entity.getProperty("data")).getBytes();
         } catch (EntityNotFoundException e) {
-          URL u = new URL(
-              "http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q=" + word);
+          URL u = new URL("http://translate.google.com/translate_tts?ie=UTF-8&tl=en&prev=input&q="
+              + word);
           Log.debug("url fetch(" + u + ")...");
           HTTPResponse resp = fs.fetch(u);
           data = resp.getContent();
@@ -65,9 +65,9 @@ public class Speech {
         }
         url = "data:audio/mpeg;base64," + Base64.encode(data);
         url = "/listen2spell/speech?q=" + word;
-        w = new Word(word, url, data);
+        spoken = new Spoken(word, url, data);
       }
-      return w;
+      return spoken;
     } catch (Exception e) {
       Log.error("oops", e);
       throw new RuntimeException(e.toString());

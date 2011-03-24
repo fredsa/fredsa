@@ -3,19 +3,20 @@ package listen2spell.shared;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class Word implements Serializable {
+public class Spoken implements Serializable {
+  public static final Spoken EMPTY = new Spoken("", "data:", new byte[] {});
   private byte[] bytes;
   private String url;
   private String word;
 
-  public Word(String word, String url, byte[] bytes) {
+  public Spoken(String word, String url, byte[] bytes) {
     this.word = word;
     this.url = url;
     this.bytes = bytes;
   }
 
   @SuppressWarnings("unused")
-  private Word() {
+  private Spoken() {
   }
 
   public byte[] getData() {

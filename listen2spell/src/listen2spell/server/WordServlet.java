@@ -3,13 +3,13 @@ package listen2spell.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import listen2spell.client.WordService;
-import listen2spell.shared.Word;
+import listen2spell.shared.Spoken;
 
 @SuppressWarnings("serial")
 public class WordServlet extends RemoteServiceServlet implements WordService {
 
   private static final String[] ARCHER_WORDS_2010_12_10 = {
-      "Girl", "Clear", "Her", "Turn", "Dark", "Work", "Smart", "Word", "Hurt", "Serve", "North",
+      "Girl", "Clear", "Her", "Turn", "Dark", "Work", "Smart", "Spoken", "Hurt", "Serve", "North",
       "Third",};
   private static final String[] ARCHER_WORDS_2010_12_13 = {
       "Clown", "Lawn", "Talk", "Sound", "Cloth", "Would", "Also", "Mouth", "Crown", "Soft",
@@ -36,7 +36,7 @@ public class WordServlet extends RemoteServiceServlet implements WordService {
       "Monday", "Sudden", "Until", "Forget", "Happen", "Follow", "Dollar", "Window", "Hello",
       "Market", "Pretty", "Order",};
 
-  public Word getSpokenWord(String word) {
+  public Spoken getSpokenWord(String word) {
     return Speech.getWord(word);
   }
 

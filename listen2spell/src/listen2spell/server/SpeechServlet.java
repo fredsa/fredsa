@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import listen2spell.shared.Word;
+import listen2spell.shared.Spoken;
 
 @SuppressWarnings("serial")
 public class SpeechServlet extends HttpServlet {
@@ -21,7 +21,7 @@ public class SpeechServlet extends HttpServlet {
       resp.sendError(400); // bad request
       return;
     }
-    Word w = Speech.getWord(word);
-    resp.getOutputStream().write(w.getData());
+    Spoken spoken = Speech.getWord(word);
+    resp.getOutputStream().write(spoken.getData());
   }
 }

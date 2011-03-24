@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import listen2spell.shared.Word;
+import listen2spell.shared.Spoken;
 
 public class Speaker {
   private SoundController sc;
@@ -44,7 +44,7 @@ public class Speaker {
       maybePlay();
       return;
     }
-    wordService.getSpokenWord(word, new AsyncCallback<Word>() {
+    wordService.getSpokenWord(word, new AsyncCallback<Spoken>() {
 
       @Override
       public void onFailure(Throwable e) {
@@ -52,8 +52,8 @@ public class Speaker {
       }
 
       @Override
-      public void onSuccess(Word w) {
-        String url = w.getUrl();
+      public void onSuccess(Spoken spoken) {
+        String url = spoken.getUrl();
         Sound sound = sc.createSound("audio/mpeg", url);
         Log.debug("sound: " + sound);
         sound.addEventHandler(new SoundHandler() {
