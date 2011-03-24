@@ -37,13 +37,35 @@ public class Speaker {
     this.wordService = wordService;
   }
 
-  public void speak(final String word) {
+  public void speak(String word) {
+    word = word.trim().toLowerCase();
     todo.add(word);
     Sound sound = soundMap.get(word);
     if (sound != null) {
       maybePlay();
       return;
     }
+    getWordAsync(word);
+  }
+
+  protected void maybePlay() {
+    if (speaking) {
+      return;
+    }
+    if (todo.size() == 0) {
+      return;
+    }
+
+    String word = todo.get(0);
+    Sound sound = soundMap.get(word);
+    if (sound != null) {
+      todo.remove(0);
+      speaking = true;
+      sound.play();
+    }
+  }
+
+  private void getWordAsync(final String word) {
     wordService.getSpokenWord(word, new AsyncCallback<Spoken>() {
 
       @Override
@@ -71,22 +93,5 @@ public class Speaker {
         maybePlay();
       }
     });
-  }
-
-  protected void maybePlay() {
-    if (speaking) {
-      return;
-    }
-    if (todo.size() == 0) {
-      return;
-    }
-
-    String word = todo.get(0);
-    Sound sound = soundMap.get(word);
-    if (sound != null) {
-      todo.remove(0);
-      speaking = true;
-      sound.play();
-    }
   }
 }
