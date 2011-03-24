@@ -45,10 +45,13 @@ public class Challenge extends Composite {
 
     focusPanel.addKeyPressHandler(new KeyPressHandler() {
       public void onKeyPress(KeyPressEvent event) {
-        char code = event.getCharCode();
-        if (code >= 'a' && code <= 'z' || code >= 'A' && code <= 'Z') {
-          speaker.speak("" + code);
-          setText(answer + code);
+        if (!event.isAltKeyDown() && !event.isControlKeyDown() && !event.isMetaKeyDown()) {
+          event.preventDefault();
+          char code = event.getCharCode();
+          if (code >= 'a' && code <= 'z' || code >= 'A' && code <= 'Z') {
+            speaker.speak("" + code);
+            setText(answer + code);
+          }
         }
       }
     });
