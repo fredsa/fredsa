@@ -6,26 +6,30 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TextBox;
 
 public class Challenge extends Composite {
   private static final String SPACES = "---------------------------------------";
   private String answer;
-  private FocusPanel focusPanel;
+  private FlowPanel container;
+  private TextBox hiddenTextBox;
   private HTML label;
   private Speaker speaker;
   private final String word;
 
   public Challenge(final String word) {
     this.word = word;
-    focusPanel = new FocusPanel();
-    focusPanel.setStylePrimaryName("answerbox");
+    container = new FlowPanel();
+    hiddenTextBox = new TextBox();
     label = new HTML();
-    focusPanel.add(label);
-    initWidget(focusPanel);
+    label.setStylePrimaryName("answerbox");
+    container.add(label);
+    container.add(hiddenTextBox);
+    initWidget(container);
 
-    focusPanel.addKeyDownHandler(new KeyDownHandler() {
+    hiddenTextBox.addKeyDownHandler(new KeyDownHandler() {
       public void onKeyDown(KeyDownEvent event) {
         if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
           event.preventDefault();
@@ -43,7 +47,7 @@ public class Challenge extends Composite {
 
     });
 
-    focusPanel.addKeyPressHandler(new KeyPressHandler() {
+    hiddenTextBox.addKeyPressHandler(new KeyPressHandler() {
       public void onKeyPress(KeyPressEvent event) {
         if (!event.isAltKeyDown() && !event.isControlKeyDown() && !event.isMetaKeyDown()) {
           event.preventDefault();
@@ -64,7 +68,7 @@ public class Challenge extends Composite {
 
   @Override
   protected void onLoad() {
-    focusPanel.setFocus(true);
+    hiddenTextBox.setFocus(true);
   }
 
   protected String pad(String txt) {
