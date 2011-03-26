@@ -2,12 +2,17 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
+    .answer {
+      font-size: 200%;
+      text-align: center;
+    }
+  
     .panel {
       border: 3px solid black;
       padding: 5px;
     }
   </ui:style>
-  <g:HTMLPanel>
+  <g:HTMLPanel styleName="{style.answer}">
     <g:SimplePanel styleName="{style.panel}" ui:field="challengePanel">
     </g:SimplePanel>
     <g:SimplePanel styleName="{style.panel}" ui:field="wordListPanel">

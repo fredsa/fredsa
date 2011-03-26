@@ -8,11 +8,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import listen2spell.client.Challenge;
 import listen2spell.client.Speaker;
 import listen2spell.client.WordServiceAsync;
 
@@ -34,15 +32,14 @@ public class GameWidget extends Composite {
 
   private Speaker speaker;
 
-  public GameWidget(WordServiceAsync wordService) {
+  public GameWidget(WordServiceAsync service) {
     initWidget(uiBinder.createAndBindUi(this));
 
     loggerPanel.add(Log.getLogger(DivLogger.class).getWidget());
 
-    speaker = new Speaker();
-    speaker.setService(wordService);
+    speaker = new Speaker(service);
 
-    wordService.getWordList(new AsyncCallback<String[]>() {
+    service.getWordList(new AsyncCallback<String[]>() {
       public void onFailure(Throwable e) {
         Log.error("failed to get words from server", e);
       }
@@ -55,10 +52,9 @@ public class GameWidget extends Composite {
   }
 
   protected void show(String word) {
-    RootPanel.get().setStylePrimaryName("answer");
-    Challenge challenge = new Challenge(word);
+    ChallengeWidget challenge = new ChallengeWidget(word);
     challenge.setSpeaker(speaker);
-    RootPanel.get().add(challenge);
+    challengePanel.add(challenge);
     speaker.speak(word);
   }
 

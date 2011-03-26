@@ -20,21 +20,18 @@ import listen2spell.shared.Spoken;
 public class Speaker {
   private SoundController sc;
 
+  private WordServiceAsync service;
   private HashMap<String, Sound> soundMap = new HashMap<String, Sound>();
-  private boolean speaking;
 
+  private boolean speaking;
   private List<String> todo = new ArrayList<String>();
-  private WordServiceAsync wordService;
 
   @SuppressWarnings("deprecation")
-  public Speaker() {
+  public Speaker(WordServiceAsync service) {
+    this.service = service;
     sc = new SoundController();
     sc.setPreferredSoundType(Html5Sound.class);
     sc.setPreferredSoundType(FlashSound.class);
-  }
-
-  public void setService(WordServiceAsync wordService) {
-    this.wordService = wordService;
   }
 
   public void speak(String word) {
@@ -66,7 +63,7 @@ public class Speaker {
   }
 
   private void getWordAsync(final String word) {
-    wordService.getSpokenWord(word, new AsyncCallback<Spoken>() {
+    service.getSpokenWord(word, new AsyncCallback<Spoken>() {
 
       @Override
       public void onFailure(Throwable e) {
