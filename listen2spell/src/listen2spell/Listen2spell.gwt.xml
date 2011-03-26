@@ -14,6 +14,7 @@
 
   <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
   <inherits name="com.allen_sauer.gwt.voices.gwt-voices" />
+  <set-property name="log_DivLogger" value="ENABLED" />
 
   <!-- Specify the app entry point class. -->
   <entry-point class='listen2spell.client.Main' />
