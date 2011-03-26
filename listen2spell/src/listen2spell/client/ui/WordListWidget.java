@@ -23,9 +23,12 @@ public class WordListWidget extends Composite {
   public WordListWidget(String[] words) {
     this.words = words;
     initWidget(uiBinder.createAndBindUi(this));
+    grid.setBorderWidth(1);
+    grid.getColumnFormatter().setWidth(0, "300");
+    grid.getColumnFormatter().setWidth(1, "300");
     for (int i = 0; i < words.length; i++) {
-      Label dashes = new Label(words[i]);
-      grid.setWidget(i, 0, dashes);
+      Label dashes = new Label(i + 1 + ": " + words[i]);
+      grid.setWidget(i / 2, i % 2, dashes);
     }
   }
 }

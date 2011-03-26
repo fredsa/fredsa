@@ -3,7 +3,10 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
     .answer {
-      font-size: 200%;
+      font-size: 150%;
+    }
+    
+    .challenge {
       text-align: center;
     }
   
@@ -11,11 +14,16 @@
       border: 3px solid black;
       padding: 5px;
     }
+    
+    .wordpanel {
+      margin: 0px auto;
+      width: 10em;
+    }
   </ui:style>
   <g:HTMLPanel styleName="{style.answer}">
-    <g:SimplePanel styleName="{style.panel}" ui:field="challengePanel">
+    <g:SimplePanel styleName="{style.panel} {style.challenge}" ui:field="challengePanel">
     </g:SimplePanel>
-    <g:SimplePanel styleName="{style.panel}" ui:field="wordListPanel">
+    <g:SimplePanel styleName="{style.panel} {style.wordpanel}" ui:field="wordListPanel">
     </g:SimplePanel>
     <g:SimplePanel styleName="{style.panel}" ui:field="loggerPanel">
     </g:SimplePanel>

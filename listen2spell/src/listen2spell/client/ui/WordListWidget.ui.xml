@@ -2,9 +2,11 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
-    
+    .grid {
+      xfont-size: 300%;
+    }
   </ui:style>
   <g:HTMLPanel>
-    <g:FlexTable ui:field="grid"></g:FlexTable>
+    <g:FlexTable styleName="{style.grid}" ui:field="grid"></g:FlexTable>
   </g:HTMLPanel>
 </ui:UiBinder> 

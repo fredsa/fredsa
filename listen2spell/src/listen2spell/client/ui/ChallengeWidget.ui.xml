@@ -4,10 +4,10 @@
   <ui:style>
     .answerbox {
       width: 22em;
+      margin-left: -11em;
       position: absolute;
       left: 50%;
       top: 20%;
-      margin-left: -11em;
       padding: 4px;
       
       font-size: 250%;
