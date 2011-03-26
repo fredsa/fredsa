@@ -14,13 +14,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import listen2spell.client.Speaker;
+import listen2spell.shared.Util;
 
 public class ChallengeWidget extends Composite {
 
   interface ChallengeWidgetUiBinder extends UiBinder<Widget, ChallengeWidget> {
   }
-
-  private static final String SPACES = "---------------------------------------";
 
   private static ChallengeWidgetUiBinder uiBinder = GWT.create(ChallengeWidgetUiBinder.class);
 
@@ -66,10 +65,6 @@ public class ChallengeWidget extends Composite {
     hiddenTextBox.setFocus(true);
   }
 
-  protected String pad(String txt) {
-    return txt + trim(SPACES, word.length() - txt.length());
-  }
-
   @UiHandler(value = "hiddenTextBox")
   void onKeyDown(KeyDownEvent event) {
     if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
@@ -88,16 +83,11 @@ public class ChallengeWidget extends Composite {
 
   private void setText(String txt) {
     // allow up to 2x the word length
-    answer = trim(txt, word.length() * 2);
+    answer = Util.trim(txt, word.length() * 2);
     if (word.equals(txt)) {
       speaker.speak(txt);
     }
-    label.setHTML(pad(txt));
-  }
-
-  private String trim(String txt, int len) {
-    len = Math.max(len, 0);
-    return txt.length() > len ? txt.substring(0, len) : txt;
+    label.setHTML(Util.rightPadDashes(txt, word.length()));
   }
 
 }
