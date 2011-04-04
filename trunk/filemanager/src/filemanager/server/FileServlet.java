@@ -1,5 +1,7 @@
 package filemanager.server;
 
+import com.allen_sauer.gwt.log.client.Log;
+
 import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
@@ -18,8 +20,6 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
-import com.allen_sauer.gwt.log.client.Log;
-
 import filemanager.shared.FileManagerConstants;
 
 import java.io.IOException;
@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@SuppressWarnings("serial")
 public class FileServlet extends HttpServlet {
 
   /**
@@ -44,14 +45,14 @@ public class FileServlet extends HttpServlet {
   private static final String PARAMETER_BLOB_UPLOAD_COUNT = "blob-upload-count";
 
   /**
-   * Datastore property for storing the BlobKey.
-   */
-  private static final String PROPERTY_BLOBKEY = "blobkey";
-
-  /**
    * URL parameter for storing the BlobKey string.
    */
   private static final String PARAMETER_BLOBKEY_STRING = "blob-key-string";
+
+  /**
+   * Datastore property for storing the BlobKey.
+   */
+  private static final String PROPERTY_BLOBKEY = "blobkey";
 
   /**
    * URI used by task queue to guarantee deletion of orphaned blobs.
@@ -214,7 +215,7 @@ public class FileServlet extends HttpServlet {
    */
   private String lastPathComponent(String uri) {
     int pos = uri.lastIndexOf('/');
-    return (pos == -1) ? uri : uri.substring(pos + 1);
+    return pos == -1 ? uri : uri.substring(pos + 1);
   }
 
   /**
