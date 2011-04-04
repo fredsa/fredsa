@@ -17,12 +17,30 @@
       </div>
     </noscript>
 
-<form action="/x" method=post>
-<input name=y>
-<input type=file><input type=submit>
+<style>
+.hide {
+visibility: hidden;
+width: 0px;
+height: 0px;
+</style>
+<form action="/x" method="post">
+comment: <input name="comment"/><br/>
+<input webkitdirectory type="file" class="hide" id="filebutton"/>
+<input type="button" onclick="clickit()" value="Select some files"/>
+<input type="submit"/>
 </form>
+<script>
+function clickit() {
+  var b = document.getElementById('filebutton');
+  b.click();
+}
+</script>
+
+<hr>
+
+
 <div id="dropbox" style="border: 1px solid blue; width: 10em; height: 10em; background-color: green;"><span id="droplabel">Drop file here...</span></div>
-<img id="preview" alt="[ preview will display here ] style="border: 1px solid red; width: 10em; height: 10em; background-color: yellow;"" />
+<img id="preview" alt="[ preview will display here ]" style="border: 1px solid red; width: 10em; height: 10em; background-color: yellow;" />
 
 <script>
 var dropbox = document.getElementById("dropbox")
@@ -85,5 +103,9 @@ dropbox.addEventListener("dragover", dragOver, false);
 dropbox.addEventListener("drop", drop, false);
 dropbox.innerHTML += "<BR>READY!!!!!!!!!!!!!!";
 </script>
+ 
+ <hr>
+ 
+ 
   </body>
 </html>
