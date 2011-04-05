@@ -1,12 +1,11 @@
 package filemanager.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class FilemanagerEntryPoint implements EntryPoint {
   @Override
   public void onModuleLoad() {
-    RootPanel.get().add(new Label("Hi"));
+    RootLayoutPanel.get().add(new UploadFormWidget());
   }
 }

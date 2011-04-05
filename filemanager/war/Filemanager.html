@@ -17,15 +17,17 @@
       </div>
     </noscript>
 
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
 <style>
 .hide {
 visibility: hidden;
 width: 0px;
 height: 0px;
 </style>
-<form action="/x" method="post">
+<form action="/" method="post" id="myform">
 comment: <input name="comment"/><br/>
-<input webkitdirectory type="file" class="hide" id="filebutton"/>
+<input webkitdirectory type="file" class="hide" id="filebutton" onchange="gotit()"/>
 <input type="button" onclick="clickit()" value="Select some files"/>
 <input type="submit"/>
 </form>
@@ -33,6 +35,9 @@ comment: <input name="comment"/><br/>
 function clickit() {
   var b = document.getElementById('filebutton');
   b.click();
+}
+function gotit(evt) {
+  document.forms["myform"].submit();
 }
 </script>
 
