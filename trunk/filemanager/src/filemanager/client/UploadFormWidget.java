@@ -122,20 +122,22 @@ public class UploadFormWidget extends Composite {
 
   private void processUpload1(final JsArray<File> files) throws RequestException {
     loadingCount = files.length();
+    final FileReader[] fileReaders = new FileReader[files.length()];
     for (int i = 0; i < files.length(); i++) {
       final File file = files.get(i);
-      final FileReader fileReader = FileReader.createIfSupported();
-      fileReader.readAsBinaryString(file);
+      final FileReader reader = FileReader.createIfSupported();
+      fileReaders[i] = reader;
+      reader.readAsBinaryString(file);
       Log.debug(file.getFileName());
       Log.debug(" " + file.getType());
       Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
         public boolean execute() {
-          int readyState = fileReader.getReadyState();
+          int readyState = reader.getReadyState();
           Log.debug("File " + file.getFileName() + " readyState = " + readyState);
           if (readyState == FileReader.DONE) {
             Log.debug("Loading Count " + loadingCount-- + " -> " + loadingCount);
             if (loadingCount == 0) {
-              processUpload2(files);
+              processUpload2(files, fileReaders);
             }
             return false;
           }
@@ -145,7 +147,7 @@ public class UploadFormWidget extends Composite {
     }
   }
 
-  private void processUpload2(JsArray<File> files) {
+  private void processUpload2(JsArray<File> files, FileReader[] fileReaders) {
     if (downloadUrl == null) {
       Log.error("Sorry, download URL is not yet available");
       return;
@@ -168,7 +170,7 @@ public class UploadFormWidget extends Composite {
       data += "Content-Type: " + file.getType() + "\r\n";
       data += "\r\n";
       data += "\r\n";
-      //      data += file.getAsBinary();
+      data += fileReaders[i].getResult();
       data += "\r\n";
       data += "--" + boundary + "\r\n";
     }

@@ -54,7 +54,7 @@ public final class FileReader extends JavaScriptObject {
     return this.readyState;
   }-*/;
 
-  public native JavaScriptObject getResult()/*-{
+  public native Object getResult()/*-{
     return this.result;
   }-*/;
 
