@@ -84,7 +84,6 @@ public class FileServlet extends HttpServlet {
       return;
     }
 
-
     Map<String, BlobKey> blobs;
     try {
       /**
@@ -135,6 +134,26 @@ public class FileServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     String uri = req.getRequestURI();
     String filename = lastPathComponent(uri);
+
+    /**
+     * User has requested an upload form.
+     */
+    if (uri.equals("/")) {
+      BlobstoreService bs = BlobstoreServiceFactory.getBlobstoreService();
+      resp.setContentType("text/html");
+
+      resp.getWriter().println("<html>");
+      resp.getWriter().println("<body>");
+      resp.getWriter().println(
+          "<form action='" + bs.createUploadUrl("/upload")
+              + "' method='post' enctype='multipart/form-data'>");
+      resp.getWriter().println("<input type='file' name='myFile'>");
+      resp.getWriter().println("<input type='submit' value='Submit'>");
+      resp.getWriter().println("</form>");
+      resp.getWriter().println("</body>");
+      resp.getWriter().println("</html>");
+      return;
+    }
 
     /**
      * User has requested a single-use blob upload URL.
@@ -260,8 +279,7 @@ public class FileServlet extends HttpServlet {
        * blob is created if, and only if, the datastore transaction succeeds.
        */
       Log.debug("- Write new asset entity for '" + filename
-          + "' and (transactionally) request deletion of orphaned blob key: "
-          + oldBlobKey);
+          + "' and (transactionally) request deletion of orphaned blob key: " + oldBlobKey);
       Queue queue = QueueFactory.getDefaultQueue();
       Transaction txn = ds.beginTransaction();
       ds.put(entity);

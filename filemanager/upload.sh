@@ -6,6 +6,13 @@ GET_UPLOAD_URL="/get-upload-url"
 DEFAULT_URL=http://assets.fredsa.appspot.com/
 
 
+curlflags=""
+if [ "$1" = "-v" ]
+then
+	curlflags=$1
+	shift
+fi
+
 url="$DEFAULT_URL"
 if [ "$1" = "-url" ]
 then
@@ -21,7 +28,7 @@ then
   echo ""
   echo "Usage:"
   echo "Manually upload one or more files:"
-  echo "  $0 [-url <url>] <file1> [file2] ..."
+  echo "  $0 [-v] [-url <url>] <file1> [file2] ..."
   echo ""
   echo "Upload a moderate number of files, which all fit on a single command line:"
   echo "  find . -type f -exec $urlargs$0 {} \\;"
@@ -53,5 +60,5 @@ do
   echo "- basename: $basename"
 
   # upload content
-  curl -L -F "file=@$file;filename=$basename;type=$mime_type" $upload_url
+  curl $curlflags -L -F "file=@$file;filename=$basename;type=$mime_type" $upload_url
 done

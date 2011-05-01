@@ -7,7 +7,24 @@ import com.google.gwt.user.client.ui.FileUpload;
 
 public class WebkitFileUpload extends FileUpload {
 
-  public final static class File extends JavaScriptObject {
+  public static class Blob extends JavaScriptObject {
+    protected Blob() {
+    }
+
+    final native int getSize() /*-{
+      return this.size;
+    }-*/;
+
+    final native String getType() /*-{
+      return this.type;
+    }-*/;
+
+    final native Blob slice(int start, int length, String contentType) /*-{
+      return this.slice(start, length, contentType);
+    }-*/;
+  }
+
+  public final static class File extends Blob {
     protected File() {
     }
 
@@ -27,14 +44,6 @@ public class WebkitFileUpload extends FileUpload {
       return this.name;
     }-*/;
 
-    native int getSize() /*-{
-      return this.size;
-    }-*/;
-
-    native int getType() /*-{
-      return this.type;
-    }-*/;
-
     native String getWebkitRelativePath() /*-{
       return this.webkitRelativePath;
     }-*/;
@@ -49,11 +58,11 @@ public class WebkitFileUpload extends FileUpload {
   }
 
   void setDirectory(boolean directory) {
-    getElement().setAttribute("webkitdirectory", directory ? "" : null);
+    getElement().setPropertyBoolean("webkitdirectory", directory);
   }
 
   void setMultiple(boolean multiple) {
-    getElement().setAttribute("multiple", multiple ? "" : null);
+    getElement().setPropertyBoolean("multiple", multiple);
   }
 
   private native JsArray<File> getFiles(Element e) /*-{
