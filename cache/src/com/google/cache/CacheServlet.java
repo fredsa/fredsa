@@ -80,6 +80,8 @@ public class CacheServlet extends HttpServlet {
           + " (same, but show HTTP request headers received)</li>");
       writer.println("</ul>");
     }
+
+    writer.println("<p><a href='static.html'>Static HTML (browser cache) test</a></p>");
   }
 
   private String makeUrl(String url) {
