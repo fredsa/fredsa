@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='highscores'>
+  <inherits name='com.google.gwt.user.User' />
+
+  <inherits name='com.google.gwt.user.theme.standard.Standard' />
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
+
+  <entry-point class='highscores.client.Highscores' />
+
+  <source path='client' />
+  <source path='shared' />
+
+
+  <!-- Logging to a variety of destinations -->
+  <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />
+
+  <!-- Log to Chrome Developer Tools, Firebug, etc. -->
+  <set-property name="log_ConsoleLogger" value="ENABLED" />
+
+  <!-- Log to a floating/draggable DIV -->
+  <set-property name="log_DivLogger" value="ENABLED" />
+
+  <!-- Development Mode only: Log to the GWT logging tree in the Development 
+    Mode view -->
+  <set-property name="log_GWTLogger" value="DISABLED" />
+
+  <!-- Development Mode only: System.out/System.err for clickable stack traces 
+    in Eclipse -->
+  <set-property name="log_SystemLogger" value="ENABLED" />
+
+  <set-configuration-property name="log_pattern"
+    value="[%-5p][%c{1}] %m%n" />
+
+</module>
