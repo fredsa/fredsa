@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Appcache Sample</title>
+    <script type="text/javascript" language="javascript" src="appcache/appcache.nocache.js"></script>
+  </head>
+
+  <body>
+
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+    <div id='appcache-status'>...status...</div><br>
+    <iframe id='appcacheInstaller' style='width: 600px; height: 300px;'></iframe>
+    <script type="text/javascript">
+    var cacheStatusValues = [];
+cacheStatusValues[0] = 'uncached';
+cacheStatusValues[1] = 'idle';
+cacheStatusValues[2] = 'checking';
+cacheStatusValues[3] = 'downloading';
+cacheStatusValues[4] = 'updateready';
+cacheStatusValues[5] = 'obsolete';
+
+var cache = window.applicationCache;
+cache.addEventListener('cached', logEvent, false);
+cache.addEventListener('checking', logEvent, false);
+cache.addEventListener('downloading', logEvent, false);
+cache.addEventListener('error', logEvent, false);
+cache.addEventListener('noupdate', logEvent, false);
+cache.addEventListener('obsolete', logEvent, false);
+cache.addEventListener('progress', logEvent, false);
+cache.addEventListener('updateready', logEvent, false);
+
+function logEvent(e) {
+    var online, status, type, message;
+    online = (navigator.onLine) ? 'yes' : 'no';
+    status = cacheStatusValues[cache.status];
+    type = e.type;
+    message = "MAIN PAGE: ";
+    message += 'online: ' + online;
+    message += ', event: ' + type;
+    message += ', status: ' + status;
+    if (type == 'error' && navigator.onLine) {
+        message+= ' (prolly a syntax error in manifest)';
+    }
+    document.getElementById("appcache-status").innerHTML += "<br>\n" + message;
+    console.log(message);
+}
+
+window.applicationCache.addEventListener(
+    'updateready',
+    function(){
+        window.applicationCache.swapCache();
+        console.log('swap cache has been called');
+    },
+    false
+);
+
+setInterval(function(){cache.update()}, 10000);
+
+console.log("----------------------------------------");
+    </script>
+
+
+
+      var appCache = window.applicationCache;
+      var handleCacheEvent = function(e) {
+        console.debug("e.type:");
+        for (x in e) {
+          console.debug(" - " + x + "=" + e[x]);
+        }
+      };
+      
+    handleCacheEvent2 = function(e) {
+      var status = document.getElementById("appcache-status");
+      status.innerHTML = e.type + " " + e.loaded + "/" + e.total;
+    };
+    
+      // Fired after the first cache of the manifest.
+      appCache.addEventListener('cached', handleCacheEvent, false);
+  
+      // Checking for an update. Always the first event fired in the sequence.
+      appCache.addEventListener('checking', handleCacheEvent, false);
+  
+      // An update was found. The browser is fetching resources.
+      appCache.addEventListener('downloading', handleCacheEvent, false);
+  
+      // The manifest returns 404 or 410, the download failed,
+      // or the manifest changed while the download was in progress.
+      appCache.addEventListener('error', handleCacheEvent, false);
+  
+      // Fired after the first download of the manifest.
+  //    appCache.addEventListener('noupdate', handleCacheEvent, false);
+  //    appCache.addEventListener('noupdate', handleCacheEvent2, false);
+  //    appCache.addEventListener('noupdate', function(e) { alert("e=" + e); alert("e.type=" + e.type); }, false);
+      appCache.addEventListener('noupdate', function(e) {
+           try { 
+            alert("e=" + e);
+            alert("e.type=" + e.type); 
+           } catch(err) {
+           }
+    
+  //         try { 
+  //          handleCacheEvent(e);
+  //         } catch(err) {
+  //          alert("err=" + err); 
+  //         }
+  //  
+  //         try { 
+  //          handleCacheEvent2(e);
+  //         } catch(err) {
+  //          alert("err=" + err); 
+  //         }
+         
+         }, false);
+  
+      // Fired if the manifest file returns a 404 or 410.
+      // This results in the application cache being deleted.
+      appCache.addEventListener('obsolete', handleCacheEvent, false);
+  
+      // Fired for each resource listed in the manifest as it is being fetched.
+      appCache.addEventListener('progress', handleCacheEvent, false);
+  
+      // Fired when the manifest resources have been newly redownloaded.
+      appCache.addEventListener('updateready', handleCacheEvent, false);
+
+<script>
+      document.getElementById('appcacheInstaller').src = '/AppCacheInstaller.html';
+</script>
+  </body>
+</html>
