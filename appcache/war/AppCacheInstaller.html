@@ -33,11 +33,47 @@ function logEvent(e) {
     message += ', event: ' + type;
     message += ', status: ' + status;
     if (type == 'error' && navigator.onLine) {
-        message+= ' (prolly a syntax error in manifest)';
+        message+= ' (probably a syntax error in manifest)';
     }
     document.getElementById("appcache-status").innerHTML += "<br>\n" + message;
+    //console.log(message);
+
+    message = ";";
+    switch (e.type) {
+      case "progress":
+        message = "Progress...";
+        if (e.lengthComputable) {
+          for (x in e) {
+            //message += "; " + x + "=" + e[x];
+          }
+          message += " " + e.loaded + "/" + e.total + " = " + (e.loaded / e.total * 100) + "%";
+        }
+        break;
+      case "noupdate":
+        message = "You're running the latest offline capable version.";
+        break;
+      case "obsolete":
+        message = "Offline mode has been uninstalled.";
+        break;
+      case "cached":
+        message = "We're ready to play offline.";
+        break;
+      case "checking":
+        message = "Checking for a new version...";
+        break;
+      case "downloading":
+        message = "Downloading...";
+        break;
+      case "updateready":
+        message = "A new version is ready. Click to <a href='.'>upgrade</a>.";
+        break;
+      case "error":
+        message = "Error loading offline version";
+        break;
+      default:
+        message = "[" + e.type + "]";
+    }
     window.parent.document.getElementById("appcache-status").innerHTML += "<br>\n" + message;
-    console.log(message);
 }
 
 window.applicationCache.addEventListener(
@@ -49,7 +85,7 @@ window.applicationCache.addEventListener(
     false
 );
 
-setInterval(function(){cache.update()}, 10000);
+//setInterval(function(){cache.update()}, 10000);
 
 console.log("----------------------------------------");
     </script>
