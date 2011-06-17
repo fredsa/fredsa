@@ -2,7 +2,7 @@ CACHE MANIFEST
 <%@page import="java.util.Date"%>
 # <%=new java.util.Date() %>
 <%
-if (Math.random() < 0.5) {
+if (Math.random() < 0.2) {
   response.sendError(404);
   return;
 }
