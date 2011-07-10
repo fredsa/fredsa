@@ -42,7 +42,11 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
     q=self.request.get("q")
     if q:
       query=db.Query(Person)
-      query.filter("words >=", q)
+      qlist = re.split('\W+', q.lower())
+      if '' in qlist:
+        qlist.remove('')
+      for qword in qlist:
+        query.filter("words ==", qword)
       for person in query:
         #person.updateWords()
         #person.put()
