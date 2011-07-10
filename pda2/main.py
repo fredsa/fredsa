@@ -41,7 +41,7 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
     q=self.request.get("q")
     if q:
       query=db.Query(Person)
-      query.filter("words ==", q)
+      query.filter("first_name >=", q)
       for person in query:
         self.personForm(person)
     elif self.request.get("action") == "create_person":
@@ -109,13 +109,15 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
           checked = "checked" if getattr(person, propname) else ""
           html = """<input type="checkbox" name="%s" %s> %s""" % (propname, checked, label)
           label = ""
+        elif isinstance(prop, db.TextProperty):
+          html = """<textarea name="%s" style="width: 50em; height: 20em; font-family: monospace;">%s</textarea>""" % (propname, value)
         elif isinstance(prop, db.StringProperty):
-          html = """<input type="text" name="%s" value="%s">""" % (propname, value)
+          html = """<input type="text" style="width: 50em;" name="%s" value="%s">""" % (propname, value)
         elif isinstance(prop, db.StringListProperty):
-          html = """<input type="text" name="%s" value="%s">""" % (propname, ", ".join(value))
+          html = """<input type="text" size="150" name="%s" value="%s">""" % (propname, ", ".join(value))
         else:
-          html = """xxxxx"""
-        self.response.out.write("""<tr style="color:red;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
+          html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
+        self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
 
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
@@ -138,9 +140,10 @@ class Person(db.Model):
   first_name = db.StringProperty(verbose_name="First Name", default="")
   last_name = db.StringProperty(verbose_name="Last Name", default="")
   company_name = db.StringProperty(verbose_name="Company Name", default="")
-  comments = db.StringProperty(verbose_name="Comments", default="")
+  comments = db.TextProperty(verbose_name="Comments", default="")
   category = SelectableStringProperty(verbose_name="Category", default="",
     choices=[
+      "(Unspecified)",
       "Relatives",
       "Personal",
       "Hotel/Restaurant/Entertainment",
