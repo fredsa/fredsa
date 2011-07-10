@@ -31,7 +31,7 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
 <script>document.searchform.q.focus(); document.searchform.q.select();</script> 
 
 <hr> 
-[<a href=".?action=person">+Person</a>] 
+[<a href=".?action=create_person">+Person</a>] 
 [<a href="_ah/admin">Admin</a>] 
 <!--
 <a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
@@ -44,6 +44,9 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
       query.filter("words ==", q)
       for person in query:
         self.personForm(person)
+    elif self.request.get("action") == "create_person":
+      person = Person()
+      self.personForm(person)
     elif self.request.get("action") == "person":
       person = self.requestToPerson(self.request)
       self.personForm(person)
@@ -54,11 +57,11 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
     """)
 
   def requestToPerson(self, req):
-      key = encoded=req.get("key")
-      person = Person()
+      key = req.get("key")
       if key:
-        key = db.Key(encoded=req.get("key"))
-        person = Person(key=key)
+        person = Person(key = db.Key(encoded=key))
+      else:
+        person = Person()
       props = Person.properties()
       words = []
       for propname in props:
@@ -104,7 +107,7 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
           html+="""</select>"""
         elif isinstance(prop, db.BooleanProperty):
           checked = "checked" if getattr(person, propname) else ""
-          html = """<input type="checkbox" name="%s" %s> %s""" % (checked, propname, label)
+          html = """<input type="checkbox" name="%s" %s> %s""" % (propname, checked, label)
           label = ""
         elif isinstance(prop, db.StringProperty):
           html = """<input type="text" name="%s" value="%s">""" % (propname, value)
