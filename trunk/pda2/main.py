@@ -45,8 +45,19 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
+      results = set([])
       for qword in qlist:
-        query.filter("words ==", qword)
+        query = db.Query(Person, keys_only=True)
+        query.filter("words >=", qword)
+        query.filter("words <=", qword + "~")
+        if len(results) == 0:
+          results = set(query)
+        else:
+          results = results & set(query)
+      query = db.Query(Person)
+      #query.filter("words >= ", "volvo")
+      #query.filter("words <= ", "volvo~")
+      query.filter("__key__ IN", list(results))
       for person in query:
         #person.updateWords()
         #person.put()
@@ -119,7 +130,7 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
         elif isinstance(prop, db.StringProperty):
           html = """<input type="text" style="width: 50em;" name="%s" value="%s">""" % (propname, value)
         elif isinstance(prop, db.StringListProperty):
-          html = """<input type="text" size="150" name="%s" value="%s">""" % (propname, ", ".join(value))
+          html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
         else:
           html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
         self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
