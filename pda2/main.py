@@ -2,6 +2,7 @@
 #
 import logging
 import pprint
+import re
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
@@ -26,7 +27,7 @@ class MainHandler(webapp.RequestHandler):
 <input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br> 
 <input type="radio" name="format"  value="compact"> Compact results<br> 
 -->
-Search text: <input type="text" name="q" value=""> <input type="submit" value="Go"><br> 
+Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br> 
 </form> 
 <script>document.searchform.q.focus(); document.searchform.q.select();</script> 
 
@@ -36,13 +37,15 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
 <!--
 <a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
 -->
-    """)
+    """ % (self.request.get("q")))
 
     q=self.request.get("q")
     if q:
       query=db.Query(Person)
-      query.filter("first_name >=", q)
+      query.filter("words >=", q)
       for person in query:
+        #person.updateWords()
+        #person.put()
         self.personForm(person)
     elif self.request.get("action") == "create_person":
       person = Person()
@@ -63,7 +66,6 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
       else:
         person = Person()
       props = Person.properties()
-      words = []
       for propname in props:
         prop = props[propname]
         if isinstance(prop, db.BooleanProperty):
@@ -73,16 +75,15 @@ Search text: <input type="text" name="q" value=""> <input type="submit" value="G
           setattr(person, propname, [])
         elif isinstance(prop, db.StringProperty):
           value=req.get(propname)
-          words.extend(value.lower().split())
           setattr(person, propname, value)
         else:
-          self.response.out.write("HMMMM" + propname)
+          self.response.out.write("HMMMM " + propname)
           setattr(person, propname, req.get(propname))
-
-      setattr(person, "words", list(set(words)))
+      person.updateWords()
       if person.first_name or person.last_name or person.mailing_name:
         person.put()
       return person
+
 
   def personForm(self, person):
       self.response.out.write("""
@@ -161,9 +162,23 @@ class Person(db.Model):
     else:
       return ""
 
+  def updateWords(self):
+    words = []
+    props = Person.properties()
+    for propname in props:
+      prop = props[propname]
+      if isinstance(prop, SelectableStringProperty):
+        continue
+      if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+        value=getattr(self, propname)
+        words.extend(re.split('\W+', value.lower()))
+    words = list(set(words))
+    words.remove('')
+    setattr(self, "words", words)
 
 def migrate(entity):
  person = Person(key_name=entity.key().name())
+ person.updateWords()
  logging.info(person)
  yield op.db.Put(person)
 
