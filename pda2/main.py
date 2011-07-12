@@ -54,14 +54,17 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
           results = set(query)
         else:
           results = results & set(query)
-      query = db.Query(Person)
-      #query.filter("words >= ", "volvo")
-      #query.filter("words <= ", "volvo~")
-      query.filter("__key__ IN", list(results))
-      for person in query:
-        #person.updateWords()
-        #person.put()
-        self.personForm(person)
+      keys = list(results)
+      while (keys):
+        # Max 30 keys allow in IN clause
+        somekeys = keys[:30]
+        keys = keys[30:]
+        query = db.Query(Person)
+        query.filter("__key__ IN", somekeys)
+        for person in query:
+          #person.updateWords()
+          #person.put()
+          self.personForm(person)
     elif self.request.get("action") == "create_person":
       person = Person()
       self.personForm(person)
