@@ -13,30 +13,30 @@ from mapreduce import operation as op
 class MainHandler(webapp.RequestHandler):
   def get(self):
     self.response.out.write("""
-<html> 
-<head> 
-  <title>PDA</title> 
-  <link rel="stylesheet" type="text/css" href="main.css"/> 
-</head> 
-<body class="pda">
-<h1>App Engine PDA2</h1> 
-<form name="searchform" method="get"> 
-<!--
-<input type="checkbox" name="includedisabled" > Include Disabled Entries<br> 
-<br> 
-<input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br> 
-<input type="radio" name="format"  value="compact"> Compact results<br> 
--->
-Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br> 
-</form> 
-<script>document.searchform.q.focus(); document.searchform.q.select();</script> 
-
-<hr> 
-[<a href=".?action=create_person">+Person</a>] 
-[<a href="_ah/admin">Admin</a>] 
-<!--
-<a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
--->
+          <html> 
+          <head> 
+            <title>PDA</title> 
+            <link rel="stylesheet" type="text/css" href="main.css"/> 
+          </head> 
+          <body class="pda">
+          <h1>App Engine PDA2</h1> 
+          <form name="searchform" method="get"> 
+          <!--
+          <input type="checkbox" name="includedisabled" > Include Disabled Entries<br> 
+          <br> 
+          <input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br> 
+          <input type="radio" name="format"  value="compact"> Compact results<br> 
+          -->
+          Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br> 
+          </form> 
+          <script>document.searchform.q.focus(); document.searchform.q.select();</script> 
+          
+          <hr> 
+          [<a href=".?action=create_person">+Person</a>] 
+          [<a href="_ah/admin">Admin</a>] 
+          <!--
+          <a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
+          -->
     """ % (self.request.get("q")))
 
     q=self.request.get("q")
@@ -73,8 +73,8 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
       self.personForm(person)
 
     self.response.out.write("""
-</body> 
-</html> 
+          </body> 
+          </html> 
     """)
 
   def requestToPerson(self, req):
@@ -105,11 +105,11 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
 
   def personForm(self, person):
       self.response.out.write("""
-<hr>
-<form name="personform" method="get" action="."> 
-<input type="hidden" name="action" value="person"> 
-<input type="text" name="key" value="%s"> 
-<table> 
+          <hr>
+          <form name="personform" method="get" action="."> 
+          <input type="hidden" name="action" value="person"> 
+          <input type="text" name="key" value="%s"> 
+          <table> 
       """ % person.maybeKey())
 
       props = Person.properties()
@@ -117,12 +117,12 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
-</table> 
-</form>
-<script>
- // document.personform.%s.focus();
-</script>
-<hr> 
+          </table> 
+          </form>
+          <script>
+           // document.personform.%s.focus();
+          </script>
+          <hr> 
       """ % propname)
       query = db.Query(Contact)
       query.ancestor(person.key())
@@ -132,11 +132,11 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
 
   def contactForm(self, contact):
       self.response.out.write("""
-<hr>
-<form name="contact" method="get" action="."> 
-<input type="hidden" name="action" value="contact"> 
-<input type="text" name="key" value="%s"> 
-<table> 
+          <hr>
+          <form name="contact" method="get" action="."> 
+          <input type="hidden" name="action" value="contact"> 
+          <input type="text" name="key" value="%s"> 
+          <table> 
       """ % contact.maybeKey())
 
       props = Contact.properties()
@@ -144,9 +144,9 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
-</table> 
-</form>
-<hr> 
+          </table> 
+          </form>
+          <hr> 
       """)
 
 
