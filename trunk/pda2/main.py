@@ -148,6 +148,55 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
 </script>
 <hr> 
       """ % propname)
+      query = db.Query(Contact)
+      query.ancestor(person.key())
+      for contact in query:
+        self.contactForm(contact)
+
+
+  def contactForm(self, contact):
+      self.response.out.write("""
+<hr>
+<form name="contact" method="get" action="."> 
+<input type="hidden" name="action" value="contact"> 
+<input type="text" name="key" value="%s"> 
+<table> 
+      """ % contact.maybeKey())
+
+      props = Contact.properties()
+      for propname in props:
+        prop = props[propname]
+	label = props[propname].verbose_name
+        value = getattr(contact, propname)
+        if isinstance(prop, SelectableStringProperty):
+          values=prop.choices
+          html="""<select name="%s" size="%s">""" % (propname, len(values))
+          for v in values:
+            selected="selected" if value == v else ""
+            html+="""<option %s value="%s">%s</option>""" % (selected, v, v)
+          html+="""</select>"""
+        elif isinstance(prop, db.BooleanProperty):
+          checked = "checked" if getattr(contact, propname) else ""
+          html = """<input type="checkbox" name="%s" %s> %s""" % (propname, checked, label)
+          label = ""
+        elif isinstance(prop, db.TextProperty):
+          html = """<textarea name="%s" style="width: 50em; height: 20em; font-family: monospace;">%s</textarea>""" % (propname, value)
+        elif isinstance(prop, db.StringProperty):
+          html = """<input type="text" style="width: 50em;" name="%s" value="%s">""" % (propname, value)
+        elif isinstance(prop, db.StringListProperty):
+          html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
+        else:
+          html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
+        self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
+
+      self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
+      propname = props.keys()[0]
+      self.response.out.write("""
+</table> 
+</form>
+<hr> 
+      """)
+
 
 class SelectableStringProperty(db.StringProperty):
   pass
@@ -174,6 +223,47 @@ class Person(db.Model):
     ])
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
   send_card = db.BooleanProperty(verbose_name="Send Card", default=False, required=True)
+  words = db.StringListProperty(verbose_name="words", default=[])
+
+  def maybeKey(self):
+    if self.is_saved():
+      return self.key()
+    else:
+      return ""
+
+  def updateWords(self):
+    words = []
+    props = Person.properties()
+    for propname in props:
+      prop = props[propname]
+      if isinstance(prop, SelectableStringProperty):
+        continue
+      if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+        value=getattr(self, propname)
+        words.extend(re.split('\W+', value.lower()))
+    words = list(set(words))
+    words.remove('')
+    setattr(self, "words", words)
+
+class Contact(db.Model):
+  contact_text = db.StringProperty(verbose_name="Contact Text", default="")
+  comments = db.TextProperty(verbose_name="Comments", default="")
+  contact_method = SelectableStringProperty(verbose_name="contact_method", default="",
+    choices=[
+      "(Unspecified)",
+      "Personal",
+      "Business",
+    ])
+  contact_type = SelectableStringProperty(verbose_name="contact_type", default="",
+    choices=[
+      "(Unspecified)",
+      "Voice",
+      "Email",
+      "Mobile",
+      "URL",
+      "Facsimile",
+    ])
+  enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
   words = db.StringListProperty(verbose_name="words", default=[])
 
   def maybeKey(self):
