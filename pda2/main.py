@@ -143,7 +143,9 @@ Search text: <input type="text" name="q" value="%s"> <input type="submit" value=
       self.response.out.write("""
 </table> 
 </form>
-<script>document.personform.%s.focus();</script>
+<script>
+ // document.personform.%s.focus();
+</script>
 <hr> 
       """ % propname)
 
