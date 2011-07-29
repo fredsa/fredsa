@@ -35,19 +35,25 @@ public class CacheServlet extends HttpServlet {
     String cacheText = req.getParameter("cache");
     if (cacheText != null) {
       int age = Integer.parseInt(cacheText);
-
+  
       resp.setDateHeader("Date", now.getTime());
 
-      if (age == 0) {
+      if (age <= 0) {
+        // HTTP/1.0
         resp.setDateHeader("Expires", 0);
         resp.setHeader("Pragma", "no-cache");
+        
+        // HTTP/1.1
         resp.setHeader("Cache-Control", "no-cache, must-revalidate");
       } else {
+        // HTTP/1.0
         resp.setDateHeader("Expires", now.getTime() + 1000L * age);
+        
+        // HTTP/1.1
         resp.setHeader("Cache-Control", "public, s-maxage=" + age);
       }
     }
-
+    
     resp.setContentType("text/html");
     PrintWriter writer = resp.getWriter();
     writer.println("<html><head><title>Cache Servlet</title></head><body>");
