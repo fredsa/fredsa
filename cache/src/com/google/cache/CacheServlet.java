@@ -59,7 +59,8 @@ public class CacheServlet extends HttpServlet {
     // Dump request headers if 'headers' is among the request parameters
     if (req.getParameter("headers") != null) {
       writer.println("<br><b>Request Headers:</b><br>");
-      for (Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
+      for (@SuppressWarnings("unchecked")
+      Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
         String key = e.nextElement();
         writer.println("- <b>" + key + ":</b> " + req.getHeader(key) + "<br>");
       }
