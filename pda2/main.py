@@ -228,6 +228,22 @@ class Person(Thing):
     Thing.updateWords(self, Person.properties())
 
 
+class Address(Thing):
+  address_line1 = db.StringProperty(verbose_name="Address Line 1", default="")
+  address_line2 = db.StringProperty(verbose_name="Address Line 2", default="")
+  address_type = SelectableStringProperty(verbose_name="Address Type", default="",
+    choices=[
+    ])
+  city = db.StringProperty(verbose_name="City", default="")
+  country = db.StringProperty(verbose_name="Country", default="")
+  directions = db.TextProperty(verbose_name="Directions", default="")
+  postal_code = db.StringProperty(verbose_name="Postal Code", default="")
+  state_province = db.StringProperty(verbose_name="State/Province", default="")
+
+  def updateWords(self):
+    Thing.updateWords(self, Address.properties())
+
+
 class Contact(Thing):
   contact_text = db.StringProperty(verbose_name="Contact Text", default="")
   contact_method = SelectableStringProperty(verbose_name="contact_method", default="",
@@ -259,12 +275,17 @@ class Calendar(Thing):
   occasion = db.StringProperty(verbose_name="Occasion", default="")
 
   def updateWords(self):
-    pass
     Thing.updateWords(self, Calendar.properties())
 
 
 def migrate(person):
  person.updateWords()
+
+ query = db.Query(Address)
+ query.ancestor(person)
+ for address in query.run():
+   address.updateWords()
+   yield op.db.Put(address)
 
  query = db.Query(Contact)
  query.ancestor(person)
@@ -275,6 +296,8 @@ def migrate(person):
  query = db.Query(Calendar)
  query.ancestor(person)
  for calendar in query.run():
+   if (calendar.first_occurence.year < 1900):
+     calendar.first_occurence = calendar.first_occurence.replace(year=1900)
    calendar.updateWords()
    yield op.db.Put(calendar)
 
