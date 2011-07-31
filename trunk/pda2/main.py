@@ -39,9 +39,9 @@ class MainHandler(webapp.RequestHandler):
           -->
     """ % (self.request.get("q")))
 
-    q=self.request.get("q")
+    q = self.request.get("q")
     if q:
-      query=db.Query(Person)
+      query = db.Query(Person)
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
@@ -80,7 +80,7 @@ class MainHandler(webapp.RequestHandler):
   def requestToPerson(self, req):
       key = req.get("key")
       if key:
-        person = Person(key = db.Key(encoded=key))
+        person = Person(key=db.Key(encoded=key))
       else:
         person = Person()
       props = Person.properties()
@@ -92,7 +92,7 @@ class MainHandler(webapp.RequestHandler):
         elif isinstance(prop, db.StringListProperty):
           setattr(person, propname, [])
         elif isinstance(prop, db.StringProperty):
-          value=req.get(propname)
+          value = req.get(propname)
           setattr(person, propname, value)
         else:
           self.response.out.write("HMMMM " + propname)
@@ -156,12 +156,12 @@ class MainHandler(webapp.RequestHandler):
       label = props[propname].verbose_name
       value = getattr(thing, propname)
       if isinstance(prop, SelectableStringProperty):
-        values=prop.choices
-        html="""<select name="%s" size="%s">""" % (propname, len(values))
+        values = prop.choices
+        html = """<select name="%s" size="%s">""" % (propname, len(values))
         for v in values:
-          selected="selected" if value == v else ""
-          html+="""<option %s value="%s">%s</option>""" % (selected, v, v)
-        html+="""</select>"""
+          selected = "selected" if value == v else ""
+          html += """<option %s value="%s">%s</option>""" % (selected, v, v)
+        html += """</select>"""
       elif isinstance(prop, db.BooleanProperty):
         checked = "checked" if getattr(thing, propname) else ""
         html = """<input type="checkbox" name="%s" %s> %s""" % (propname, checked, label)
@@ -220,7 +220,7 @@ class Person(Thing):
       if isinstance(prop, SelectableStringProperty):
         continue
       if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
-        value=getattr(self, propname)
+        value = getattr(self, propname)
         words.extend(re.split('\W+', value.lower()))
     words = list(set(words))
     words.remove('')
