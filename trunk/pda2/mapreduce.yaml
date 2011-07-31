@@ -5,4 +5,4 @@ mapreduce:
     handler: main.migrate
     params:
     - name: entity_kind
-      default: main.PERSON
+      default: main.Person
