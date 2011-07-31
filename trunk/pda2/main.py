@@ -247,8 +247,7 @@ class Contact(Thing):
   words = db.StringListProperty(verbose_name="words", default=[])
 
 
-def migrate(entity):
- person = Person(key_name=entity.key().name())
+def migrate(person):
  person.updateWords()
  logging.info(person)
  yield op.db.Put(person)
