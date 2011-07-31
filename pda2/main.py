@@ -193,6 +193,21 @@ class Thing(db.Model):
     else:
       return ""
 
+  def updateWords_(self, props):
+    words = []
+    for propname in props:
+      prop = props[propname]
+      if isinstance(prop, SelectableStringProperty):
+        continue
+      if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+        value = getattr(self, propname)
+        words.extend(re.split('\W+', value.lower()))
+    words = list(set(words))
+    if '' in words:
+      words.remove('')
+    setattr(self, "words", words)
+
+
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
   title = db.StringProperty(verbose_name="Title", default="")
@@ -213,18 +228,7 @@ class Person(Thing):
   words = db.StringListProperty(verbose_name="words", default=[])
 
   def updateWords(self):
-    words = []
-    props = Person.properties()
-    for propname in props:
-      prop = props[propname]
-      if isinstance(prop, SelectableStringProperty):
-        continue
-      if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
-        value = getattr(self, propname)
-        words.extend(re.split('\W+', value.lower()))
-    words = list(set(words))
-    words.remove('')
-    setattr(self, "words", words)
+    self.updateWords_(Person.properties())
 
 
 class Contact(Thing):
@@ -239,6 +243,7 @@ class Contact(Thing):
     choices=[
       "(Unspecified)",
       "Voice",
+      "Data",
       "Email",
       "Mobile",
       "URL",
@@ -246,10 +251,17 @@ class Contact(Thing):
     ])
   words = db.StringListProperty(verbose_name="words", default=[])
 
+  def updateWords(self):
+    self.updateWords_(Contact.properties())
+
 
 def migrate(person):
  person.updateWords()
- logging.info(person)
+ q = db.Query(Contact)
+ q.ancestor(person)
+ for c in q.run():
+   c.updateWords()
+   yield op.db.Put(c)
  yield op.db.Put(person)
 
 
