@@ -183,6 +183,7 @@ class SelectableStringProperty(db.StringProperty):
 class Thing(db.Model):
   comments = db.TextProperty(verbose_name="Comments", default="")
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
+  words = db.StringListProperty(verbose_name="words", default=[])
 
   def maybeKey(self):
     if self.is_saved():
@@ -190,7 +191,7 @@ class Thing(db.Model):
     else:
       return ""
 
-  def updateWords_(self, props):
+  def updateWords(self, props):
     words = []
     for propname in props:
       prop = props[propname]
@@ -222,10 +223,9 @@ class Person(Thing):
       "Business Relations"
     ])
   send_card = db.BooleanProperty(verbose_name="Send Card", default=False, required=True)
-  words = db.StringListProperty(verbose_name="words", default=[])
 
   def updateWords(self):
-    self.updateWords_(Person.properties())
+    Thing.updateWords(self, Person.properties())
 
 
 class Contact(Thing):
@@ -236,7 +236,7 @@ class Contact(Thing):
       "Personal",
       "Business",
     ])
-  contact_type = SelectableStringProperty(verbose_name="contact_type", default="",
+  contact_type = SelectableStringProperty(verbose_name="Contact Type", default="",
     choices=[
       "(Unspecified)",
       "Voice",
@@ -246,19 +246,38 @@ class Contact(Thing):
       "URL",
       "Facsimile",
     ])
-  words = db.StringListProperty(verbose_name="words", default=[])
 
   def updateWords(self):
-    self.updateWords_(Contact.properties())
+    Thing.updateWords(self, Contact.properties())
+
+class Calendar(Thing):
+  first_occurence = db.DateProperty()
+  frequency = SelectableStringProperty(verbose_name="Frequency", default="",
+    choices=[
+      "Annual",
+    ])
+  occasion = db.StringProperty(verbose_name="Occasion", default="")
+
+  def updateWords(self):
+    pass
+    Thing.updateWords(self, Calendar.properties())
 
 
 def migrate(person):
  person.updateWords()
- q = db.Query(Contact)
- q.ancestor(person)
- for c in q.run():
-   c.updateWords()
-   yield op.db.Put(c)
+
+ query = db.Query(Contact)
+ query.ancestor(person)
+ for contact in query.run():
+   contact.updateWords()
+   yield op.db.Put(contact)
+
+ query = db.Query(Calendar)
+ query.ancestor(person)
+ for calendar in query.run():
+   calendar.updateWords()
+   yield op.db.Put(calendar)
+
  yield op.db.Put(person)
 
 
