@@ -180,9 +180,6 @@ class MainHandler(webapp.RequestHandler):
 class SelectableStringProperty(db.StringProperty):
   pass
 
-class PERSON(db.Expando):
-  pass
-
 class Thing(db.Model):
   comments = db.TextProperty(verbose_name="Comments", default="")
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
