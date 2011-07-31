@@ -41,29 +41,37 @@ class MainHandler(webapp.RequestHandler):
 
     q = self.request.get("q")
     if q:
-      query = db.Query(Person)
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
-      results = set([])
+      results = None
       for qword in qlist:
-        query = db.Query(Person, keys_only=True)
-        query.filter("words >=", qword)
-        query.filter("words <=", qword + "~")
-        if len(results) == 0:
-          results = set(query)
+        word_results = set([])
+        for kind in [Person, Address, Calendar, Contact]:
+          query = db.Query(kind, keys_only=True)
+          query.filter("words >=", qword)
+          query.filter("words <=", qword + "~")
+          word_results = word_results | set([x.parent() or x for x in query])
+          #self.response.out.write("word_results = %s<br><br>" % word_results)
+        if results is None:
+          #self.response.out.write("results is None<br>")
+          results = word_results
         else:
-          results = results & set(query)
+          results = results & word_results
+        #self.response.out.write("results = %s<br><br>" % results)
+
       keys = list(results)
       while (keys):
         # Max 30 keys allow in IN clause
         somekeys = keys[:30]
         keys = keys[30:]
+        self.response.out.write("somekeys = %s<br><br>" % somekeys)
         query = db.Query(Person)
         query.filter("__key__ IN", somekeys)
-        for person in query:
-          #person.updateWords()
-          #person.put()
+        s = set(query)
+        self.response.out.write("s = %s<br><br>" % s)
+        for person in s:
+          #self.response.out.write("person = %s<br><br>" % person)
           self.personForm(person)
     elif self.request.get("action") == "create_person":
       person = Person()
