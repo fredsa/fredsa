@@ -128,9 +128,9 @@ class MainHandler(webapp.RequestHandler):
           <hr>
           <form name="personform" method="get" action="."> 
           <input type="hidden" name="action" value="person"> 
-          <input type="text" name="key" value="%s"> 
+          <input type="hidden" name="key" value="%s"><code>%s</code>
           <table> 
-      """ % person.maybeKey())
+      """ % (person.maybeKey(), person.maybeKey()))
 
       props = Person.properties()
       self.formFields(person, props)
@@ -155,9 +155,9 @@ class MainHandler(webapp.RequestHandler):
           <hr>
           <form name="contact" method="get" action="."> 
           <input type="hidden" name="action" value="contact"> 
-          <input type="text" name="key" value="%s"> 
+          <input type="hidden" name="key" value="%s"><code>%s</code>
           <table> 
-      """ % contact.maybeKey())
+      """ % (contact.maybeKey(), contact.maybeKey()))
 
       props = Contact.properties()
       self.formFields(contact, props)
@@ -191,7 +191,8 @@ class MainHandler(webapp.RequestHandler):
       elif isinstance(prop, db.StringProperty):
         html = """<input type="text" style="width: 50em;" name="%s" value="%s">""" % (propname, value)
       elif isinstance(prop, db.StringListProperty):
-        html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
+        #html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
+        html = """<code style="color:gray;">%s</code>""" % " ".join(value)
       else:
         html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
       self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
