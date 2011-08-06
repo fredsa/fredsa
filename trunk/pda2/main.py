@@ -34,9 +34,12 @@ class MainHandler(webapp.RequestHandler):
           <hr> 
           [<a href=".?action=create_person">+Person</a>] 
           [<a href="_ah/admin">Admin</a>] 
+          [<a href=".?action=fix">MAP-OVER-PERSON</a>]
           <!--
           <a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
           -->
+          <br>
+          <br>
     """ % (self.request.get("q")))
 
     q = self.request.get("q")
@@ -79,6 +82,13 @@ class MainHandler(webapp.RequestHandler):
     elif self.request.get("action") == "person":
       person = self.requestToPerson(self.request)
       self.personForm(person)
+    elif self.request.get("action") == "fix":
+      query = db.Query(Person)
+      for person in query:
+        person.updateWords()
+        db.put(person)
+      self.response.out.write("DONE<br>")
+
 
     self.response.out.write("""
           </body> 
@@ -274,6 +284,7 @@ class Contact(Thing):
   def updateWords(self):
     Thing.updateWords(self, Contact.properties())
 
+
 class Calendar(Thing):
   first_occurence = db.DateProperty()
   frequency = SelectableStringProperty(verbose_name="Frequency", default="",
@@ -287,29 +298,29 @@ class Calendar(Thing):
 
 
 def migrate(person):
- person.updateWords()
+  person.updateWords()
 
- query = db.Query(Address)
- query.ancestor(person)
- for address in query.run():
-   address.updateWords()
-   yield op.db.Put(address)
+  query = db.Query(Address)
+  query.ancestor(person)
+  for address in query.run():
+    address.updateWords()
+    yield op.db.Put(address)
 
- query = db.Query(Contact)
- query.ancestor(person)
- for contact in query.run():
-   contact.updateWords()
-   yield op.db.Put(contact)
+  query = db.Query(Contact)
+  query.ancestor(person)
+  for contact in query.run():
+    contact.updateWords()
+    yield op.db.Put(contact)
 
- query = db.Query(Calendar)
- query.ancestor(person)
- for calendar in query.run():
-   if (calendar.first_occurence.year < 1900):
-     calendar.first_occurence = calendar.first_occurence.replace(year=1900)
-   calendar.updateWords()
-   yield op.db.Put(calendar)
+  query = db.Query(Calendar)
+  query.ancestor(person)
+  for calendar in query.run():
+    if (calendar.first_occurence.year < 1900):
+      calendar.first_occurence = calendar.first_occurence.replace(year=1900)
+    calendar.updateWords()
+    yield op.db.Put(calendar)
 
- yield op.db.Put(person)
+  yield op.db.Put(person)
 
 
 def main():
