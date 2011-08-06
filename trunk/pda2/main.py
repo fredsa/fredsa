@@ -13,23 +13,52 @@ from google.appengine.api import users
 class MainHandler(webapp.RequestHandler):
   def get(self):
     self.response.out.write("""
-          <html> 
-          <head> 
-            <title>PDA</title> 
-            <link rel="stylesheet" type="text/css" href="main.css"/> 
-          </head> 
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>PDA</title>
+            <link rel="stylesheet" type="text/css" href="main.css"/>
+            <style type="text/css">
+              body {
+                line-height: 1.3em;
+              }
+              .comments {
+                font-family: monospace;
+                color: #c44;
+              }
+              .tag {
+                font-size: small;
+              }
+              .indent {
+                border-left: 1em solid #eee;
+                padding-left: 1em;
+              }
+              .edit-link {
+                font-size: small;
+                background-color: #ddd;
+                margin: 0.2em;
+                padding: 0px 10px;
+                border-radius: 5px;
+                display: inline-block;
+              }
+              .thing {
+                font-weight: bold;
+                margin: 0em 0.5em 0em 0.2em;
+              }
+            </style>
+          </head>
           <body class="pda">
-          <h1>App Engine PDA2</h1> 
-          <form name="searchform" method="get"> 
+          <h1>App Engine PDA2</h1>
+          <form name="searchform" method="get">
           <!--
-          <input type="checkbox" name="includedisabled" > Include Disabled Entries<br> 
-          <br> 
-          <input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br> 
-          <input type="radio" name="format"  value="compact"> Compact results<br> 
+          <input type="checkbox" name="includedisabled" > Include Disabled Entries<br>
+          <br>
+          <input type="radio" name="format" checked value="verbose"> Verbose (regular) results<br>
+          <input type="radio" name="format"  value="compact"> Compact results<br>
           -->
-          Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br> 
-          </form> 
-          <script>document.searchform.q.focus(); document.searchform.q.select();</script> 
+          Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br>
+          </form>
+          <script>document.searchform.q.focus(); document.searchform.q.select();</script>
           
           <hr> 
           [<a href=".?action=create_person">+Person</a>] 
@@ -77,13 +106,14 @@ class MainHandler(webapp.RequestHandler):
         #self.response.out.write("s = %s<br><br>" % s)
         for person in s:
           #self.response.out.write("person = %s<br><br>" % person)
+          self.personView(person)
           self.personForm(person)
     elif self.request.get("action") == "create_person":
       person = Person()
       self.personForm(person)
-    elif self.request.get("action") == "person":
+    elif self.request.get("action") == "Person":
       person = self.requestToPerson(self.request)
-      self.personForm(person)
+      self.personView(person)
     elif self.request.get("action") == "fix":
       query = db.Query(Person)
       for person in query:
@@ -111,7 +141,7 @@ class MainHandler(webapp.RequestHandler):
           setattr(person, propname, res)
         elif isinstance(prop, db.StringListProperty):
           setattr(person, propname, [])
-        elif isinstance(prop, db.StringProperty):
+        elif isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
           value = req.get(propname)
           setattr(person, propname, value)
         else:
@@ -123,14 +153,33 @@ class MainHandler(webapp.RequestHandler):
       return person
 
 
+  def personView(self, person):
+      self.response.out.write("""
+          <hr>
+          <a href="%s" class="edit-link">Edit</a>
+          <span class="thing">%s</span> <span class="tag">(%s) [%s]</span><br>
+          <div class="comments">%s</div>
+          <div class="indent">
+            <br>
+      """ % (person.editUrl(),
+             person.displayName(), person.category, person.enabledText(),
+             person.comments))
+      query = db.Query(Contact)
+      query.ancestor(person.key())
+      for contact in query:
+        self.contactView(contact)
+      self.response.out.write("""
+          </div>""") 
+
+
   def personForm(self, person):
       self.response.out.write("""
           <hr>
-          <form name="personform" method="get" action="."> 
-          <input type="hidden" name="action" value="person"> 
+          <form name="personform" method="get" action=".">
+          <input type="hidden" name="action" value="%s">
           <input type="hidden" name="key" value="%s"><code>%s</code>
           <table> 
-      """ % (person.maybeKey(), person.maybeKey()))
+      """ % (person.kind(), person.maybeKey(), person.maybeKey()))
 
       props = Person.properties()
       self.formFields(person, props)
@@ -150,6 +199,16 @@ class MainHandler(webapp.RequestHandler):
         self.contactForm(contact)
 
 
+  def contactView(self, contact):
+      self.response.out.write("""
+          <a href="%s" class="edit-link">Edit</a>
+          <span class="thing">%s</span> <span class="tag">(%s %s) [%s]</span><br>
+          <div class="comments">%s</div>
+      """ % (contact.editUrl(),
+             contact.contact_text, contact.contact_method, contact.contact_type, contact.enabledText(),
+             contact.comments))
+
+  
   def contactForm(self, contact):
       self.response.out.write("""
           <hr>
@@ -226,6 +285,14 @@ class Thing(db.Model):
       words.remove('')
     setattr(self, "words", words)
 
+  def enabledText(self):
+    if self.enabled:
+      return "enabled"
+    else:
+      return "disabled"
+
+  def editUrl(self):
+    return "?action=%s&key=%s" % (self.kind(), self.key())
 
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
@@ -247,7 +314,20 @@ class Person(Thing):
 
   def updateWords(self):
     Thing.updateWords(self, Person.properties())
-
+    
+  def displayName(self):
+    t = ""
+    if self.mailing_name:
+      t += "[%s] " % self.mailing_name
+    if self.company_name:
+      t += "%s " % self.company_name
+    if self.title:
+      t += self.title + " "
+    if self.first_name:
+      t += self.first_name + " "
+    if self.last_name:
+      t += self.last_name
+    return t
 
 class Address(Thing):
   address_line1 = db.StringProperty(verbose_name="Address Line 1", default="")
