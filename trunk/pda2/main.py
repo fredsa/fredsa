@@ -130,9 +130,11 @@ class MainHandler(webapp.RequestHandler):
   def requestToPerson(self, req):
       key = req.get("key")
       if key:
-        person = Person(key=db.Key(encoded=key))
+        person = db.get(db.Key(encoded=key))
       else:
         person = Person()
+      if not req.get("modified"):
+        return person
       props = Person.properties()
       for propname in props:
         prop = props[propname]
@@ -177,6 +179,7 @@ class MainHandler(webapp.RequestHandler):
           <hr>
           <form name="personform" method="get" action=".">
           <input type="hidden" name="action" value="%s">
+          <input type="hidden" name="modified" value="true">
           <input type="hidden" name="key" value="%s"><code>%s</code>
           <table> 
       """ % (person.kind(), person.maybeKey(), person.maybeKey()))
@@ -277,7 +280,7 @@ class Thing(db.Model):
       prop = props[propname]
       if isinstance(prop, SelectableStringProperty):
         continue
-      if isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+      if isinstance(prop, (db.StringProperty, db.TextProperty)):
         value = getattr(self, propname)
         words.extend(re.split('\W+', value.lower()))
     words = list(set(words))
