@@ -8,7 +8,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from google.appengine.api import users
-from mapreduce import operation as op
+#from mapreduce import operation as op
 
 class MainHandler(webapp.RequestHandler):
   def get(self):
