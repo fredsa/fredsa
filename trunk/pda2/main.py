@@ -61,18 +61,20 @@ class MainHandler(webapp.RequestHandler):
           results = word_results
         else:
           results = results & word_results
-        #self.response.out.write("results = %s<br><br>" % results)
+        #self.response.out.write("results = %s<br><br>" % results
+        self.response.out.write("- <code>%s</code> had %s hits<br>" % (qword, len(word_results)))
 
       keys = list(results)
+      self.response.out.write("%s result(s) matching <code>%s</code><br>" % (len(keys), " ".join(qlist)))
       while (keys):
         # Max 30 keys allow in IN clause
         somekeys = keys[:30]
         keys = keys[30:]
-        self.response.out.write("somekeys = %s<br><br>" % somekeys)
+        #self.response.out.write("somekeys = %s<br><br>" % somekeys)
         query = db.Query(Person)
         query.filter("__key__ IN", somekeys)
         s = set(query)
-        self.response.out.write("s = %s<br><br>" % s)
+        #self.response.out.write("s = %s<br><br>" % s)
         for person in s:
           #self.response.out.write("person = %s<br><br>" % person)
           self.personForm(person)
