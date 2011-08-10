@@ -1,0 +1,31 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .answer {
+      font-size: 180%;
+    }
+    
+    .challenge {
+      text-align: center;
+    }
+  
+    .panel {
+      border: 3px solid black;
+      padding: 5px;
+    }
+    
+    .wordlistpanel {
+      margin: 0px auto;
+      width: 20em;
+    }
+  </ui:style>
+  <g:HTMLPanel styleName="{style.answer}">
+    <g:SimplePanel styleName="{style.panel} {style.challenge}" ui:field="challengePanel">
+    </g:SimplePanel>
+    <g:SimplePanel styleName="{style.panel} {style.wordlistpanel}" ui:field="wordListPanel">
+    </g:SimplePanel>
+    <g:SimplePanel styleName="{style.panel}" ui:field="loggerPanel">
+    </g:SimplePanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 
