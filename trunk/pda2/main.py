@@ -26,13 +26,13 @@ class MainHandler(webapp.RequestHandler):
                 font-family: monospace;
                 color: #c44;
                 white-space: pre;
+                padding-bottom: 2em;
               }
               .tag {
                 font-size: small;
               }
               .indent {
-                border-left: 1em solid #eee;
-                padding-left: 1em;
+                padding-left: 2em;
               }
               .edit-link {
                 font-size: small;
@@ -92,10 +92,11 @@ class MainHandler(webapp.RequestHandler):
         else:
           results = results & word_results
         #self.response.out.write("results = %s<br><br>" % results
-        self.response.out.write("- <code>%s</code> had %s hits<br>" % (qword, len(word_results)))
+        self.response.out.write("%s result(s) matching <code>%s</code><br>" % (len(word_results), qword))
 
       keys = list(results)
-      self.response.out.write("%s result(s) matching <code>%s</code><br>" % (len(keys), " ".join(qlist)))
+      if (len(qlist) > 1):
+        self.response.out.write("===> %s result(s) matching <code>%s</code><br>" % (len(keys), " ".join(qlist)))
       while (keys):
         # Max 30 keys allow in IN clause
         somekeys = keys[:30]
@@ -108,7 +109,7 @@ class MainHandler(webapp.RequestHandler):
         for person in sorted(s, key=Thing.key):
           #self.response.out.write("person = %s<br><br>" % person)
           self.personView(person)
-          self.personForm(person)
+#          self.personForm(person)
     elif self.request.get("action") == "create_person":
       person = Person()
       self.personForm(person)
@@ -163,7 +164,6 @@ class MainHandler(webapp.RequestHandler):
           <span class="thing">%s</span> <span class="tag">(%s) [%s]</span><br>
           <div class="comments">%s</div>
           <div class="indent">
-            <br>
       """ % (person.editUrl(),
              person.displayName(), person.category, person.enabledText(),
              person.comments))
