@@ -46,10 +46,18 @@ class MainHandler(webapp.RequestHandler):
                 font-weight: bold;
                 margin: 0em 0.5em 0em 0.2em;
               }
+              .title {
+                text-decoration: none;
+                font-size: 2em;
+                font-weight: bold;
+                padding: 0.2em 0em 0.5em;
+                display: block;
+                color: black;
+              }
             </style>
           </head>
           <body class="pda">
-          <h1>App Engine PDA2</h1>
+          <a href="/" class="title">App Engine PDA2</a>
           <form name="searchform" method="get">
           <!--
           <input type="checkbox" name="includedisabled" > Include Disabled Entries<br>
@@ -59,10 +67,9 @@ class MainHandler(webapp.RequestHandler):
           -->
           Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br>
           </form>
-          <script>document.searchform.q.focus(); document.searchform.q.select();</script>
           
           <hr> 
-          [<a href=".?action=create_person">+Person</a>] 
+          [<a href=".?action=create&kind=Person">+Person</a>] 
           [<a href="_ah/admin">Admin</a>] 
           [<a href=".?action=fix">MAP-OVER-PERSON</a>]
           <!--
@@ -71,9 +78,15 @@ class MainHandler(webapp.RequestHandler):
           <br>
           <br>
     """ % (self.request.get("q")))
-
+    
     q = self.request.get("q")
+    action = self.request.get("action")
+    kind = self.request.get("kind")
+    modified = self.request.get("modified")
     if q:
+      self.response.out.write("""
+            <script>document.searchform.q.focus(); document.searchform.q.select();</script>
+      """)
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
@@ -109,23 +122,31 @@ class MainHandler(webapp.RequestHandler):
         for person in sorted(s, key=Thing.key):
           #self.response.out.write("person = %s<br><br>" % person)
           self.personView(person)
-#          self.personForm(person)
-    elif self.request.get("action") == "create_person":
-      person = Person()
-      self.personForm(person)
-    elif self.request.get("action") == "Person":
-      person = self.requestToPerson(self.request)
-      self.personForm(person)
-    elif self.request.get("action") == "Contact":
-      contact = self.requestToContact(self.request)
-      self.contactForm(contact)
-    elif self.request.get("action") == "fix":
+    elif action == "create":
+      if kind == "Person":
+        self.personForm(Person())
+      elif kind == "Contact":
+        self.contactForm(Contact())
+    elif action == "edit":
+      if kind == "Person":
+        person = self.requestToPerson(self.request)
+        if modified:
+          self.personView(person)
+        else:
+          self.personForm(person)
+      elif kind == "Contact":
+        contact = self.requestToContact(self.request)
+        if modified:
+          person = db.get(contact.key().parent())
+          self.personView(person)
+        else:
+          self.contactForm(contact)
+    elif action == "fix":
       query = db.Query(Person)
       for person in query:
         person.updateWords()
         db.put(person)
       self.response.out.write("DONE<br>")
-
 
     self.response.out.write("""
           </body> 
@@ -207,11 +228,12 @@ class MainHandler(webapp.RequestHandler):
       self.response.out.write("""
           <hr>
           <form name="personform" method="get" action=".">
-          <input type="hidden" name="action" value="%s">
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
-          <input type="hidden" name="key" value="%s"><code>%s</code>
+          <input type="hidden" name="key" value="%s">
           <table> 
-      """ % (person.kind(), person.maybeKey(), person.maybeKey()))
+      """ % (person.kind(), person.maybeKey()))
 
       props = Person.properties()
       self.formFields(person, props)
@@ -227,8 +249,6 @@ class MainHandler(webapp.RequestHandler):
       """ % propname)
       query = db.Query(Contact)
       query.ancestor(person.key())
-      for contact in query:
-        self.contactForm(contact)
 
 
   def contactView(self, contact):
@@ -244,11 +264,12 @@ class MainHandler(webapp.RequestHandler):
       self.response.out.write("""
           <hr>
           <form name="contactform" method="get" action="."> 
-          <input type="hidden" name="action" value="%s"> 
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
-          <input type="hidden" name="key" value="%s"><code>%s</code>
+          <input type="hidden" name="key" value="%s">
           <table> 
-      """ % (contact.kind(), contact.maybeKey(), contact.maybeKey()))
+      """ % (contact.kind(), contact.maybeKey()))
 
       props = Contact.properties()
       self.formFields(contact, props)
@@ -283,7 +304,7 @@ class MainHandler(webapp.RequestHandler):
         html = """<input type="text" style="width: 50em;" name="%s" value="%s">""" % (propname, value)
       elif isinstance(prop, db.StringListProperty):
         #html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
-        html = """<code style="color:gray;">%s</code>""" % " ".join(value)
+        html = """<code style="color:#ddd;">%s</code>""" % " ".join(value)
       else:
         html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
       self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
@@ -327,7 +348,7 @@ class Thing(db.Model):
       return "disabled"
 
   def editUrl(self):
-    return "?action=%s&key=%s" % (self.kind(), self.key())
+    return "?action=edit&kind=%s&key=%s" % (self.kind(), self.key())
 
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
