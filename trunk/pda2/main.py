@@ -25,6 +25,7 @@ class MainHandler(webapp.RequestHandler):
               .comments {
                 font-family: monospace;
                 color: #c44;
+                white-space: pre;
               }
               .tag {
                 font-size: small;
@@ -104,7 +105,7 @@ class MainHandler(webapp.RequestHandler):
         query.filter("__key__ IN", somekeys)
         s = set(query)
         #self.response.out.write("s = %s<br><br>" % s)
-        for person in s:
+        for person in sorted(s, key=Thing.key):
           #self.response.out.write("person = %s<br><br>" % person)
           self.personView(person)
           self.personForm(person)
@@ -267,6 +268,9 @@ class Thing(db.Model):
   comments = db.TextProperty(verbose_name="Comments", default="")
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
   words = db.StringListProperty(verbose_name="words", default=[])
+  
+  def __str__(self):
+    return "%s(key=%s)" % (self.kind(), self.key())
 
   def maybeKey(self):
     if self.is_saved():
