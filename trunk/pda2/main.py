@@ -115,7 +115,10 @@ class MainHandler(webapp.RequestHandler):
       self.personForm(person)
     elif self.request.get("action") == "Person":
       person = self.requestToPerson(self.request)
-      self.personView(person)
+      self.personForm(person)
+    elif self.request.get("action") == "Contact":
+      contact = self.requestToContact(self.request)
+      self.contactForm(contact)
     elif self.request.get("action") == "fix":
       query = db.Query(Person)
       for person in query:
@@ -152,9 +155,34 @@ class MainHandler(webapp.RequestHandler):
           self.response.out.write("HMMMM " + propname)
           setattr(person, propname, req.get(propname))
       person.updateWords()
-      if person.first_name or person.last_name or person.mailing_name:
-        person.put()
+      person.put()
       return person
+
+  def requestToContact(self, req):
+      key = req.get("key")
+      if key:
+        contact = db.get(db.Key(encoded=key))
+      else:
+        contact = Contact()
+      if not req.get("modified"):
+        return contact
+      props = Contact.properties()
+      for propname in props:
+        prop = props[propname]
+        if isinstance(prop, db.BooleanProperty):
+          res = propname in req.arguments()
+          setattr(contact, propname, res)
+        elif isinstance(prop, db.StringListProperty):
+          setattr(contact, propname, [])
+        elif isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+          value = req.get(propname)
+          setattr(contact, propname, value)
+        else:
+          self.response.out.write("HMMMM " + propname)
+          setattr(contact, propname, req.get(propname))
+      contact.updateWords()
+      contact.put()
+      return contact
 
 
   def personView(self, person):
@@ -212,15 +240,15 @@ class MainHandler(webapp.RequestHandler):
              contact.contact_text, contact.contact_method, contact.contact_type, contact.enabledText(),
              contact.comments))
 
-  
   def contactForm(self, contact):
       self.response.out.write("""
           <hr>
-          <form name="contact" method="get" action="."> 
-          <input type="hidden" name="action" value="contact"> 
+          <form name="contactform" method="get" action="."> 
+          <input type="hidden" name="action" value="%s"> 
+          <input type="hidden" name="modified" value="true">
           <input type="hidden" name="key" value="%s"><code>%s</code>
           <table> 
-      """ % (contact.maybeKey(), contact.maybeKey()))
+      """ % (contact.kind(), contact.maybeKey(), contact.maybeKey()))
 
       props = Contact.properties()
       self.formFields(contact, props)
@@ -335,6 +363,7 @@ class Person(Thing):
     if self.last_name:
       t += self.last_name
     return t
+  
 
 class Address(Thing):
   address_line1 = db.StringProperty(verbose_name="Address Line 1", default="")
