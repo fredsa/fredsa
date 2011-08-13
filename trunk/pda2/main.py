@@ -46,6 +46,15 @@ class MainHandler(webapp.RequestHandler):
                 font-weight: bold;
                 margin: 0em 0.5em 0em 0.2em;
               }
+              .thing.Address {
+                color: green;
+              }
+              .thing.Contact {
+                color: blue;
+              }
+              .thing.Calendar {
+                color: purple;
+              }
               .title {
                 text-decoration: none;
                 font-size: 2em;
@@ -216,10 +225,22 @@ class MainHandler(webapp.RequestHandler):
       """ % (person.editUrl(),
              person.displayName(), person.category, person.enabledText(),
              person.comments))
+
       query = db.Query(Contact)
       query.ancestor(person.key())
       for contact in query:
         self.contactView(contact)
+
+      query = db.Query(Address)
+      query.ancestor(person.key())
+      for address in query:
+        self.addressView(address)
+
+      query = db.Query(Calendar)
+      query.ancestor(person.key())
+      for calendar in query:
+        self.calendarView(calendar)
+
       self.response.out.write("""
           </div>""") 
 
@@ -251,13 +272,44 @@ class MainHandler(webapp.RequestHandler):
       query.ancestor(person.key())
 
 
+  def addressView(self, address):
+      self.response.out.write("""
+          <a href="%s" class="edit-link">Edit</a>
+          <span class="thing %s">%s</span> <span class="tag">(%s) [%s]</span><br>
+          <div class="comments">%s</div>
+      """ % (address.editUrl(),
+             address.kind(), address.snippet(), address.address_type, address.enabledText(),
+             address.comments))
+
+  def addressForm(self, address):
+      self.response.out.write("""
+          <hr>
+          <form name="addressform" method="get" action="."> 
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="kind" value="%s">
+          <input type="hidden" name="modified" value="true">
+          <input type="hidden" name="key" value="%s">
+          <table> 
+      """ % (address.kind(), address.maybeKey()))
+
+      props = Address.properties()
+      self.formFields(address, props)
+      self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
+      propname = props.keys()[0]
+      self.response.out.write("""
+          </table> 
+          </form>
+          <hr> 
+      """)
+
+
   def contactView(self, contact):
       self.response.out.write("""
           <a href="%s" class="edit-link">Edit</a>
-          <span class="thing">%s</span> <span class="tag">(%s %s) [%s]</span><br>
+          <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
           <div class="comments">%s</div>
       """ % (contact.editUrl(),
-             contact.contact_text, contact.contact_method, contact.contact_type, contact.enabledText(),
+             contact.kind(), contact.contact_text, contact.contact_method, contact.contact_type, contact.enabledText(),
              contact.comments))
 
   def contactForm(self, contact):
@@ -273,6 +325,37 @@ class MainHandler(webapp.RequestHandler):
 
       props = Contact.properties()
       self.formFields(contact, props)
+      self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
+      propname = props.keys()[0]
+      self.response.out.write("""
+          </table> 
+          </form>
+          <hr> 
+      """)
+
+
+  def calendarView(self, calendar):
+      self.response.out.write("""
+          <a href="%s" class="edit-link">Edit</a>
+          <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
+          <div class="comments">%s</div>
+      """ % (calendar.editUrl(),
+             calendar.kind(), calendar.first_occurence, calendar.frequency, calendar.occasion, calendar.enabledText(),
+             calendar.comments))
+
+  def calendarForm(self, calendar):
+      self.response.out.write("""
+          <hr>
+          <form name="calendarform" method="get" action="."> 
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="kind" value="%s">
+          <input type="hidden" name="modified" value="true">
+          <input type="hidden" name="key" value="%s">
+          <table> 
+      """ % (calendar.kind(), calendar.maybeKey()))
+
+      props = Calendar.properties()
+      self.formFields(calendar, props)
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
@@ -400,6 +483,9 @@ class Address(Thing):
 
   def updateWords(self):
     Thing.updateWords(self, Address.properties())
+
+  def snippet(self):
+    return " / ".join([self.address_line1, self.address_line2, self.postal_code, self.city, self.state_province, self.country]).replace("/  /", "/")
 
 
 class Contact(Thing):
