@@ -136,6 +136,10 @@ class MainHandler(webapp.RequestHandler):
         self.personForm(Person())
       elif kind == "Contact":
         self.contactForm(Contact())
+      elif kind == "Address":
+        self.addressForm(Address())
+      elif kind == "Calendar":
+        self.calendarForm(Calendar())
     elif action == "edit":
       if kind == "Person":
         person = self.requestToPerson(self.request)
@@ -150,6 +154,20 @@ class MainHandler(webapp.RequestHandler):
           self.personView(person)
         else:
           self.contactForm(contact)
+      elif kind == "Address":
+        address = self.requestToAddress(self.request)
+        if modified:
+          person = db.get(address.key().parent())
+          self.personView(person)
+        else:
+          self.addressForm(address)
+      elif kind == "Calendar":
+        calendar = self.requestToCalendar(self.request)
+        if modified:
+          person = db.get(calendar.key().parent())
+          self.personView(person)
+        else:
+          self.calendarForm(calendar)
     elif action == "fix":
       query = db.Query(Person)
       for person in query:
@@ -213,6 +231,58 @@ class MainHandler(webapp.RequestHandler):
       contact.updateWords()
       contact.put()
       return contact
+
+  def requestToAddress(self, req):
+      key = req.get("key")
+      if key:
+        address = db.get(db.Key(encoded=key))
+      else:
+        address = Address()
+      if not req.get("modified"):
+        return address
+      props = Address.properties()
+      for propname in props:
+        prop = props[propname]
+        if isinstance(prop, db.BooleanProperty):
+          res = propname in req.arguments()
+          setattr(address, propname, res)
+        elif isinstance(prop, db.StringListProperty):
+          setattr(address, propname, [])
+        elif isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+          value = req.get(propname)
+          setattr(address, propname, value)
+        else:
+          self.response.out.write("HMMMM " + propname)
+          setattr(address, propname, req.get(propname))
+      address.updateWords()
+      address.put()
+      return address
+
+  def requestToCalendar(self, req):
+      key = req.get("key")
+      if key:
+        calendar = db.get(db.Key(encoded=key))
+      else:
+        calendar = Calendar()
+      if not req.get("modified"):
+        return calendar
+      props = Calendar.properties()
+      for propname in props:
+        prop = props[propname]
+        if isinstance(prop, db.BooleanProperty):
+          res = propname in req.arguments()
+          setattr(calendar, propname, res)
+        elif isinstance(prop, db.StringListProperty):
+          setattr(calendar, propname, [])
+        elif isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
+          value = req.get(propname)
+          setattr(calendar, propname, value)
+        else:
+          self.response.out.write("HMMMM " + propname)
+          setattr(calendar, propname, req.get(propname))
+      calendar.updateWords()
+      calendar.put()
+      return calendar
 
 
   def personView(self, person):
