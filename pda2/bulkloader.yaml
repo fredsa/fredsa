@@ -67,7 +67,7 @@ transformers:
   - property: enabled
     external_name: enabled
     import_transform: "lambda x: x!='N'"
-  - property: first_occurence
+  - property: first_occurrence
     external_name: first_occurence
     import_transform: "lambda x: datetime.datetime.strptime(x, '%m/%d/%Y')"
   - property: frequency
