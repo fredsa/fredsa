@@ -3,6 +3,7 @@
 import logging
 import pprint
 import re
+import datetime
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
@@ -92,10 +93,11 @@ class MainHandler(webapp.RequestHandler):
     action = self.request.get("action")
     kind = self.request.get("kind")
     modified = self.request.get("modified")
-    if q:
+    if not q:
       self.response.out.write("""
             <script>document.searchform.q.focus(); document.searchform.q.select();</script>
       """)
+    if q:
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
@@ -277,6 +279,11 @@ class MainHandler(webapp.RequestHandler):
         elif isinstance(prop, db.StringProperty) or isinstance(prop, db.TextProperty):
           value = req.get(propname)
           setattr(calendar, propname, value)
+        elif isinstance(prop, db.DateProperty):
+          value = req.get(propname)
+          value = datetime.datetime.strptime(value, '%m/%d/%y')
+          value = value.date()
+          setattr(calendar, propname, value)
         else:
           self.response.out.write("HMMMM " + propname)
           setattr(calendar, propname, req.get(propname))
@@ -410,7 +417,7 @@ class MainHandler(webapp.RequestHandler):
           <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
           <div class="comments">%s</div>
       """ % (calendar.editUrl(),
-             calendar.kind(), calendar.first_occurence, calendar.frequency, calendar.occasion, calendar.enabledText(),
+             calendar.kind(), calendar.first_occurrence, calendar.frequency, calendar.occasion, calendar.enabledText(),
              calendar.comments))
 
   def calendarForm(self, calendar):
@@ -458,6 +465,8 @@ class MainHandler(webapp.RequestHandler):
       elif isinstance(prop, db.StringListProperty):
         #html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
         html = """<code style="color:#ddd;">%s</code>""" % " ".join(value)
+      elif isinstance(prop, db.DateProperty):
+        html = """<input type="text" style="width: 8em;" name="%s" value="%s">""" % (propname, value.strftime("%m/%d/%y"))
       else:
         html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
       self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
@@ -582,7 +591,7 @@ class Contact(Thing):
 
 
 class Calendar(Thing):
-  first_occurence = db.DateProperty()
+  first_occurrence = db.DateProperty(verbose_name="First Occurrence")
   frequency = SelectableStringProperty(verbose_name="Frequency", default="",
     choices=[
       "Annual",
@@ -611,8 +620,8 @@ def migrate(person):
   query = db.Query(Calendar)
   query.ancestor(person)
   for calendar in query.run():
-    if (calendar.first_occurence.year < 1900):
-      calendar.first_occurence = calendar.first_occurence.replace(year=1900)
+    if (calendar.first_occurrence.year < 1900):
+      calendar.first_occurrence = calendar.first_occurrence.replace(year=1900)
     calendar.updateWords()
     yield op.db.Put(calendar)
 
