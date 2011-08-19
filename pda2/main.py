@@ -190,9 +190,7 @@ class MainHandler(webapp.RequestHandler):
         person = Person()
       if not req.get("modified"):
         return person
-      props = Person.properties()
-      for propname in props:
-        prop = props[propname]
+      for (propname, prop) in Person.properties().iteritems():
         if isinstance(prop, db.BooleanProperty):
           res = propname in req.arguments()
           setattr(person, propname, res)
@@ -216,9 +214,7 @@ class MainHandler(webapp.RequestHandler):
         contact = Contact()
       if not req.get("modified"):
         return contact
-      props = Contact.properties()
-      for propname in props:
-        prop = props[propname]
+      for (propname, prop) in Contact.properties().iteritems():
         if isinstance(prop, db.BooleanProperty):
           res = propname in req.arguments()
           setattr(contact, propname, res)
@@ -242,9 +238,7 @@ class MainHandler(webapp.RequestHandler):
         address = Address()
       if not req.get("modified"):
         return address
-      props = Address.properties()
-      for propname in props:
-        prop = props[propname]
+      for (propname, prop) in Address.properties().iteritems():
         if isinstance(prop, db.BooleanProperty):
           res = propname in req.arguments()
           setattr(address, propname, res)
@@ -268,9 +262,7 @@ class MainHandler(webapp.RequestHandler):
         calendar = Calendar()
       if not req.get("modified"):
         return calendar
-      props = Calendar.properties()
-      for propname in props:
-        prop = props[propname]
+      for (propname, prop) in Calendar.properties().iteritems():
         if isinstance(prop, db.BooleanProperty):
           res = propname in req.arguments()
           setattr(calendar, propname, res)
@@ -334,7 +326,7 @@ class MainHandler(webapp.RequestHandler):
       """ % (person.kind(), person.maybeKey()))
 
       props = Person.properties()
-      self.formFields(person, props)
+      self.formFields(person)
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
@@ -370,7 +362,7 @@ class MainHandler(webapp.RequestHandler):
       """ % (address.kind(), address.maybeKey()))
 
       props = Address.properties()
-      self.formFields(address, props)
+      self.formFields(address)
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
@@ -401,7 +393,7 @@ class MainHandler(webapp.RequestHandler):
       """ % (contact.kind(), contact.maybeKey()))
 
       props = Contact.properties()
-      self.formFields(contact, props)
+      self.formFields(contact)
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
@@ -432,7 +424,7 @@ class MainHandler(webapp.RequestHandler):
       """ % (calendar.kind(), calendar.maybeKey()))
 
       props = Calendar.properties()
-      self.formFields(calendar, props)
+      self.formFields(calendar)
       self.response.out.write("""<tr><td></td><td><input type="submit" name="updated" value="Save Changes" style="margin-top: 1em;"></td></tr>""")
       propname = props.keys()[0]
       self.response.out.write("""
@@ -442,10 +434,9 @@ class MainHandler(webapp.RequestHandler):
       """)
 
 
-  def formFields(self, thing, props):
-    for propname in props:
-      prop = props[propname]
-      label = props[propname].verbose_name
+  def formFields(self, thing):
+    for (propname, prop) in thing.properties().iteritems():
+      label = prop.verbose_name
       value = getattr(thing, propname)
       if isinstance(prop, SelectableStringProperty):
         values = prop.choices
@@ -489,10 +480,9 @@ class Thing(db.Model):
     else:
       return ""
 
-  def updateWords(self, props):
+  def updateWords(self):
     words = []
-    for propname in props:
-      prop = props[propname]
+    for (propname, prop) in self.properties().iteritems():
       if isinstance(prop, SelectableStringProperty):
         continue
       if isinstance(prop, (db.StringProperty, db.TextProperty)):
@@ -530,9 +520,6 @@ class Person(Thing):
     ])
   send_card = db.BooleanProperty(verbose_name="Send Card", default=False, required=True)
 
-  def updateWords(self):
-    Thing.updateWords(self, Person.properties())
-    
   def displayName(self):
     t = ""
     if self.mailing_name:
@@ -560,9 +547,6 @@ class Address(Thing):
   postal_code = db.StringProperty(verbose_name="Postal Code", default="")
   state_province = db.StringProperty(verbose_name="State/Province", default="")
 
-  def updateWords(self):
-    Thing.updateWords(self, Address.properties())
-
   def snippet(self):
     return " / ".join([self.address_line1, self.address_line2, self.postal_code, self.city, self.state_province, self.country]).replace("/  /", "/")
 
@@ -586,9 +570,6 @@ class Contact(Thing):
       "Facsimile",
     ])
 
-  def updateWords(self):
-    Thing.updateWords(self, Contact.properties())
-
 
 class Calendar(Thing):
   first_occurrence = db.DateProperty(verbose_name="First Occurrence")
@@ -597,9 +578,6 @@ class Calendar(Thing):
       "Annual",
     ])
   occasion = db.StringProperty(verbose_name="Occasion", default="")
-
-  def updateWords(self):
-    Thing.updateWords(self, Calendar.properties())
 
 
 def migrate(person):
