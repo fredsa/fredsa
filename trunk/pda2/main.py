@@ -93,11 +93,10 @@ class MainHandler(webapp.RequestHandler):
     action = self.request.get("action")
     kind = self.request.get("kind")
     modified = self.request.get("modified")
-    if not q:
+    if q:
       self.response.out.write("""
             <script>document.searchform.q.focus(); document.searchform.q.select();</script>
       """)
-    if q:
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
@@ -435,7 +434,7 @@ class MainHandler(webapp.RequestHandler):
 
 
   def formFields(self, thing):
-    for (propname, prop) in thing.properties().iteritems():
+    for (propname, prop) in thing.props():
       label = prop.verbose_name
       value = getattr(thing, propname)
       if isinstance(prop, SelectableStringProperty):
@@ -470,7 +469,42 @@ class Thing(db.Model):
   comments = db.TextProperty(verbose_name="Comments", default="")
   enabled = db.BooleanProperty(verbose_name="Enabled", required=True, default=True)
   words = db.StringListProperty(verbose_name="words", default=[])
-  
+  propnames = [
+              "category",
+              "send_card",
+              "title",
+              "mailing_name",
+              "first_name",
+              "last_name",
+              "company_name",
+              
+              "address_type",
+              "address_line1",
+              "address_line2",
+              "city",
+              "state_province",
+              "postal_code",
+              "country",
+              "directions",
+              
+              "contact_method",
+              "contact_type",
+              "contact_text",
+              
+              "first_occurrence",
+              "frequency",
+              "occasion",
+                              
+              "comments",
+              "enabled",
+              "words",
+               ];
+
+  def props(self):
+    for propname in self.propnames:
+      if propname in self.properties().keys():
+        yield (propname, self.properties()[propname])
+    
   def __str__(self):
     return "%s(key=%s)" % (self.kind(), self.key())
 
@@ -501,7 +535,7 @@ class Thing(db.Model):
 
   def editUrl(self):
     return "?action=edit&kind=%s&key=%s" % (self.kind(), self.key())
-
+    
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
   title = db.StringProperty(verbose_name="Title", default="")
@@ -540,6 +574,9 @@ class Address(Thing):
   address_line2 = db.StringProperty(verbose_name="Address Line 2", default="")
   address_type = SelectableStringProperty(verbose_name="Address Type", default="",
     choices=[
+             "(Unspecified)",
+             "Home",
+             "Business",
     ])
   city = db.StringProperty(verbose_name="City", default="")
   country = db.StringProperty(verbose_name="Country", default="")
