@@ -11,12 +11,4 @@ builtins:
 handlers:
 - url: /
   script: main.py
-
-- url: /main.css
-  static_files: main.css
-  upload: main.css
-
-- url: /mapreduce(/.*)?
-  script: mapreduce/main.py
   login: admin
-

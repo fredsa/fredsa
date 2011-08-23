@@ -3,19 +3,21 @@
 import logging
 import pprint
 import re
+import os
 import datetime
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from google.appengine.api import users
-#from mapreduce import operation as op
+from google.appengine.api import users
 
 class MainHandler(webapp.RequestHandler):
   def post(self):
     self.get()
 
   def get(self):
+    user = users.get_current_user()
     self.response.out.write("""
           <!DOCTYPE html>
           <html>
@@ -71,15 +73,20 @@ class MainHandler(webapp.RequestHandler):
                 color: black;
               }
               .powered {
-                color: #aaa;
+                color: #777;
                 font-style: italic;
-                margin-bottom: 1em;
+                margin-left: 42%%;                
+              }
+              .topbar {
+                position: absolute;
+                right: 0.5em;
+                top: 0.2em;
               }
             </style>
           </head>
           <body class="pda">
           <a href="/" class="title">PDA2</a>
-          <div class="powered">powered by App Engine</div>
+          <div class="topbar">%s</div>
           <form name="searchform" method="get">
           <!--
           <input type="checkbox" name="includedisabled" > Include Disabled Entries<br>
@@ -90,17 +97,17 @@ class MainHandler(webapp.RequestHandler):
           Search text: <input type="text" name="q" value="%s"> <input type="submit" value="Go"><br>
           </form>
           
-          <hr> 
-          [<a href=".?action=create&kind=Person">+Person</a>] 
-          [<a href="_ah/admin">Admin</a>] 
-          [<a href=".?action=fix">MAP-OVER-PERSON</a>]
-          <!--
-          <a href=".?mailing_list=preview">[Mailing Labels Preview]</a> 
-          -->
+          <hr>
+          [<a href=".?action=create&kind=Person">+Person</a>]
           <br>
           <br>
-    """ % (self.request.get("q")))
-    
+    """ % (user, self.request.get("q")))
+    if user.user_id in ("fredsa@gmail.com", "fredsa@google.com") or re.search("^Development", os.environ["SERVER_SOFTWARE"]):
+      self.response.out.write("""
+            {<a href="_ah/admin">Admin</a>}
+            {<a href=".?action=fix">map-over-person-entities</a>}
+      """)
+
     q = self.request.get("q")
     action = self.request.get("action")
     kind = self.request.get("kind")
@@ -190,6 +197,7 @@ class MainHandler(webapp.RequestHandler):
       self.response.out.write("DONE<br>")
 
     self.response.out.write("""
+          <div class="powered">powered by App Engine</div>
           </body> 
           </html> 
     """)
