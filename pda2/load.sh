@@ -9,8 +9,8 @@ function csv() {
   row=$(cat temp | head -1)
   (echo "$row"; cat temp | grep -v "$row") > $lower.csv
   rm temp
-  url=http://pda2.ext.allen-sauer.com/_ah/remote_api
   url=http://localhost:8080/_ah/remote_api
+  url=https://sauer-pda.appspot.com/_ah/remote_api
   set -x
   appcfg.py upload_data \
             --url=$url \
