@@ -102,7 +102,7 @@ class MainHandler(webapp.RequestHandler):
           <br>
           <br>
     """ % (user, self.request.get("q")))
-    if user.user_id in ("fredsa@gmail.com", "fredsa@google.com") or re.search("^Development", os.environ["SERVER_SOFTWARE"]):
+    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or re.search("^Development", os.environ["SERVER_SOFTWARE"]):
       self.response.out.write("""
             {<a href="_ah/admin">Admin</a>}
             {<a href=".?action=fix">map-over-person-entities</a>}
