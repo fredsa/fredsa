@@ -105,7 +105,7 @@ class MainHandler(webapp.RequestHandler):
     if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or re.search("^Development", os.environ["SERVER_SOFTWARE"]):
       self.response.out.write("""
             {<a href="_ah/admin">Admin</a>}
-            {<a href=".?action=fix">map-over-person-entities</a>}
+            {<a href=".?action=fix">map-over-entities</a>}
             <br>
       """)
 
@@ -191,10 +191,10 @@ class MainHandler(webapp.RequestHandler):
         else:
           self.calendarForm(calendar)
     elif action == "fix":
-      query = db.Query(Person)
-      for person in query:
-        person.updateWords()
-        db.put(person)
+      query = db.Query()
+      for thing in query:
+        thing.updateWords()
+        db.put(thing)
       self.response.out.write("DONE<br>")
 
     self.response.out.write("""
