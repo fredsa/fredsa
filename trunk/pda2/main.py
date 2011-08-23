@@ -106,6 +106,7 @@ class MainHandler(webapp.RequestHandler):
       self.response.out.write("""
             {<a href="_ah/admin">Admin</a>}
             {<a href=".?action=fix">map-over-person-entities</a>}
+            <br>
       """)
 
     q = self.request.get("q")
