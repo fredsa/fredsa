@@ -12,22 +12,28 @@ from google.appengine.api import users
 #from mapreduce import operation as op
 
 class MainHandler(webapp.RequestHandler):
+  def post(self):
+    self.get()
+
   def get(self):
     self.response.out.write("""
           <!DOCTYPE html>
           <html>
           <head>
-            <title>PDA</title>
+            <title>PDA2</title>
             <link rel="stylesheet" type="text/css" href="main.css"/>
             <style type="text/css">
               body {
                 line-height: 1.3em;
               }
-              .comments {
+              .comments , .directions {
                 font-family: monospace;
                 color: #c44;
                 white-space: pre;
                 padding-bottom: 2em;
+              }
+              .directions {
+                color: #444;
               }
               .tag {
                 font-size: small;
@@ -64,10 +70,16 @@ class MainHandler(webapp.RequestHandler):
                 display: block;
                 color: black;
               }
+              .powered {
+                color: #aaa;
+                font-style: italic;
+                margin-bottom: 1em;
+              }
             </style>
           </head>
           <body class="pda">
-          <a href="/" class="title">App Engine PDA2</a>
+          <a href="/" class="title">PDA2</a>
+          <div class="powered">powered by App Engine</div>
           <form name="searchform" method="get">
           <!--
           <input type="checkbox" name="includedisabled" > Include Disabled Entries<br>
@@ -93,10 +105,11 @@ class MainHandler(webapp.RequestHandler):
     action = self.request.get("action")
     kind = self.request.get("kind")
     modified = self.request.get("modified")
-    if q:
+    if q or not self.request.arguments():
       self.response.out.write("""
             <script>document.searchform.q.focus(); document.searchform.q.select();</script>
       """)
+    if q:
       qlist = re.split('\W+', q.lower())
       if '' in qlist:
         qlist.remove('')
@@ -207,8 +220,11 @@ class MainHandler(webapp.RequestHandler):
 
   def requestToContact(self, req):
       key = req.get("key")
+      parent_key = req.get("parent_key")
       if key:
         contact = db.get(db.Key(encoded=key))
+      elif parent_key:
+        contact = Contact(parent=db.Key(encoded=parent_key))
       else:
         contact = Contact()
       if not req.get("modified"):
@@ -231,8 +247,11 @@ class MainHandler(webapp.RequestHandler):
 
   def requestToAddress(self, req):
       key = req.get("key")
+      parent_key = req.get("parent_key")
       if key:
         address = db.get(db.Key(encoded=key))
+      elif parent_key:
+        address = Address(parent=db.Key(encoded=parent_key))
       else:
         address = Address()
       if not req.get("modified"):
@@ -255,8 +274,11 @@ class MainHandler(webapp.RequestHandler):
 
   def requestToCalendar(self, req):
       key = req.get("key")
+      parent_key = req.get("parent_key")
       if key:
         calendar = db.get(db.Key(encoded=key))
+      elif parent_key:
+        calendar = Calendar(parent=db.Key(encoded=parent_key))
       else:
         calendar = Calendar()
       if not req.get("modified"):
@@ -316,7 +338,7 @@ class MainHandler(webapp.RequestHandler):
   def personForm(self, person):
       self.response.out.write("""
           <hr>
-          <form name="personform" method="get" action=".">
+          <form name="personform" method="post" action=".">
           <input type="hidden" name="action" value="edit">
           <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
@@ -332,33 +354,42 @@ class MainHandler(webapp.RequestHandler):
           </table> 
           </form>
           <script>
-           // document.personform.%s.focus();
+            document.personform.%s.focus();
           </script>
-          <hr> 
+          <hr>
       """ % propname)
-      query = db.Query(Contact)
-      query.ancestor(person.key())
+      if person.maybeKey():
+        self.response.out.write("""
+            <a href="?action=create&kind=Contact&parent_key=%s">[+Contact]</a>
+            &nbsp;
+            <a href="?action=create&kind=Address&parent_key=%s">[+Address]</a>
+            &nbsp;  
+            <a href="?action=create&kind=Calendar&parent_key=%s">[+Calendar]</a>
+        """ % (person.key(), person.key(), person.key()))
 
 
   def addressView(self, address):
       self.response.out.write("""
           <a href="%s" class="edit-link">Edit</a>
           <span class="thing %s">%s</span> <span class="tag">(%s) [%s]</span><br>
+          <div class="directions">%s</div>
           <div class="comments">%s</div>
       """ % (address.editUrl(),
              address.kind(), address.snippet(), address.address_type, address.enabledText(),
+             address.directions,
              address.comments))
 
   def addressForm(self, address):
       self.response.out.write("""
           <hr>
-          <form name="addressform" method="get" action="."> 
+          <form name="addressform" method="post" action="."> 
           <input type="hidden" name="action" value="edit">
           <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
           <input type="hidden" name="key" value="%s">
+          <input type="hidden" name="parent_key" value="%s">
           <table> 
-      """ % (address.kind(), address.maybeKey()))
+      """ % (address.kind(), address.maybeKey(), self.request.get("parent_key")))
 
       props = Address.properties()
       self.formFields(address)
@@ -383,13 +414,14 @@ class MainHandler(webapp.RequestHandler):
   def contactForm(self, contact):
       self.response.out.write("""
           <hr>
-          <form name="contactform" method="get" action="."> 
+          <form name="contactform" method="post" action="."> 
           <input type="hidden" name="action" value="edit">
           <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
           <input type="hidden" name="key" value="%s">
+          <input type="hidden" name="parent_key" value="%s">
           <table> 
-      """ % (contact.kind(), contact.maybeKey()))
+      """ % (contact.kind(), contact.maybeKey(), self.request.get("parent_key")))
 
       props = Contact.properties()
       self.formFields(contact)
@@ -408,19 +440,20 @@ class MainHandler(webapp.RequestHandler):
           <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
           <div class="comments">%s</div>
       """ % (calendar.editUrl(),
-             calendar.kind(), calendar.first_occurrence, calendar.frequency, calendar.occasion, calendar.enabledText(),
+             calendar.kind(), calendar.first_occurrence.strftime("%m/%d/%y"), calendar.frequency, calendar.occasion, calendar.enabledText(),
              calendar.comments))
 
   def calendarForm(self, calendar):
       self.response.out.write("""
           <hr>
-          <form name="calendarform" method="get" action="."> 
+          <form name="calendarform" method="post" action="."> 
           <input type="hidden" name="action" value="edit">
           <input type="hidden" name="kind" value="%s">
           <input type="hidden" name="modified" value="true">
           <input type="hidden" name="key" value="%s">
+          <input type="hidden" name="parent_key" value="%s">
           <table> 
-      """ % (calendar.kind(), calendar.maybeKey()))
+      """ % (calendar.kind(), calendar.maybeKey(), self.request.get("parent_key")))
 
       props = Calendar.properties()
       self.formFields(calendar)
@@ -456,10 +489,18 @@ class MainHandler(webapp.RequestHandler):
         #html = """<textarea name="%s" style="width: 50em; height: 4em; color: gray;">%s</textarea>""" % (propname, ", ".join(value))
         html = """<code style="color:#ddd;">%s</code>""" % " ".join(value)
       elif isinstance(prop, db.DateProperty):
-        html = """<input type="text" style="width: 8em;" name="%s" value="%s">""" % (propname, value.strftime("%m/%d/%y"))
+        if value:
+          value = value.strftime("%m/%d/%y")
+        else:
+          value = ""
+        html = """<input type="text" style="width: 8em;" name="%s" value="%s">""" % (propname, value)
       else:
         html = """<span style="color:red;">** Unknown property type '%s' for '%s' **</span>""" % (prop.__class__.__name__, propname)
-      self.response.out.write("""<tr style="color:blue;"><td style="vertical-align: top; text-align: right;">%s</td><td>%s</td></tr>""" % (label, html))
+      if label == "words":
+        color = "color: #ccc;"
+      else:
+        color = "color: blue;"
+      self.response.out.write("""<tr><td style="vertical-align: top; text-align: right; %s">%s</td><td>%s</td></tr>""" % (color, label, html))
 
 
 class SelectableStringProperty(db.StringProperty):
