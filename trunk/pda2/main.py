@@ -5,6 +5,7 @@ import pprint
 import re
 import os
 import datetime
+import time
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import webapp
@@ -12,18 +13,43 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.api import app_identity
+from google.appengine.api import mail
 
 class MainHandler(webapp.RequestHandler):
   def post(self):
     self.get()
 
   def get(self):
+    if self.request.path == "/notify":
+      now = datetime.datetime.fromtimestamp(time.time() - 7 * 60 * 60)
+      self.response.out.write("NOW = %s<br>" % now)
+      query = db.Query(Calendar)
+      # Pacific Daylight Savings Time
+      for calendar in query:
+        when = calendar.first_occurrence
+        if when.strftime("%m/%d") == now.strftime("%m/%d"):
+          event = "%s %s %s<br>" % (calendar.first_occurrence, calendar.occasion, calendar.comments)
+          self.response.out.write(event)
+          mail.send_mail(sender="pda@allen-sauer.com",
+                         #to="Amber and/or Fred Sauer <sauer@allen-sauer.com>",
+                         to="Amber and/or Fred Sauer <fredsa@google.com>",
+                         subject=event,
+                         body="--PDA")
+      return
+
+    if self.request.path != "/":
+      self.response.set_status(400)
+      return
+
     fix = self.request.get("fix")
     if fix:
       thing = db.get(fix)
       thing.updateWords()
+      if thing.kind() == "Calendar" and thing.first_occurrence.year == 1600:
+        logging.info("Fixing YEAR for %s" % thing.first_occurrence)
+        thing.first_occurrence = datetime.date(1900, thing.first_occurrence.month, thing.first_occurrence.day)
       db.put(thing)
-      logging.info("Fixed %s" % fix)
+      #logging.info("Fixed %s" % fix)
       return
 
     isdevappserver = re.search("^Development", os.environ["SERVER_SOFTWARE"])
