@@ -6,17 +6,27 @@ import re
 import os
 import datetime
 
+from google.appengine.api import taskqueue
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from google.appengine.api import users
-from google.appengine.api import users
+from google.appengine.api import app_identity
 
 class MainHandler(webapp.RequestHandler):
   def post(self):
     self.get()
 
   def get(self):
+    fix = self.request.get("fix")
+    if fix:
+      thing = db.get(fix)
+      thing.updateWords()
+      db.put(thing)
+      logging.info("Fixed %s" % fix)
+      return
+
+    isdevappserver = re.search("^Development", os.environ["SERVER_SOFTWARE"])
     user = users.get_current_user()
     self.response.out.write("""
           <!DOCTYPE html>
@@ -102,12 +112,25 @@ class MainHandler(webapp.RequestHandler):
           <br>
           <br>
     """ % (user, self.request.get("q")))
-    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or re.search("^Development", os.environ["SERVER_SOFTWARE"]):
+    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or isdevappserver:
+      if isdevappserver:
+        admin_url = "/_ah/admin"
+      else:
+        admin_url = "https://appengine.google.com/dashboard?&app_id=%s" % app_identity.get_application_id()
       self.response.out.write("""
-            {<a href="_ah/admin">Admin</a>}
-            {<a href=".?action=fix">map-over-entities</a>}
+            {<a href="%s" target="_blank">Admin</a>}
             <br>
-      """)
+      """ % admin_url)
+
+      if isdevappserver:
+        fix_url = "."
+      else:
+        fix_url = "https://fix.%s.appspot.com/" % app_identity.get_application_id()
+      fix_url += "?action=fix"
+      self.response.out.write("""
+            {<a href="%s">map-over-entities</a>}
+            <br>
+      """ % fix_url)
 
     q = self.request.get("q")
     action = self.request.get("action")
@@ -191,10 +214,12 @@ class MainHandler(webapp.RequestHandler):
         else:
           self.calendarForm(calendar)
     elif action == "fix":
-      query = db.Query()
-      for thing in query:
-        thing.updateWords()
-        db.put(thing)
+      count = 0
+      query = db.Query(keys_only=True)
+      for key in query:
+        count += 1
+        taskqueue.add(url='/', params={'fix': key})
+        logging.info("%s: %s" % (count, key))
       self.response.out.write("DONE<br>")
 
     self.response.out.write("""
@@ -694,7 +719,7 @@ def migrate(person):
 
 
 def main():
-  application = webapp.WSGIApplication([('/', MainHandler)],
+  application = webapp.WSGIApplication([('/.*', MainHandler)],
                                        debug=True)
   util.run_wsgi_app(application)
 
