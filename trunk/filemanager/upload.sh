@@ -49,7 +49,7 @@ do
   echo "- MIME Type: $mime_type"
 
   # request blobstore upload URL
-  upload_url=$(curl -s $url$GET_UPLOAD_URL)
+  upload_url=$(curl -s -f $url$GET_UPLOAD_URL)
 
   # fix for devappserver lacking scheme/host/port
   upload_url=${url}${upload_url#${url}}
@@ -60,5 +60,5 @@ do
   echo "- basename: $basename"
 
   # upload content
-  curl $curlflags -L -F "file=@$file;filename=$basename;type=$mime_type" $upload_url
+  curl $curlflags -L -F -f "file=@$file;filename=$basename;type=$mime_type" $upload_url
 done
