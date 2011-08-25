@@ -15,29 +15,61 @@ from google.appengine.api import users
 from google.appengine.api import app_identity
 from google.appengine.api import mail
 
+SENDER = "fred@allen-sauer.com"
+ISDEVAPPSERVER = re.search("^Development", os.environ["SERVER_SOFTWARE"])
+if ISDEVAPPSERVER:
+  ORIGIN = "http://localhost:8080/"
+  ADMIN_URL = ORIGIN + "_ah/admin"
+else:
+  ORIGIN = "https://fix.%s.appspot.com/" % app_identity.get_application_id()
+  ADMIN_URL = "https://appengine.google.com/dashboard?&app_id=%s" % app_identity.get_application_id()
+
+
+
 class MainHandler(webapp.RequestHandler):
   def post(self):
     self.get()
 
   def get(self):
-    if self.request.path == "/notify":
-      now = datetime.datetime.fromtimestamp(time.time() - 7 * 60 * 60)
-      self.response.out.write("NOW = %s<br>" % now)
-      query = db.Query(Calendar)
+    log = ""
+
+    def log_and_mail():
+      self.response.out.write("<html><body style='color: #00a; font-family: monospace;'>%s</body></html>" % 
+                              log.replace("\n", "<br>\n"))
+      mail.send_mail(sender=SENDER, to=("fredsa@google.com", "fred@allen-sauer.com"), subject="notify-log", body=log)
+      
+    if self.request.path == "/task/mail":
+      key = db.Key(self.request.get("key"))
+      (calendar, person) = db.get((key, key.parent()))
+      event = "%s %s %s" % (calendar.first_occurrence, calendar.occasion, calendar.comments)
+      log += "%s -- %s\n" % (event, person.displayName())
+      body = "%s\n\n%s\n" % (person.displayName(), person.editUrl())
+      log + "body = %s" % body
+      mail.send_mail(sender=SENDER,
+                     to=(#"Amber Allen-Sauer <amber@allen-sauer.com>",
+                         #"Fred Sauer <fred@allen-sauer.com>",
+                         "fredsa@google.com"),
+                         subject=event,
+                         body=body)
+      log_and_mail()
+      return
+      
+    if self.request.path == "/task/notify":
       # Pacific Daylight Savings Time
-      for calendar in query:
+      now = datetime.datetime.fromtimestamp(time.time() - 7 * 60 * 60)
+      log += "NOW = %s\n" % now
+      
+      for calendar in Calendar.all():
         when = calendar.first_occurrence
         if when.strftime("%m/%d") == now.strftime("%m/%d"):
-          event = "%s %s %s<br>" % (calendar.first_occurrence, calendar.occasion, calendar.comments)
-          self.response.out.write(event)
-          mail.send_mail(sender="pda@allen-sauer.com",
-                         #to="Amber and/or Fred Sauer <sauer@allen-sauer.com>",
-                         to="Amber and/or Fred Sauer <fredsa@google.com>",
-                         subject=event,
-                         body="--PDA")
+          log += "%s\n" % calendar.editUrl()
+          taskqueue.add(url='/task/mail', params={'key': calendar.key()})
+      log_and_mail()
       return
 
     if self.request.path != "/":
+      self.response.clear()
+      self.response.out.write("HTTP 400 - Unsupported path: %s" % self.request.path)
       self.response.set_status(400)
       return
 
@@ -52,7 +84,6 @@ class MainHandler(webapp.RequestHandler):
       #logging.info("Fixed %s" % fix)
       return
 
-    isdevappserver = re.search("^Development", os.environ["SERVER_SOFTWARE"])
     user = users.get_current_user()
     self.response.out.write("""
           <!DOCTYPE html>
@@ -138,21 +169,13 @@ class MainHandler(webapp.RequestHandler):
           <br>
           <br>
     """ % (user, self.request.get("q")))
-    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or isdevappserver:
-      if isdevappserver:
-        admin_url = "/_ah/admin"
-      else:
-        admin_url = "https://appengine.google.com/dashboard?&app_id=%s" % app_identity.get_application_id()
+    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or ISDEVAPPSERVER:
       self.response.out.write("""
             {<a href="%s" target="_blank">Admin</a>}
             <br>
-      """ % admin_url)
+      """ % ADMIN_URL)
 
-      if isdevappserver:
-        fix_url = "."
-      else:
-        fix_url = "https://fix.%s.appspot.com/" % app_identity.get_application_id()
-      fix_url += "?action=fix"
+      fix_url = "%s?action=fix" % ORIGIN
       self.response.out.write("""
             {<a href="%s">map-over-entities</a>}
             <br>
@@ -429,13 +452,17 @@ class MainHandler(webapp.RequestHandler):
 
 
   def addressView(self, address):
+      qlocation = address.snippet().replace(" / ", " ")
+      qdirections = "from:1184 Saint Anthony Court, Los Altos, CA 94024, USA to:%s" % qlocation
+      location_url = "https://maps.google.com/q=%s" % qlocation
+      directions_url = "https://maps.google.com/q=%s" % qdirections
       self.response.out.write("""
           <a href="%s" class="edit-link">Edit</a>
-          <span class="thing %s">%s</span> <span class="tag">(%s) [%s]</span><br>
+          <span class="thing %s">%s</span> <a href="%s">[Google Maps]</a>&nbsp;&nbsp;<a href="%s">[directions]</a> <span class="tag">(%s) [%s]</span><br>
           <div class="directions">%s</div>
           <div class="comments">%s</div>
       """ % (address.editUrl(),
-             address.kind(), address.snippet(), address.address_type, address.enabledText(),
+             address.kind(), address.snippet(), location_url, directions_url, address.address_type, address.enabledText(),
              address.directions,
              address.comments))
 
@@ -610,7 +637,7 @@ class Thing(db.Model):
     return "%s(key=%s)" % (self.kind(), self.key())
 
   def maybeKey(self):
-    if self.is_saved():
+    if self.has_key():
       return self.key()
     else:
       return ""
@@ -635,7 +662,7 @@ class Thing(db.Model):
       return "disabled"
 
   def editUrl(self):
-    return "?action=edit&kind=%s&key=%s" % (self.kind(), self.key())
+    return "%s?action=edit&kind=%s&key=%s" % (ORIGIN, self.kind(), self.key())
     
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
@@ -686,7 +713,7 @@ class Address(Thing):
   state_province = db.StringProperty(verbose_name="State/Province", default="")
 
   def snippet(self):
-    return " / ".join([self.address_line1, self.address_line2, self.postal_code, self.city, self.state_province, self.country]).replace("/  /", "/")
+    return " / ".join([self.address_line1, self.address_line2, self.city, self.state_province, self.postal_code, self.country]).replace("/  /", "/")
 
 
 class Contact(Thing):
