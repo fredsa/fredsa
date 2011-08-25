@@ -42,7 +42,7 @@ class MainHandler(webapp.RequestHandler):
       logging.info(log)
       self.response.out.write("<html><body style='color: #00a; font-family: monospace;'>%s</body></html>" % 
                               log.replace("\n", "<br>\n"))
-      subject = "%s %s" % (APPID, self.request.path)
+      subject = "%s log for %s" % (APPID, self.request.path)
       mail.send_mail(sender=SENDER, to=FREDSA, subject=subject, body=log)
       return
       
