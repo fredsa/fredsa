@@ -15,14 +15,19 @@ from google.appengine.api import users
 from google.appengine.api import app_identity
 from google.appengine.api import mail
 
-SENDER = "fred@allen-sauer.com"
+APPID = app_identity.get_application_id()
+SENDER = "pda@%s.appspotmail.com" % APPID
+EMAIL_TO = ("Amber Allen-Sauer <amber@allen-sauer.com>",
+           "Fred Sauer <fred@allen-sauer.com>",
+           "Fred Sauer <fredsa@google.com")
+FREDSA = ("fredsa@gmail.com", "fredsa@google.com", "fred@allen-sauer.com")
 ISDEVAPPSERVER = re.search("^Development", os.environ["SERVER_SOFTWARE"])
 if ISDEVAPPSERVER:
-  ORIGIN = "http://localhost:8080/"
-  ADMIN_URL = ORIGIN + "_ah/admin"
+  ORIGIN = "http://localhost:8080"
+  ADMIN_URL = ORIGIN + "/_ah/admin"
 else:
-  ORIGIN = "https://fix.%s.appspot.com/" % app_identity.get_application_id()
-  ADMIN_URL = "https://appengine.google.com/dashboard?&app_id=%s" % app_identity.get_application_id()
+  ORIGIN = "https://fix.%s.appspot.com" % APPID
+  ADMIN_URL = "https://appengine.google.com/dashboard?&app_id=%s" % APPID
 
 
 
@@ -34,9 +39,12 @@ class MainHandler(webapp.RequestHandler):
     log = ""
 
     def log_and_mail():
+      logging.info(log)
       self.response.out.write("<html><body style='color: #00a; font-family: monospace;'>%s</body></html>" % 
                               log.replace("\n", "<br>\n"))
-      mail.send_mail(sender=SENDER, to=("fredsa@google.com", "fred@allen-sauer.com"), subject="notify-log", body=log)
+      subject = "%s %s" % (APPID, self.request.path)
+      mail.send_mail(sender=SENDER, to=FREDSA, subject=subject, body=log)
+      return
       
     if self.request.path == "/task/mail":
       key = db.Key(self.request.get("key"))
@@ -45,12 +53,11 @@ class MainHandler(webapp.RequestHandler):
       log += "%s -- %s\n" % (event, person.displayName())
       body = "%s\n\n%s\n" % (person.displayName(), person.editUrl())
       log + "body = %s" % body
+      subject = "%s %s" % (APPID, event)
       mail.send_mail(sender=SENDER,
-                     to=(#"Amber Allen-Sauer <amber@allen-sauer.com>",
-                         #"Fred Sauer <fred@allen-sauer.com>",
-                         "fredsa@google.com"),
-                         subject=event,
-                         body=body)
+                     to=EMAIL_TO,
+                     subject=subject,
+                     body=body)
       log_and_mail()
       return
       
@@ -59,11 +66,15 @@ class MainHandler(webapp.RequestHandler):
       now = datetime.datetime.fromtimestamp(time.time() - 7 * 60 * 60)
       log += "NOW = %s\n" % now
       
+      now_mm_dd = now.strftime("%m/%d")
+      log += "Searching for calendar entities for %s ...\n" % now_mm_dd
+      
       for calendar in Calendar.all():
         when = calendar.first_occurrence
-        if when.strftime("%m/%d") == now.strftime("%m/%d"):
+        if when.strftime("%m/%d") == now_mm_dd:
           log += "%s\n" % calendar.editUrl()
           taskqueue.add(url='/task/mail', params={'key': calendar.key()})
+      log += "Done"
       log_and_mail()
       return
 
@@ -169,17 +180,23 @@ class MainHandler(webapp.RequestHandler):
           <br>
           <br>
     """ % (user, self.request.get("q")))
-    if user.nickname() in ("fredsa@gmail.com", "fredsa@google.com") or ISDEVAPPSERVER:
+    if user.nickname() in FREDSA or ISDEVAPPSERVER:
       self.response.out.write("""
             {<a href="%s" target="_blank">Admin</a>}
             <br>
       """ % ADMIN_URL)
 
-      fix_url = "%s?action=fix" % ORIGIN
+      fix_url = "%s/?action=fix" % ORIGIN
       self.response.out.write("""
             {<a href="%s">map-over-entities</a>}
             <br>
       """ % fix_url)
+
+      notify_url = "%s/task/notify" % ORIGIN
+      self.response.out.write("""
+            {<a href="%s">/task/notify</a>}
+            <br>
+      """ % notify_url)
 
     q = self.request.get("q")
     action = self.request.get("action")
@@ -670,7 +687,7 @@ class Thing(db.Model):
       return "disabled"
 
   def editUrl(self):
-    return "%s?action=edit&kind=%s&key=%s" % (ORIGIN, self.kind(), self.key())
+    return "%s/?action=edit&kind=%s&key=%s" % (ORIGIN, self.kind(), self.key())
     
 class Person(Thing):
   mailing_name = db.StringProperty(verbose_name="Mailing Name", default="")
