@@ -9,7 +9,7 @@ DEFAULT_URL=http://assets.fredsa.appspot.com/
 curlflags=""
 if [ "$1" = "-v" ]
 then
-	curlflags=$1
+	curlflags="$curlflags $1"
 	shift
 fi
 
@@ -60,5 +60,5 @@ do
   echo "- basename: $basename"
 
   # upload content
-  curl $curlflags -L -F -f "file=@$file;filename=$basename;type=$mime_type" $upload_url
+  curl $curlflags -f -L -F "file=@$file;filename=$basename;type=$mime_type" $upload_url
 done
