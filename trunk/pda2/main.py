@@ -454,15 +454,23 @@ class MainHandler(webapp.RequestHandler):
   def addressView(self, address):
       qlocation = address.snippet().replace(" / ", " ")
       qdirections = "from:1184 Saint Anthony Court, Los Altos, CA 94024, USA to:%s" % qlocation
-      location_url = "https://maps.google.com/q=%s" % qlocation
-      directions_url = "https://maps.google.com/q=%s" % qdirections
+      location_url = "https://maps.google.com/?q=%s" % qlocation
+      directions_url = "https://maps.google.com/?q=%s" % qdirections
       self.response.out.write("""
           <a href="%s" class="edit-link">Edit</a>
-          <span class="thing %s">%s</span> <a href="%s">[Google Maps]</a>&nbsp;&nbsp;<a href="%s">[directions]</a> <span class="tag">(%s) [%s]</span><br>
+          
+          <span class="thing %s">%s</span>
+          <a href="%s">[Google Maps]</a>&nbsp;&nbsp;<a href="%s" target="_blank">[directions]</a>
+          <span class="tag" target="_blank">(%s) [%s]</span><br>
+          
           <div class="directions">%s</div>
           <div class="comments">%s</div>
       """ % (address.editUrl(),
-             address.kind(), address.snippet(), location_url, directions_url, address.address_type, address.enabledText(),
+             
+             address.kind(), address.snippet(),
+             location_url, directions_url,
+             address.address_type, address.enabledText(),
+             
              address.directions,
              address.comments))
 
