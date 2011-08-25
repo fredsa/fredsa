@@ -3,9 +3,4 @@ cron:
   url: /task/notify
   schedule: every day 7:00
   timezone: America/Los_Angeles
-
-- description: test
-  url: /task/notify
-  schedule: every 1 minutes
-  timezone: America/Los_Angeles
   
