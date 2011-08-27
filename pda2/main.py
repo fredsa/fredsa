@@ -160,6 +160,9 @@ class MainHandler(webapp.RequestHandler):
                 right: 0.5em;
                 top: 0.2em;
               }
+              .disabled , .disabled * {
+                color: #ccc !important;
+              }
             </style>
           </head>
           <body class="pda">
@@ -473,7 +476,12 @@ class MainHandler(webapp.RequestHandler):
       qdirections = "from:1184 Saint Anthony Court, Los Altos, CA 94024, USA to:%s" % qlocation
       location_url = "https://maps.google.com/?q=%s" % qlocation
       directions_url = "https://maps.google.com/?q=%s" % qdirections
+
+      clazz = ""
+      if not address.enabled:
+        clazz = "disabled"
       self.response.out.write("""
+          <div class="%s">
           <a href="%s" class="edit-link">Edit</a>
           
           <span class="thing %s">%s</span>
@@ -482,7 +490,10 @@ class MainHandler(webapp.RequestHandler):
           
           <div class="directions">%s</div>
           <div class="comments">%s</div>
-      """ % (address.editUrl(),
+          </div>
+      """ % (clazz,
+             
+             address.editUrl(),
              
              address.kind(), address.snippet(),
              location_url, directions_url,
@@ -518,15 +529,22 @@ class MainHandler(webapp.RequestHandler):
       text = contact.contact_text
       if re.match("^http", text):
         text = """<a href="%s" target="_blank">%s</a>""" % (text, text)
+
+      clazz = ""
+      if not contact.enabled:
+        clazz = "disabled"
       self.response.out.write("""
+          <div class="%s">
           <a href="%s" class="edit-link">Edit</a>
           <span class="thing %s">%s</span>
-      """ % (contact.editUrl(),
+      """ % (clazz,
+             contact.editUrl(),
              contact.kind(), text))
 
       self.response.out.write("""
           <span class="tag">(%s %s) [%s]</span><br>
           <div class="comments">%s</div>
+          </div>
       """ % (contact.contact_method, contact.contact_type, contact.enabledText(),
              contact.comments))
 
@@ -554,11 +572,17 @@ class MainHandler(webapp.RequestHandler):
 
 
   def calendarView(self, calendar):
+      clazz = ""
+      if not calendar.enabled:
+        clazz = "disabled"
       self.response.out.write("""
+          <div class="%s">
           <a href="%s" class="edit-link">Edit</a>
           <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
           <div class="comments">%s</div>
-      """ % (calendar.editUrl(),
+          </div>
+      """ % (clazz,
+             calendar.editUrl(),
              calendar.kind(), calendar.first_occurrence.strftime("%m/%d/%y"), calendar.frequency, calendar.occasion, calendar.enabledText(),
              calendar.comments))
 
@@ -691,7 +715,7 @@ class Thing(db.Model):
     if self.enabled:
       return "enabled"
     else:
-      return "disabled"
+      return "DISABLED"
 
   def editUrl(self):
     return "%s/?action=edit&kind=%s&key=%s" % (ORIGIN, self.kind(), self.key())
