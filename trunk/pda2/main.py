@@ -477,7 +477,7 @@ class MainHandler(webapp.RequestHandler):
           <a href="%s" class="edit-link">Edit</a>
           
           <span class="thing %s">%s</span>
-          <a href="%s">[Google Maps]</a>&nbsp;&nbsp;<a href="%s" target="_blank">[directions]</a>
+          <a href="%s" target="_blank">[Google Maps]</a>&nbsp;&nbsp;<a href="%s" target="_blank">[directions]</a>
           <span class="tag" target="_blank">(%s) [%s]</span><br>
           
           <div class="directions">%s</div>
@@ -515,12 +515,19 @@ class MainHandler(webapp.RequestHandler):
 
 
   def contactView(self, contact):
+      text = contact.contact_text
+      if re.match("^http", text):
+        text = """<a href="%s" target="_blank">%s</a>""" % (text, text)
       self.response.out.write("""
           <a href="%s" class="edit-link">Edit</a>
-          <span class="thing %s">%s</span> <span class="tag">(%s %s) [%s]</span><br>
-          <div class="comments">%s</div>
+          <span class="thing %s">%s</span>
       """ % (contact.editUrl(),
-             contact.kind(), contact.contact_text, contact.contact_method, contact.contact_type, contact.enabledText(),
+             contact.kind(), text))
+
+      self.response.out.write("""
+          <span class="tag">(%s %s) [%s]</span><br>
+          <div class="comments">%s</div>
+      """ % (contact.contact_method, contact.contact_type, contact.enabledText(),
              contact.comments))
 
   def contactForm(self, contact):
@@ -695,7 +702,7 @@ class Person(Thing):
   first_name = db.StringProperty(verbose_name="First Name", default="")
   last_name = db.StringProperty(verbose_name="Last Name", default="")
   company_name = db.StringProperty(verbose_name="Company Name", default="")
-  category = SelectableStringProperty(verbose_name="Category", default="",
+  category = SelectableStringProperty(verbose_name="Category", default="(Unspecified)",
     choices=[
       "(Unspecified)",
       "Relatives",
@@ -725,7 +732,7 @@ class Person(Thing):
 class Address(Thing):
   address_line1 = db.StringProperty(verbose_name="Address Line 1", default="")
   address_line2 = db.StringProperty(verbose_name="Address Line 2", default="")
-  address_type = SelectableStringProperty(verbose_name="Address Type", default="",
+  address_type = SelectableStringProperty(verbose_name="Address Type", default="(Unspecified)",
     choices=[
              "(Unspecified)",
              "Home",
@@ -743,13 +750,13 @@ class Address(Thing):
 
 class Contact(Thing):
   contact_text = db.StringProperty(verbose_name="Contact Text", default="")
-  contact_method = SelectableStringProperty(verbose_name="contact_method", default="",
+  contact_method = SelectableStringProperty(verbose_name="contact_method", default="(Unspecified)",
     choices=[
       "(Unspecified)",
       "Personal",
       "Business",
     ])
-  contact_type = SelectableStringProperty(verbose_name="Contact Type", default="",
+  contact_type = SelectableStringProperty(verbose_name="Contact Type", default="(Unspecified)",
     choices=[
       "(Unspecified)",
       "Voice",
@@ -763,7 +770,7 @@ class Contact(Thing):
 
 class Calendar(Thing):
   first_occurrence = db.DateProperty(verbose_name="First Occurrence")
-  frequency = SelectableStringProperty(verbose_name="Frequency", default="",
+  frequency = SelectableStringProperty(verbose_name="Frequency", default="Annual",
     choices=[
       "Annual",
     ])
