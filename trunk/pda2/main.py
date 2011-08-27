@@ -26,7 +26,7 @@ if ISDEVAPPSERVER:
   ORIGIN = "http://localhost:8080"
   ADMIN_URL = ORIGIN + "/_ah/admin"
 else:
-  ORIGIN = "https://fix.%s.appspot.com" % APPID
+  ORIGIN = "https://%s.appspot.com" % APPID
   ADMIN_URL = "https://appengine.google.com/dashboard?&app_id=%s" % APPID
 
 
