@@ -4,6 +4,14 @@
   <ui:style>
     .grid {
     }
+    @export numColumn;
+    @export wordColumn;
+    .numColumn {
+      width: 30px;
+    }
+    .wordColumn {
+      width: 300px;
+    }
   </ui:style>
   <g:HTMLPanel>
     <g:FlexTable styleName="{style.grid}" ui:field="grid"></g:FlexTable>
