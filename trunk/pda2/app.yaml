@@ -1,5 +1,5 @@
 application: s~sauer-pda
-version: 
+version: YYYY-MM-DD-rXXX
 runtime: python
 api_version: 1
 
@@ -13,6 +13,9 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
  
+- url: /stats.*
+  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
 - url: /.*
   script: main.py
   login: admin
