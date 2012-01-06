@@ -6,6 +6,8 @@ import re
 import os
 import datetime
 import time
+import email
+import itertools
 
 from google.appengine.api import taskqueue
 from google.appengine.ext import webapp
@@ -14,12 +16,14 @@ from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.api import app_identity
 from google.appengine.api import mail
+from google.appengine.ext.webapp.mail_handlers import InboundMailHandler 
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 APPID = app_identity.get_application_id()
 SENDER = "pda@%s.appspotmail.com" % APPID
 EMAIL_TO = ("Amber Allen-Sauer <amber@allen-sauer.com>",
            "Fred Sauer <fred@allen-sauer.com>",
-           "Fred Sauer <fredsa@google.com")
+           "Fred Sauer <fredsa@google.com>")
 FREDSA = ("fredsa@gmail.com", "fredsa@google.com", "fred@allen-sauer.com")
 ISDEVAPPSERVER = re.search("^Development", os.environ["SERVER_SOFTWARE"])
 if ISDEVAPPSERVER:
@@ -29,6 +33,37 @@ else:
   ORIGIN = "https://%s.appspot.com" % APPID
   ADMIN_URL = "https://appengine.google.com/dashboard?&app_id=%s" % APPID
 
+
+
+class EmailHandler(InboundMailHandler):
+   def receive(self, msg):
+      logging.warning("Received a message from: " + msg.sender)
+
+      to = getattr(msg, "to", "")
+      cc = getattr(msg, "cc", "")
+      subject = getattr(msg, "subject", "")
+
+      top = """-- FORWARDED MESSAGE --
+From: %s
+To: %s
+Cc: %s
+Date: %s
+Subject: %s
+
+""" % (msg.sender, to, cc, msg.date, subject)
+
+      plain = top
+      for (dummy, body) in msg.bodies('text/plain'):
+        plain += body.decode()
+      logging.info("plain body to be sent:\n%s" % plain)
+
+      html = top.replace("\n","<br>")
+      for (dummy, body) in msg.bodies('text/html'):
+        html += body.decode()
+      logging.info("HTML body to be sent:\n%s" % html)
+
+      # Note, subject must not be empty
+      mail.send_mail(sender=SENDER, to=EMAIL_TO, subject="fwd: " + subject, body=plain, html=html)
 
 
 class MainHandler(webapp.RequestHandler):
@@ -828,7 +863,8 @@ def migrate(person):
 
 
 def main():
-  application = webapp.WSGIApplication([('/.*', MainHandler)],
+  application = webapp.WSGIApplication([('/_ah/mail/.+', EmailHandler),
+                                        ('/.*', MainHandler)],
                                        debug=True)
   util.run_wsgi_app(application)
 
